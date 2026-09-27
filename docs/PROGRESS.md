@@ -14,8 +14,8 @@ In progress at shutdown
 - QA logic done: 127 tests pass (TZ Tallinn, New York, Santiago, Kiritimati). Fixed start-override cascade bug in schedule.js. Open wording items: rules.js code-freeze text vs Wed freeze end, cutoff-reminder hard-codes "Monday 12:00", priority-call title not imperative; dayOfSprint can exceed 10 with year-end overrides.
 
 Next steps (morning)
-1. `cd C:\dev\sprint-monitor && git status && npm test`. Review any uncommitted QA changes; re-run QA if it was cut off.
-2. Commit, then create repo: `gh repo create Insly/sprint-monitor --private --source . --push` (Kaspar approved creating + pushing once QA is done).
+1. DONE: QA passed, 127 tests.
+2. DONE: pushed to https://github.com/Insly/sprint-monitor (private).
 3. Send Kaspar: Blueprint link https://render.com/deploy?repo=https://github.com/Insly/sprint-monitor and expected URL https://insly-sprint-monitor.onrender.com (he connects the Blueprint once in the Render dashboard).
 4. After deploy: verify live URL, then share home-page setup steps (Edge/Chrome: Settings → Start, home, and new tabs → open specific page; Intune policies RestoreOnStartupURLs / HomepageLocation / NewTabPageLocation for company-wide).
 
