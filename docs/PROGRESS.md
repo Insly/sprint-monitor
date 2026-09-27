@@ -1,6 +1,6 @@
 # Progress log
 
-## 2026-09-28 (night) — state at shutdown
+## 2026-09-28 (night) — state at shutdown (QA passed, pushed)
 
 Done
 - Research: Confluence MGA sprint process (lifecycle page, RP release calendar, refinement, live issues, QA estimation, 2026 Sprints page).
@@ -11,7 +11,7 @@ Done
 - Hosting decision (Kaspar): Render static site, own private repo Insly/sprint-monitor, no login.
 
 In progress at shutdown
-- QA logic agent was reviewing test oracles vs Confluence dates (S5–S22 table), writing tests/scenarios.test.js for S21 day by day, DST/timezone and edge cases. It may have left uncommitted edits in tests/ (and possibly minimal fixes in public/schedule.js). Check `git status` / `git diff` first.
+- QA logic done: 127 tests pass (TZ Tallinn, New York, Santiago, Kiritimati). Fixed start-override cascade bug in schedule.js. Open wording items: rules.js code-freeze text vs Wed freeze end, cutoff-reminder hard-codes "Monday 12:00", priority-call title not imperative; dayOfSprint can exceed 10 with year-end overrides.
 
 Next steps (morning)
 1. `cd C:\dev\sprint-monitor && git status && npm test`. Review any uncommitted QA changes; re-run QA if it was cut off.
