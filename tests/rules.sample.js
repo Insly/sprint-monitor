@@ -1,0 +1,88 @@
+// SAMPLE rules for engine tests and local development only.
+// The real data lives in rules.js (owned by the analyst). Same shape: RULES + SOURCES.
+// Covers every `when` form: on, on+offset, from/to, weekly, weekly+week.
+
+export const SOURCES = {
+  lifecycle: { title: 'MGA sprint lifecycle (sample)', url: 'https://insly.atlassian.net/wiki/' },
+  calendar: { title: 'MGA sprint calendar (sample)', url: 'https://insly.atlassian.net/wiki/' },
+  refinement: { title: 'Refinement process (sample)', url: 'https://insly.atlassian.net/wiki/' },
+  liveIssues: { title: 'Live issues handling (sample)', url: 'https://insly.atlassian.net/wiki/' },
+  qaEstimation: { title: 'QA estimation (sample)', url: 'https://insly.atlassian.net/wiki/' },
+};
+
+export const RULES = [
+  {
+    id: 'bug-retro',
+    title: 'Bug retro',
+    detail: 'Review bugs found during the sprint that just closed.',
+    who: ['All'],
+    sprint: 'previous',
+    when: { on: 'bugRetro' },
+    time: '11:00',
+    kind: 'meeting',
+    source: 'lifecycle',
+  },
+  {
+    id: 'code-freeze',
+    title: 'Code freeze',
+    detail: 'Only fixes for the frozen sprint get merged.',
+    who: ['Dev', 'QA'],
+    sprint: 'previous',
+    when: { from: 'freezeStart', to: 'freezeEnd' },
+    kind: 'window',
+    source: 'lifecycle',
+  },
+  {
+    id: 'demo-matrix-reminder',
+    title: 'Fill in the Demo/Live update matrix',
+    detail: 'Mark anything that must not move to Demo tomorrow.',
+    who: ['IM/AM', 'Lead'],
+    sprint: 'previous',
+    when: { on: 'demoStart', offset: -1 },
+    kind: 'reminder',
+    source: 'lifecycle',
+  },
+  {
+    id: 'live-release',
+    title: 'Live release',
+    detail: 'Demo moves to Live after the 12:00 cut-off.',
+    who: ['Dev'],
+    sprint: 'previous',
+    when: { on: 'live' },
+    time: '18:00',
+    kind: 'deploy',
+    source: 'lifecycle',
+  },
+  {
+    id: 'sprint-planning',
+    title: 'Sprint planning',
+    detail: 'Agree the scope of the next sprint.',
+    who: ['All'],
+    sprint: 'next',
+    when: { on: 'planning' },
+    time: '10:00',
+    kind: 'meeting',
+    source: 'calendar',
+  },
+  {
+    id: 'refinement',
+    title: 'Backlog refinement',
+    detail: 'Refine tickets for the next sprint.',
+    who: ['Analyst', 'Lead', 'Dev'],
+    sprint: 'current',
+    when: { weekly: 'Wed' },
+    time: '13:00',
+    kind: 'meeting',
+    source: 'refinement',
+  },
+  {
+    id: 'qa-estimates',
+    title: 'QA estimates due',
+    detail: 'Add QA estimates to next-sprint tickets.',
+    who: ['QA'],
+    sprint: 'next',
+    when: { weekly: 'Tue', week: 2 },
+    kind: 'deadline',
+    source: 'qaEstimation',
+  },
+];

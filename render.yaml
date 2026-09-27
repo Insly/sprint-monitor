@@ -1,0 +1,23 @@
+# Render Blueprint for the MGA Sprint Board (static site, no build step).
+# One-time setup: Render dashboard > New > Blueprint > connect Insly/sprint-monitor.
+# Every push to main redeploys. Static sites do not sleep, so the page opens instantly.
+services:
+  - type: web
+    name: insly-sprint-monitor
+    runtime: static
+    buildCommand: echo "no build step"
+    staticPublishPath: public
+    buildFilter:
+      paths:
+        - public/**
+    headers:
+      # Updated rules.js / schedule.js must show up on the next page load.
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
