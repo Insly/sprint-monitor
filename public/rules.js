@@ -55,7 +55,7 @@ export const RULES = [
   // ---------------------------------------------------------------- NEXT sprint: planning prep
   {
     id: 'priority-call-due',
-    title: 'Priority call done before planning',
+    title: 'Hold priority calls before planning',
     detail: 'Sprint planning is tomorrow. Make sure the priority call with each of your clients has happened so priorities are locked when planning starts.',
     who: ['IM/AM'],
     sprint: 'next',
@@ -246,7 +246,7 @@ export const RULES = [
   {
     id: 'code-freeze',
     title: 'Code freeze',
-    detail: 'Beta is locked until the Demo update. QA-reported bug fixes still go in; new features and config changes without QA permission do not. Only hotfixes bypass it.',
+    detail: 'Beta stays locked until the freeze ends, the day after the Demo update. QA-reported bug fixes still go in; new features and config changes without QA permission do not. Only hotfixes bypass it.',
     who: ['Dev', 'QA', 'IM/AM'],
     sprint: 'previous',
     when: { from: 'freezeStart', to: 'freezeEnd' },
@@ -357,8 +357,8 @@ export const RULES = [
   },
   {
     id: 'cutoff-reminder',
-    title: 'Cut-off is Monday 12:00',
-    detail: 'Chase UAT results now. A bugfix that is not in by Monday 12:00 means a revert, not a fix.',
+    title: 'Chase UAT results before the cut-off',
+    detail: 'The fix cut-off is 12:00 on the day of the Live update. A bugfix that misses it means a revert, not a fix.',
     who: ['IM/AM'],
     sprint: 'previous',
     when: { on: 'cutoff', offset: -3 },

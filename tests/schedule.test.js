@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
+import { workingDaysIn,
   ANCHOR,
   LAST_CONFIRMED,
   sprintDates,
@@ -497,6 +497,22 @@ describe('OVERRIDES: start override (QA)', () => {
       expect(actionsFor('2027-02-02', RULES).find((a) => a.id === 'live-update')).toMatchObject({ sprintNumber: 28 });
     } finally {
       delete OVERRIDES[28];
+    }
+  });
+});
+
+describe('workingDaysIn', () => {
+  it('is 10 for a normal sprint', () => {
+    expect(workingDaysIn(sprintDates(21))).toBe(10);
+  });
+  it('follows an end override so the page never shows "day 15 of 10"', () => {
+    OVERRIDES[27] = { end: '2027-01-08' };
+    try {
+      const s = sprintDates(27); // starts Mon 21 Dec 2026
+      expect(workingDaysIn(s)).toBe(15);
+      expect(context('2027-01-08').dayOfSprint).toBeLessThanOrEqual(workingDaysIn(s));
+    } finally {
+      delete OVERRIDES[27];
     }
   });
 });

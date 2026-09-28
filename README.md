@@ -4,7 +4,7 @@ A browser home page for the Insly MGA delivery unit. It shows which sprint is ac
 
 Tier: T1 per software-project-playbook (one owner, low stakes, no personal data, static page).
 
-Spec: `SPEC.md`. Calendar model and rule schema: `CONTRACT.md`.
+Spec: `docs/SPEC.md`. Calendar model and rule schema: `docs/CONTRACT.md`. Progress log: `docs/PROGRESS.md`.
 
 ## Files
 
@@ -50,6 +50,14 @@ To correct a sprint's dates (for example the year-end plan), add an entry to `OV
 
 - **Edge:** Settings > Start, home, and new tabs > "When Edge starts" > Open these pages > Add a new page > paste the URL. To also use it for the Home button, set "Home button" to the same URL.
 - **Chrome:** Settings > On startup > Open a specific page or set of pages > Add a new page > paste the URL. For the Home button: Settings > Appearance > Show home button > enter the URL.
+
+### Company-wide (IT, Microsoft Intune)
+
+IT can push the page to every managed laptop with an Intune configuration profile (Administrative Templates > Microsoft Edge; the same policy names exist for Chrome):
+
+- `RestoreOnStartup` = 4 and `RestoreOnStartupURLs` = the page address (opens on browser start)
+- `HomepageLocation` = the page address, `ShowHomeButton` = enabled (Home button)
+- `NewTabPageLocation` = the page address (new tabs; the only way to set a custom new tab page without an extension)
 
 ## Rollback
 

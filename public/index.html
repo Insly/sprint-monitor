@@ -264,6 +264,12 @@ footer p { margin: 4px 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+.howto { margin-block: 2rem 1rem; border-top: 1px solid var(--rule); padding-block-start: 1rem; color: var(--muted); }
+.howto summary { cursor: pointer; font-weight: 500; color: var(--ink); }
+.howto summary:focus-visible, .howto button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.howto-body { max-width: 65ch; display: grid; gap: .5rem; padding-block-start: .75rem; }
+.howto code { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); overflow-wrap: anywhere; }
+.howto button { font: inherit; font-size: .85em; padding: .15rem .6rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--ink); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -297,6 +303,15 @@ footer p { margin: 4px 0; }
     <div id="upcoming"></div>
   </section>
 
+  <details class="howto" id="howto">
+    <summary>Make this your browser home page</summary>
+    <div class="howto-body">
+      <p>Page address: <code id="howto-url">https://insly-sprint-monitor.onrender.com</code> <button type="button" id="howto-copy">Copy</button></p>
+      <p><strong>Edge:</strong> Settings &gt; Start, home, and new tabs &gt; When Edge starts &gt; Open these pages &gt; Add a new page &gt; paste the address. For the Home button, set Home button to the same address.</p>
+      <p><strong>Chrome:</strong> Settings &gt; On startup &gt; Open a specific page or set of pages &gt; Add a new page &gt; paste the address. For the Home button: Settings &gt; Appearance &gt; Show home button &gt; enter the address.</p>
+      <p>Neither browser lets you choose a custom new tab page in settings. Your IT admin can set one for everyone.</p>
+    </div>
+  </details>
   <footer id="footer">
     <noscript><p>This page needs JavaScript to compute today's sprint.</p></noscript>
   </footer>
@@ -305,7 +320,7 @@ footer p { margin: 4px 0; }
 <script type="module">
 import {
   context, actionsFor, upcoming, nextWorkingDay, toKey, addDays, daysBetween, sprintDates,
-  LAST_CONFIRMED,
+  LAST_CONFIRMED, workingDaysIn,
 } from './schedule.js';
 
 let RULES = [];
@@ -448,14 +463,15 @@ function renderPreview(preview, realToday) {
 function renderToday(today, c, actDate, ctx) {
   const s = c.current;
   const meter = h('div', { class: 'meter', 'aria-hidden': 'true' });
-  const done = c.dayOfSprint ?? (c.weekOfSprint === 1 ? 5 : 10) + 0.5;
-  for (let i = 1; i <= 10; i++) {
-    if (i === 6) meter.append(h('span', { class: 'gap' }));
+  const total = workingDaysIn(s);
+  const done = c.dayOfSprint ?? (c.weekOfSprint === 1 ? 5 : total) + 0.5;
+  for (let i = 1; i <= total; i++) {
+    if (i > 1 && i % 5 === 1) meter.append(h('span', { class: 'gap' }));
     meter.append(h('span', { class: i < done ? 'done' : i === c.dayOfSprint ? 'now' : '' }));
   }
   const title = c.isWeekend
     ? h('h1', null, s.label, h('span', { class: 'sep' }, '·'), 'Weekend')
-    : h('h1', null, s.label, h('span', { class: 'sep' }, '·'), `Day ${c.dayOfSprint} of 10`);
+    : h('h1', null, s.label, h('span', { class: 'sep' }, '·'), `Day ${c.dayOfSprint} of ${total}`);
 
   const phaseLine = h('p', { class: 'phases' },
     h('b', null, ctx.previous.label), `: ${phaseOf(ctx.previous, today)}. `,
@@ -673,6 +689,16 @@ function renderFooter() {
 // ---------- boot + keep "today" fresh ----------
 function refreshIfDayChanged() {
   if (toKey(new Date()) !== renderedFor) render();
+}
+// Home-page help: show the address this page is actually served from.
+{
+  const url = location.origin.startsWith('http') ? location.origin + '/' : 'https://insly-sprint-monitor.onrender.com';
+  $('howto-url').textContent = url;
+  $('howto-copy').addEventListener('click', async (e) => {
+    try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; }
+    catch { getSelection().selectAllChildren($('howto-url')); e.target.textContent = 'Press Ctrl+C'; }
+    setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
+  });
 }
 render();
 setInterval(refreshIfDayChanged, 60_000);
