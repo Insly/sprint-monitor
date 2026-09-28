@@ -1,5 +1,18 @@
 # Progress log
 
+## 2026-09-29 — morning session
+
+Done
+- Wording fixes in rules.js (priority-call title imperative; code-freeze text matches Wed freeze end; cut-off reminder no longer hard-codes Monday).
+- Day counter/meter use real working-day count of the sprint (`workingDaysIn` in schedule.js) so year-end overrides never show "day 15 of 10".
+- In-page "Make this your browser home page" help (copy button, Edge/Chrome steps); README Intune section.
+- 129 tests pass. Pushed to main.
+
+Waiting on
+- Kaspar connects the Render Blueprint (https://render.com/deploy?repo=https://github.com/Insly/sprint-monitor). Then: verify live URL, confirm the help box shows the real URL.
+- Kaspar's call on refinement days (Tue/Wed vs Wed/Thu).
+- Year-end 2026 plan and 2027 numbering → OVERRIDES in public/schedule.js (label year reset still TODO once known).
+
 ## 2026-09-28 (night) — state at shutdown (QA passed, pushed)
 
 Done
