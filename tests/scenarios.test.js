@@ -1,7 +1,7 @@
 // QA scenario tests: day-by-day expectations for the whole S21 period, Mon 28 Sep to Mon 19 Oct 2026.
 // Expectations are written from the process (CONTRACT.md, SPEC.md acceptance checks and the
 // Confluence calendar), not copied from engine output:
-//   S20: freeze Fri 25 Sep - Wed 30 Sep, bug retro Mon 28 Sep, Demo Tue 29 / Wed 30 Sep, Live Mon 5 Oct
+//   S20: freeze Fri 25 Sep until the Demo update Tue 29 Sep (v2: ends at demoStart), bug retro Mon 28 Sep, Demo Tue 29 / Wed 30 Sep, Live Mon 5 Oct
 //   S21: 28 Sep - 9 Oct, freeze 9-14 Oct, bug retro Mon 12 Oct, Demo 13-14 Oct, Live Mon 19 Oct
 //   S22: planning Thu 8 Oct, starts Mon 12 Oct
 import { describe, it, expect } from 'vitest';
@@ -31,7 +31,7 @@ const DAYS = {
       'inform-client-uat': 20, 'check-own-items-demo': 20,
       'pre-refinement': 22, 'rank-refinement-queue': 22, 'answer-parked-questions': 22,
     },
-    windows: { 'code-freeze': 20, 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
+    windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) }, // v2: the freeze ended with Tuesday's Demo update
   },
   '2026-10-01': { // Thu week 1: Full Refinement
     sprint: 21, day: 4,
@@ -45,7 +45,10 @@ const DAYS = {
   },
   '2026-10-05': { // Mon: S20 cut-off and Live (acceptance check 4)
     sprint: 21, day: 6,
-    today: { 'fix-cutoff': 20, 'revert-missed-fixes': 20, 'live-update': 20, 'golive-page': 20, 'confirm-live-to-client': 20 },
+    today: {
+      'cutoff-last-chase': 20, 'fix-cutoff': 20, 'revert-missed-fixes': 20, 'tell-client-revert': 20,
+      'live-update': 20, 'golive-page': 20, 'confirm-live-to-client': 20,
+    },
     windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
   '2026-10-06': { // Tue week 2: nothing dated
@@ -58,6 +61,7 @@ const DAYS = {
     today: {
       'pre-refinement': 22, 'rank-refinement-queue': 22,
       'priority-call-due': 22, 'definition-of-ready': 22, 'qa-estimate-present': 22,
+      'uat-findings-to-planning': 22,
     },
     windows: build(21),
   },
@@ -87,7 +91,7 @@ const DAYS = {
       'inform-client-uat': 21, 'check-own-items-demo': 21,
       'pre-refinement': 23, 'rank-refinement-queue': 23, 'answer-parked-questions': 23,
     },
-    windows: { 'code-freeze': 21, 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
+    windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
   '2026-10-15': { // Thu week 1 of S22: Full Refinement
     sprint: 22, day: 4,
@@ -101,7 +105,10 @@ const DAYS = {
   },
   '2026-10-19': { // Mon: S21 cut-off and Live
     sprint: 22, day: 6,
-    today: { 'fix-cutoff': 21, 'revert-missed-fixes': 21, 'live-update': 21, 'golive-page': 21, 'confirm-live-to-client': 21 },
+    today: {
+      'cutoff-last-chase': 21, 'fix-cutoff': 21, 'revert-missed-fixes': 21, 'tell-client-revert': 21,
+      'live-update': 21, 'golive-page': 21, 'confirm-live-to-client': 21,
+    },
     windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
 };
@@ -193,20 +200,20 @@ describe('rules.js wording and SPEC consistency', () => {
 
   it('titles are short and details end with a full stop', () => {
     for (const r of RULES) {
-      expect(r.title.length, r.id).toBeLessThanOrEqual(45);
+      expect(r.title.length, r.id).toBeLessThanOrEqual(50); // v2: 'Bring UAT findings to planning as first priority' (48)
       expect(r.detail, r.id).toMatch(/[.!?]$/);
     }
   });
 
-  it('who / sprint / source match the SPEC.md rule catalogue (36 rules)', () => {
+  it('who / sprint / source match the SPEC.md rule catalogue (39 rules)', () => {
     const spec = readFileSync(new URL('../docs/SPEC.md', import.meta.url), 'utf8');
     const rows = spec
       .split('\n')
       .filter((l) => /^\| [a-z0-9-]+ \| /.test(l))
       .map((l) => l.split('|').map((c) => c.trim()).filter(Boolean))
       .filter((cells) => cells[0] !== 'id');
-    expect(rows.length).toBe(36);
-    expect(RULES.length).toBe(36);
+    expect(rows.length).toBe(39);
+    expect(RULES.length).toBe(39);
     const REL = { prev: 'previous', cur: 'current', next: 'next' };
     for (const [id, who, when, source] of rows) {
       const r = RULES.find((x) => x.id === id);

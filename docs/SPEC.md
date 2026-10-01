@@ -38,15 +38,16 @@ As defined in `CONTRACT.md`: anchor S17 = Mon 2026-08-03, 14-day sprints. `rules
 
 Weekly refinement mapping: sprint planning falls on Thursday of week 2 of the current sprint (next.start − 4). So the bi-weekly Full Refinement is Thursday of **week 1** (`{ weekly: 'Thu', week: 1 }`).
 
-## Rule catalogue (36 rules)
+## Rule catalogue (39 rules)
 
-Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation.
+Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation. Optional fields (DESIGN.md §14): `slot` orders an item within the day, `carryOver: 1` repeats it on the next working day under "From last night", `links` lists `SOURCES` keys shown in the expanded item, `time` is Tallinn time (Demo update 17:00, Live update 20:00: the owner's usual start times, 2026-10-01).
 
 | id | who | when | source |
 |---|---|---|---|
 | priority-call-due | IM/AM | next: planning −1 (Wed) | lifecycle |
 | definition-of-ready | IM/AM | next: planning −1 (Wed) | lifecycle |
 | qa-estimate-present | IM/AM, QA | next: planning −1 (Wed) | qaEstimation |
+| uat-findings-to-planning | IM/AM, Lead | next: planning −1 (Wed) | lifecycle |
 | sprint-planning | Lead, IM/AM, Dev | next: planning (Thu) | lifecycle |
 | sprint-start | All | cur: start (Mon) | lifecycle |
 | code-review-24h | Dev | cur: start → end | lifecycle |
@@ -62,24 +63,28 @@ Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation.
 | full-refinement | Dev, QA, IM/AM, Analyst | next: weekly Thu 14:00, week 1 | refinement |
 | regression-plans | QA | cur: freezeStart −1 (Thu) | lifecycle |
 | bug-retro-prep | Lead | cur: end (Fri) | bugRetro |
-| code-freeze | Dev, QA, IM/AM | prev: freezeStart → freezeEnd | calendar |
+| code-freeze | Dev, QA, IM/AM | prev: freezeStart → demoStart (Fri to Demo update Tue evening; links matrix) | calendar |
 | regression-run | QA | prev: freezeStart → demoStart | lifecycle |
 | bug-retro | All | prev: bugRetro (Mon) | liveIssues |
 | matrix-before-demo | IM/AM | prev: demoStart −1 (Mon) | demoLiveMatrix |
-| ready-for-demo | QA | prev: demoStart (Tue) | lifecycle |
-| demo-update | Dev | prev: demoStart (Tue evening) | lifecycle |
-| release-page | Dev | prev: demoStart (Tue) | releasePage |
+| ready-for-demo | QA | prev: demoStart (Tue), slot before-deploy | lifecycle |
+| demo-update | Dev | prev: demoStart (Tue) 17:00, slot evening, links matrix | lifecycle |
+| release-page | Dev | prev: demoStart (Tue), slot after-deploy, carryOver 1 | releasePage |
 | inform-client-uat | IM/AM | prev: uatStart (Wed) | lifecycle |
-| check-own-items-demo | IM/AM | prev: uatStart (Wed) | oldProcess |
+| check-own-items-demo | IM/AM | prev: uatStart (Wed), slot morning | oldProcess |
 | uat-window | IM/AM, Dev | prev: uatStart → cutoff | lifecycle |
-| ready-for-live | IM/AM | prev: uatStart → live | lifecycle |
+| ready-for-live | IM/AM | prev: uatStart → cutoff (by 12:00) | lifecycle |
 | cutoff-reminder | IM/AM | prev: cutoff −3 (Fri) | lifecycle |
 | matrix-before-live | IM/AM | prev: cutoff −3 (Fri) | demoLiveMatrix |
+| cutoff-last-chase | IM/AM | prev: cutoff (Mon), slot morning | lifecycle |
 | fix-cutoff | IM/AM, Dev | prev: cutoff 12:00 (Mon) | lifecycle |
-| revert-missed-fixes | Dev, IM/AM | prev: live (Mon) | lifecycle |
-| live-update | Dev | prev: live (Mon evening) | lifecycle |
-| golive-page | Dev | prev: live (Mon) | releasePage |
-| confirm-live-to-client | IM/AM | prev: live (Mon) | lifecycle |
+| revert-missed-fixes | Dev | prev: live (Mon), slot after-cutoff (if needed) | lifecycle |
+| tell-client-revert | IM/AM | prev: live (Mon), slot after-cutoff (if needed) | lifecycle |
+| live-update | Dev | prev: live (Mon) 20:00, slot evening, links matrix | lifecycle |
+| golive-page | Dev | prev: live (Mon), slot after-deploy, carryOver 1 | releasePage |
+| confirm-live-to-client | IM/AM | prev: live (Mon), slot after-deploy, carryOver 1 | lifecycle |
+
+Changed on 2026-10-01 (DESIGN.md §14): `code-freeze` now ends at `demoStart` (owner decision 2: the freeze ends with the Tuesday evening Demo update; Beta reopens Wednesday). `ready-for-live` ends at the cut-off. `revert-missed-fixes` is Dev only; the IM/AM part is the new `tell-client-revert`. New: `cutoff-last-chase`, `uat-findings-to-planning`.
 
 Note: the engine checks dated rules against all three sprints. So `code-freeze` and `regression-run` also show on the Friday the freeze starts, while that sprint is still "current".
 
@@ -89,10 +94,10 @@ Note: the engine checks dated rules against all three sprints. So `code-freeze` 
 
 1. **Refinement days.** The lifecycle page says backlog refinement runs "every Tuesday and Wednesday". The Backlog Refinement page says Pre-Refinement is **Wed 14:00 weekly** and Full Refinement is **Thu 14:00 bi-weekly**, skipped in planning weeks. It mentions Tuesday only as a possible extra session. `rules.js` follows the refinement page as the more specific source. The lifecycle page should be corrected. The refinement page also calls its schedule "a starting point, not a fixed rule".
 2. **Demo update day.** The lifecycle page says "every second Tuesday evening". The calendar lists Demo as "Tue–Wed" (e.g. 29–30 Sep). The 2023 page said Tuesday afternoon, 14:00–15:00 EET. `rules.js` puts the deploy on Tuesday (`demoStart`) with no time, and client notification and UAT start on Wednesday. Needs confirmation: is Wednesday a spill-over day, or part of the planned Demo work?
-3. **Code freeze end.** The lifecycle page says the freeze lasts "until the Demo update" (Tuesday evening). The calendar says "freeze ends Wed". `code-freeze` follows the calendar (to `freezeEnd`). `regression-run` ends at `demoStart`.
+3. **Code freeze end.** The lifecycle page says the freeze lasts "until the Demo update" (Tuesday evening). The calendar says "freeze ends Wed". Resolved by the owner (2026-10-01): `code-freeze` ends at `demoStart`, worded "until the Demo update Tue (evening)"; Beta reopens Wednesday. `regression-run` also ends at `demoStart`.
 4. **Sprint numbering after S22, year rollover and holidays.** The calendar confirms only S17–S22. The "2026 Sprints" page (5551063088) shows numbering **resets per year** (2026-1 … 2026-10) and release pages are named `release/2026-NN`. It also shows the cadence **broke over the year end**: 2026-1 ran 8.12.2025 with the freeze to 06.01.2026, and 2026-2 started 09.01. So the contract's "numbering continues across years, fixed 14-day cadence" will be wrong from the first sprint of 2027, and possibly around Christmas 2026. The page must label N > 22 as projected. The 2027 numbering and holiday plan are unconfirmed.
 5. **2023 process page is outdated.** It describes Live on **Thursday evening / Friday morning**, UAT Wed–Thu, and sprints starting on Friday. These are all superseded by the Monday Live / Monday 12:00 cut-off model. It is used only for one uncontradicted rule (`check-own-items-demo`). The page should be archived or marked obsolete.
-6. **No documented times** for sprint planning, bug retro, Demo update, Live update or priority calls. These rules have no `time`. The bug retro page date (28.09) confirms only the Monday.
+6. **No documented times** for sprint planning, bug retro or priority calls. These rules have no `time`. Demo update 17:00 and Live update 20:00 Tallinn are the owner's usual start times (2026-10-01). The bug retro page date (28.09) confirms only the Monday.
 7. **Priority call day** varies per client and is not modelled. `priority-call-due` is a generic reminder the day before planning.
 8. **Weekly QA Refinement** (QA Estimation Process) has no documented day or time, so it has no rule. `qa-estimate-present` covers the enforcement side.
 9. **Sprint retro cadence.** Team sprint retros exist for RP (e.g. "RP S11 retro"), but no MGA-wide cadence or day is documented. The bug retro is the only retro in the catalogue.

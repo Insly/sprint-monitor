@@ -56,8 +56,11 @@ Relative sprints for a given date D: `current` = sprint whose [start, end+2 (Sun
                                  //   { from: <dateKey>, to: <dateKey> }    window, inclusive
                                  //   { weekly: 'Wed' }                     every week on that weekday
                                  //   { weekly: 'Thu', week: 1|2 }          only in week 1 or 2 of CURRENT sprint
-  time: '18:00',                 // optional HH:MM
+  time: '17:00',                 // optional HH:MM, Europe/Tallinn (demo-update 17:00, live-update 20:00, fix-cutoff 12:00)
   kind: 'deadline',              // 'deadline' | 'meeting' | 'deploy' | 'window' | 'reminder'
+  slot: 'evening',               // optional: 'morning' | 'before-deploy' | 'after-cutoff' | 'evening' | 'after-deploy'
+  carryOver: 1,                  // optional: also show on the next N working days ("From last night")
+  links: ['demoLiveMatrix'],     // optional: SOURCES keys shown in the expanded item
   source: 'lifecycle'            // key into SOURCES
 }
 ```

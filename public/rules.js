@@ -1,6 +1,9 @@
 // Sprint Monitor rule catalogue (MGA delivery unit). Data only, see CONTRACT.md for the schema.
 // Owner: analyst. Every rule cites a key in SOURCES. Times are included only where documented.
 // Discrepancies between sources are listed in SPEC.md ("Open discrepancies").
+// Optional fields (DESIGN.md §14): slot ('morning' | 'before-deploy' | 'after-cutoff' | 'evening' | 'after-deploy'),
+// carryOver (number of following working days the item also shows on), links (SOURCES keys shown in the detail),
+// time ('HH:MM', Tallinn). The deploy times (Demo 17:00, Live 20:00) are the owner's usual start times (2026-10-01).
 
 const WIKI = 'https://insly.atlassian.net/wiki/spaces/MGA/pages';
 
@@ -82,6 +85,16 @@ export const RULES = [
     when: { on: 'planning', offset: -1 },
     kind: 'reminder',
     source: 'qaEstimation',
+  },
+  {
+    id: 'uat-findings-to-planning',
+    title: 'Bring UAT findings to planning as first priority',
+    detail: 'Non-blocking findings from the last UAT go into the next sprint as first priority. Make sure each one is a ticket that meets the Definition of Ready before tomorrow\'s sprint planning.',
+    who: ['IM/AM', 'Lead'],
+    sprint: 'next',
+    when: { on: 'planning', offset: -1 },
+    kind: 'reminder',
+    source: 'lifecycle',
   },
   {
     id: 'sprint-planning',
@@ -249,14 +262,15 @@ export const RULES = [
     detail: 'Beta stays locked until the Demo update on Tuesday evening. Because that update can run into the night, Beta reopens on Wednesday. QA-reported bug fixes still go in; new features and config changes without QA permission do not. Only hotfixes bypass it.',
     who: ['Dev', 'QA', 'IM/AM'],
     sprint: 'previous',
-    when: { from: 'freezeStart', to: 'freezeEnd' },
+    when: { from: 'freezeStart', to: 'demoStart' },
     kind: 'window',
+    links: ['demoLiveMatrix'],
     source: 'calendar',
   },
   {
     id: 'regression-run',
     title: 'Run regression',
-    detail: 'Execute manual and automated regression on Beta during the freeze. QA controls what may still be deployed.',
+    detail: 'Execute manual and automated regression on Beta during the freeze. QA controls what may still be deployed. It ends with the Demo update, by when every task should be Ready for Demo.',
     who: ['QA'],
     sprint: 'previous',
     when: { from: 'freezeStart', to: 'demoStart' },
@@ -281,6 +295,7 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'demoStart', offset: -1 },
     kind: 'deadline',
+    links: ['demoLiveMatrix'],
     source: 'demoLiveMatrix',
   },
   {
@@ -291,6 +306,7 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'demoStart' },
     kind: 'deadline',
+    slot: 'before-deploy',
     source: 'lifecycle',
   },
   {
@@ -300,7 +316,10 @@ export const RULES = [
     who: ['Dev'],
     sprint: 'previous',
     when: { on: 'demoStart' },
+    time: '17:00',
     kind: 'deploy',
+    slot: 'evening',
+    links: ['demoLiveMatrix'],
     source: 'lifecycle',
   },
   {
@@ -311,6 +330,8 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'demoStart' },
     kind: 'deadline',
+    slot: 'after-deploy',
+    carryOver: 1,
     source: 'releasePage',
   },
   {
@@ -331,6 +352,7 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'uatStart' },
     kind: 'reminder',
+    slot: 'morning',
     source: 'oldProcess',
   },
 
@@ -351,7 +373,7 @@ export const RULES = [
     detail: 'After the client signs off UAT, set the task to Ready for Live.',
     who: ['IM/AM'],
     sprint: 'previous',
-    when: { from: 'uatStart', to: 'live' },
+    when: { from: 'uatStart', to: 'cutoff' },
     kind: 'window',
     source: 'lifecycle',
   },
@@ -373,7 +395,19 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'cutoff', offset: -3 },
     kind: 'deadline',
+    links: ['demoLiveMatrix'],
     source: 'demoLiveMatrix',
+  },
+  {
+    id: 'cutoff-last-chase',
+    title: 'Last chase of UAT results before 12:00',
+    detail: 'The fix cut-off is 12:00 today. Chase clients who have not signed off UAT, and raise any blocking bug with the developers now: a fix still needs code review and a deploy before 12:00. Anything not fixed by then is reverted, not fixed.',
+    who: ['IM/AM'],
+    sprint: 'previous',
+    when: { on: 'cutoff' },
+    kind: 'deadline',
+    slot: 'morning',
+    source: 'lifecycle',
   },
   {
     id: 'fix-cutoff',
@@ -389,11 +423,23 @@ export const RULES = [
   {
     id: 'revert-missed-fixes',
     title: 'Revert items that missed the cut-off',
-    detail: 'Remove the ticket\'s commits from the release branch so it is gone from Demo before Live starts. Re-point the feature branch at the next release and move the task to Canceled, To Do or Code review.',
-    who: ['Dev', 'IM/AM'],
+    detail: 'If anything missed the cut-off: remove the ticket\'s commits from the release branch so it is gone from Demo before Live starts. Re-point the feature branch at the next release and move the task to Canceled, To Do or Code review. The IM/AM decide which items.',
+    who: ['Dev'],
     sprint: 'previous',
     when: { on: 'live' },
     kind: 'deadline',
+    slot: 'after-cutoff',
+    source: 'lifecycle',
+  },
+  {
+    id: 'tell-client-revert',
+    title: 'Agree reverts and tell affected clients',
+    detail: 'If anything missed the cut-off: agree with the developers which items are reverted, then tell each affected client that the item will not go Live tonight and will come in a later release.',
+    who: ['IM/AM'],
+    sprint: 'previous',
+    when: { on: 'live' },
+    kind: 'deadline',
+    slot: 'after-cutoff',
     source: 'lifecycle',
   },
   {
@@ -403,7 +449,10 @@ export const RULES = [
     who: ['Dev'],
     sprint: 'previous',
     when: { on: 'live' },
+    time: '20:00',
     kind: 'deploy',
+    slot: 'evening',
+    links: ['demoLiveMatrix'],
     source: 'lifecycle',
   },
   {
@@ -414,16 +463,20 @@ export const RULES = [
     sprint: 'previous',
     when: { on: 'live' },
     kind: 'deadline',
+    slot: 'after-deploy',
+    carryOver: 1,
     source: 'releasePage',
   },
   {
     id: 'confirm-live-to-client',
     title: 'Confirm Live update to clients',
-    detail: 'Once developers confirm the Live update, tell each client it is completed. Issues found after release go through live issue triage.',
+    detail: 'Once the developers confirm the Live update (tonight or next morning), tell each client it is completed. Issues found after release go through live issue triage.',
     who: ['IM/AM'],
     sprint: 'previous',
     when: { on: 'live' },
     kind: 'deadline',
+    slot: 'after-deploy',
+    carryOver: 1,
     source: 'lifecycle',
   },
 ];

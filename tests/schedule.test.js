@@ -228,11 +228,11 @@ describe('actionsFor (real rules.js)', () => {
     });
     const freeze = acts.find((a) => a.id === 'code-freeze');
     expect(freeze).toMatchObject({
-      when: { from: 'freezeStart', to: 'freezeEnd' },
+      when: { from: 'freezeStart', to: 'demoStart' }, // v2: the freeze ends with the Demo update (Tue evening)
       sprintNumber: 20,
       relation: 'previous',
       status: 'active-window',
-      dates: { from: '2026-09-25', to: '2026-09-30' },
+      dates: { from: '2026-09-25', to: '2026-09-29' },
     });
     // on + offset: day before the Demo update (29 Sep)
     expect(ids(acts)).toContain('matrix-before-demo');

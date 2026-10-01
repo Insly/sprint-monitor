@@ -6,6 +6,7 @@ const WHO = ['Dev', 'QA', 'IM/AM', 'Analyst', 'Lead', 'All'];
 const KINDS = ['deadline', 'meeting', 'deploy', 'window', 'reminder'];
 const SPRINTS = ['previous', 'current', 'next', null];
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SLOTS = ['morning', 'before-deploy', 'after-cutoff', 'evening', 'after-deploy'];
 
 describe('rules.js schema', () => {
   it('has unique kebab-case ids', () => {
@@ -29,6 +30,13 @@ describe('rules.js schema', () => {
     expect(KINDS).toContain(r.kind);
     expect(Object.keys(SOURCES)).toContain(r.source);
     if (r.time != null) expect(r.time).toMatch(/^([01]\d|2[0-3]):[0-5]\d$/);
+    // Optional v2 fields (DESIGN.md §14)
+    if (r.slot != null) expect(SLOTS).toContain(r.slot);
+    if (r.carryOver != null) expect(Number.isInteger(r.carryOver) && r.carryOver >= 1).toBe(true);
+    if (r.links != null) {
+      expect(Array.isArray(r.links)).toBe(true);
+      for (const k of r.links) expect(Object.keys(SOURCES)).toContain(k);
+    }
     const w = r.when;
     if ('weekly' in w) {
       expect(WEEKDAYS).toContain(w.weekly);
@@ -53,5 +61,31 @@ describe('rules.js smoke test', () => {
     }
     // Every rule fires at least once in that span.
     expect(RULES.filter((r) => !fired.has(r.id)).map((r) => r.id)).toEqual([]);
+  });
+});
+
+describe('rules.js v2 changes (DESIGN.md §14)', () => {
+  const byId = (id) => RULES.find((r) => r.id === id);
+
+  it('deploy rules carry the owner times: Demo 17:00, Live 20:00, cut-off 12:00', () => {
+    expect(byId('demo-update').time).toBe('17:00');
+    expect(byId('live-update').time).toBe('20:00');
+    expect(byId('fix-cutoff').time).toBe('12:00');
+  });
+
+  it('the freeze ends with the Demo update; Ready for Live ends at the cut-off', () => {
+    expect(byId('code-freeze').when).toEqual({ from: 'freezeStart', to: 'demoStart' });
+    expect(byId('ready-for-live').when).toEqual({ from: 'uatStart', to: 'cutoff' });
+  });
+
+  it('carry-over items are the release pages and the Live confirmation', () => {
+    expect(RULES.filter((r) => r.carryOver).map((r) => r.id).sort()).toEqual(['confirm-live-to-client', 'golive-page', 'release-page']);
+  });
+
+  it('new rules exist with the specified who / when / slot', () => {
+    expect(byId('cutoff-last-chase')).toMatchObject({ who: ['IM/AM'], sprint: 'previous', when: { on: 'cutoff' }, slot: 'morning' });
+    expect(byId('tell-client-revert')).toMatchObject({ who: ['IM/AM'], sprint: 'previous', when: { on: 'live' }, slot: 'after-cutoff' });
+    expect(byId('uat-findings-to-planning')).toMatchObject({ who: ['IM/AM', 'Lead'], sprint: 'next', when: { on: 'planning', offset: -1 } });
+    expect(byId('revert-missed-fixes').who).toEqual(['Dev']);
   });
 });
