@@ -890,7 +890,6 @@ function renderSprintView(n) {
     if (ms.key === 'uatStart') extra = `UAT deadline ${fmtDay(s.cutoff)} ${T.cutoff}`;
     if (ms.key === 'demoStart' && demoPeople) extra = ['Deployer: ', personNodes(demoPeople)];
     if (ms.key === 'live' && livePeople) extra = livePeople.every((p) => !p.name) ? 'Lead and backup: not assigned yet' : ['Lead: ', livePeople[0].name || NOT_ASSIGNED, ' · Backup: ', livePeople[1].name || NOT_ASSIGNED];
-    if (ms.key === 'bugRetro' && s.n === 26) extra = 'Owner to confirm the date';
     const status = ms.status === 'passed' ? 'Passed' : ms.status === 'today' ? 'Today'
       : firstComing ? `Coming · in ${ms.workingDaysAway} working day${ms.workingDaysAway === 1 ? '' : 's'}` : 'Coming';
     if (ms.status === 'coming') firstComing = false;

@@ -3,6 +3,14 @@
 ## TODO (future)
 - Dev duty rota (public/duty.js) is a one-time paste from "Duty dev.xlsx" valid to end of 2026. Replace with a live source (SharePoint) when the sheet is available there; extend by hand for 2027 until then. Names: first name + last initial only (page and repo are public).
 
+## 2026-10-01 — v2.1 build (developer; not pushed, QA next)
+- Rules v2 (DESIGN §14): 39 rules. New cutoff-last-chase, tell-client-revert, uat-findings-to-planning. code-freeze ends at demoStart, ready-for-live at cutoff, revert-missed-fixes is Dev only. Optional slot / carryOver / links fields; demo-update 17:00, live-update 20:00. SPEC table and CONTRACT schema updated.
+- Owner correction: no year-end break. 2027-1 = 7 Dec to Fri 1 Jan (20 working days, `OVERRIDES[26] = { end: '2027-01-01' }`), Demo Tue 5 Jan, Live Mon 11 Jan; 2027-2 starts Mon 4 Jan. `context().isBreak` removed. UNCONFIRMED_FROM = 28 (2027-3 onwards = plain projections).
+- New: public/holidays.js (EE + PL 2026-2027), public/board.js (pure state resolver for STATES.md), engine API (sprintByLabel, sprintDetail, zonedNow, formatAcrossZones, sprintPhase, ...).
+- Page rebuilt to DESIGN v2.1 / mockup: band states, duty line, Your day, rail, Coming up, sprint view (#sprint-…), first-visit picker, focus ring, forced colours, 768–1199 layout, dark mode, Arial only.
+- Tests: states.test.js reads the STATES.md fixture block; rails, sub-lines, duty lines, sprintDetail, holidays, duty.js, device in New York / London.
+- Open for the owner: 2027-2 planning (formula gives Thu 31 Dec); in 4-week 2027-1 Full Refinement fires only Thu 10 Dec (weeks 2–4 count as "week 2") while Pre-Refinement runs every Wednesday incl. 23 and 30 Dec; 1 Jan (holiday) is 2027-1's freeze start.
+
 ## 2026-10-01 — UX redesign in progress
 - UX specialist: docs/ux/USE-CASES.md, ANALYSIS.md, DESIGN.md, mockup.html (v1). Reviews: docs/ux/REVIEW-1-ux-a11y.md, REVIEW-2-practitioner.md. v2 revision running (STATES.md, rule additions, rota component).
 - Rota data added (public/duty.js): Demo/Live deployers per release to Jan 2027, weekly support duty dev to 18 Oct. Sheet's 22/28 Dec release dropped (superseded by 2027-1 plan); sheet confirms 2027-1 Demo 5 Jan.
