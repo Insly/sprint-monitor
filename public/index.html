@@ -1014,7 +1014,7 @@ function renderFooter() {
   const rota = DUTY && DUTY.ROTA_UPDATED ? `Rota updated ${fmtDM(DUTY.ROTA_UPDATED)}` : null;
   fill($('foot-row'),
     h('span', null, diff ? 'Times are Tallinn time (your device is in another time zone)' : 'Times are Tallinn time'),
-    h('span', null, `Confluence confirms dates up to ${sprintDates(LAST_CONFIRMED).label}`),
+    h('span', null, `Dates confirmed up to ${sprintDates(LAST_CONFIRMED).label}`),
     rota ? h('span', null, rota) : null);
   const list = $('sources-list');
   if (!list.childElementCount) {
