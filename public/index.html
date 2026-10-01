@@ -194,6 +194,8 @@ h1, h2, h3 { line-height: 1.2; }
   :is(.fold, .cycle)[open] > summary .chev { visibility: hidden; width: 9px; height: 9px; border-color: var(--muted); }
   :is(.fold, .cycle)[open] > summary:hover .chev, :is(.fold, .cycle)[open] > summary:focus-visible .chev { visibility: visible; }
   :is(.fold, .cycle) > summary:hover { background: var(--section-body); }
+  .group > summary .chev { visibility: hidden; }
+  .group > summary:hover .chev, .group > summary:focus-visible .chev { visibility: visible; }
 }
 .sv-toggle { display: flex; justify-content: flex-end; margin-bottom: 4px; }
 .sv-duty .ltag { font-size: 13px; color: var(--tag-on-tray); }
@@ -230,7 +232,7 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
 .fact { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-2); border-radius: 4px; padding: 6px 10px; font-size: 15px; margin-bottom: 8px; color: var(--text); }
 .group { margin-top: 12px; border-top: 1px solid var(--line); }
-.group > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
+.group > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 40px; font-size: 13px; }
 .group > summary::-webkit-details-marker { display: none; }
 .group > summary b { font-size: 13px; color: var(--muted); min-width: 150px; }
 .group > summary .cnt { color: var(--muted); font-size: 13px; flex: 1 1 auto; min-width: 0; }
@@ -239,7 +241,9 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .rows li { display: flex; gap: 10px; align-items: baseline; min-height: 40px; padding: 8px 0 8px 12px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
 .rows li b { font-size: 15px; }
 .rows li span { font-size: 13px; color: var(--muted); }
-.nextfor { display: flex; gap: 10px; align-items: baseline; min-height: 44px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; margin-top: 12px; }
+.nextfor { display: flex; gap: 10px; align-items: baseline; min-height: 40px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--text-2); }
+/* Supplementary process info stays small; the day's own items are the focus (owner). */
+.group .rows li b { font-size: 14px; font-weight: 600; }
 .nextfor b.k { font-size: 13px; color: var(--muted); min-width: 150px; }
 .nf-list { display: inline; list-style: none; margin: 0; padding: 0; flex: 1 1 0; min-width: 0; }
 .nf-list li { display: inline; }
@@ -314,8 +318,8 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .seg2 button[aria-checked="true"] { background: var(--text); color: var(--bg); font-weight: 700; }
 
 /* ---------------------------------------------------------------- cycle, footer */
-.cycle { border-top: 2px solid var(--text); margin-top: 16px; } /* reference material: option C rule, no panel */
-.cycle > summary { min-height: 44px; padding: 0 12px 0 0; }
+.cycle { margin-top: 16px; } /* reference material, now a panel like the others (owner) */
+.cycle > summary { min-height: 44px; }
 .cycle > summary .sec-head h2 { font-size: 18px; }
 #cycle-body { padding-bottom: 8px; }
 .track-wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 4px; }
@@ -516,9 +520,9 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
 </main>
 
 <div class="wrap pad">
-  <details class="cycle" id="cycle">
+  <details class="cycle fold" id="cycle">
     <summary><div class="sec-head"><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><i class="chev" aria-hidden="true"></i><span class="aside sum"><b>Folded</b> · Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></div></summary>
-    <div id="cycle-body"></div>
+    <div class="fold-body" id="cycle-body"></div>
   </details>
 </div>
 
@@ -890,11 +894,7 @@ function renderYourDay(n, m) {
       h('ul', { class: 'nf-list' }, nf.items.map((x, i) => h('li', { class: i >= 3 ? 'nf-x' : null }, x.time ? `${x.time} ` : null, x.title)),
         nf.items.length > 3 ? h('li', { class: 'nf-more' }, `+${nf.items.length - 3} more`) : null)));
   }
-  if (a.also.length) {
-    kids.push(h('details', { class: 'group', open: a.alsoOpen, 'data-k': 'also' },
-      h('summary', null, h('b', null, 'Also today'), h('span', { class: 'cnt' }, `${a.also.length} for other roles`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
-      h('ul', { class: 'rows' }, a.also.map((it) => h('li', null, h('span', { class: 'chip other' }, it.chip?.text || 'Check'), h('b', null, it.title), h('span', null, it.who.map((w) => (w === 'All' ? 'Everyone' : roleLabel(w))).join(', ')))))));
-  }
+  // "Also today" for other roles is not shown: switch to Everyone to see them (owner, 2026-10-01).
   out();
   $('body').dataset.band = m.band;
 }
