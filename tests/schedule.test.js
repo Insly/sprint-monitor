@@ -14,6 +14,13 @@ import { workingDaysIn,
   OVERRIDES,
 } from '../public/schedule.js';
 import { RULES } from '../public/rules.js';
+
+// Tests below use OVERRIDES as scratch space; put the published plan back afterwards.
+const ORIGINAL_OVERRIDES = structuredClone(OVERRIDES);
+function restoreOverride(k) {
+  if (k in ORIGINAL_OVERRIDES) OVERRIDES[k] = structuredClone(ORIGINAL_OVERRIDES[k]);
+  else delete OVERRIDES[k];
+}
 import { RULES as SAMPLE_RULES } from './rules.sample.js';
 
 // Default to a timezone with a DST switch (EU clocks go back Sun 25 Oct 2026), but let
@@ -76,10 +83,11 @@ describe('calendar model', () => {
     expect(s.yearEndUnconfirmed).toBe(false);
   });
 
-  it('flags sprints after 2027-1 as unconfirmed until the post-break start is published', () => {
-    expect(sprintDates(25).yearEndUnconfirmed).toBe(false);
-    expect(sprintDates(26).yearEndUnconfirmed).toBe(false);
-    expect(sprintDates(27).yearEndUnconfirmed).toBe(true);
+  it('2027-2 starts Mon 4 Jan 2027 after the break (Kaspar, 2026-10-01) and the cadence continues from there', () => {
+    expect(sprintDates(27).label).toBe('2027-2');
+    expect(sprintDates(27).start).toBe('2027-01-04');
+    expect(sprintDates(28).start).toBe('2027-01-18');
+    for (const n of [25, 26, 27, 28]) expect(sprintDates(n).yearEndUnconfirmed).toBe(false);
   });
 
   it('numbering resets per release year (2026-25 is followed by 2027-1)', () => {
@@ -90,7 +98,7 @@ describe('calendar model', () => {
   });
 
   it('applies OVERRIDES over the formula', () => {
-    expect(Object.keys(OVERRIDES)).toEqual(['26']); // only the published 2027-1 plan
+    expect(Object.keys(OVERRIDES)).toEqual(['26', '27']); // only the published 2027-1 / 2027-2 plan
     try {
       OVERRIDES[27] = { live: '2027-01-07', cutoff: '2027-01-07' };
       const s = sprintDates(27);
@@ -101,9 +109,9 @@ describe('calendar model', () => {
       const live = actionsFor('2027-01-07', RULES).find((a) => a.id === 'live-update');
       expect(live).toMatchObject({ sprintNumber: 27, relation: 'previous' });
     } finally {
-      delete OVERRIDES[27];
+      restoreOverride(27);
     }
-    expect(sprintDates(27).live).toBe('2027-01-11');
+    expect(sprintDates(27).live).toBe('2027-01-25'); // real 2027-2 plan is back after the scratch test
   });
 
   it('re-derives dependent keys when an override moves start/end', () => {
@@ -117,8 +125,8 @@ describe('calendar model', () => {
       expect(sprintForDate('2027-01-11')).toBe(28);
       expect(context('2027-01-11').dayOfSprint).toBe(1);
     } finally {
-      delete OVERRIDES[27];
-      delete OVERRIDES[28];
+      restoreOverride(27);
+      restoreOverride(28);
     }
   });
 
@@ -377,8 +385,12 @@ describe('Confluence calendar oracle (table-driven)', () => {
 
   it('sprints are back to back with no gap or overlap', () => {
     for (let n = 5; n <= 40; n++) {
+      if (n === 26) continue; // the year-end break, asserted below
       expect(sprintDates(n + 1).start).toBe(addDays(sprintDates(n).end, 3));
     }
+    // 2027-1 ends Fri 18 Dec; 2027-2 starts Mon 4 Jan after the break (owner, 2026-10-01).
+    expect(sprintDates(26).end).toBe('2026-12-18');
+    expect(sprintDates(27).start).toBe('2027-01-04');
   });
 
   it('known historical deviation: 2026-5 Demo was Wed 04.03 / Thu 05.03, the engine models Tue/Wed', () => {
@@ -425,13 +437,12 @@ describe('edge exploration (QA)', () => {
     expect(context('2026-03-02')).toMatchObject({ dayOfSprint: 1, isWeekend: false });
   });
 
-  it('far future (2027-06-01) does not throw and is flagged projected/unconfirmed', () => {
+  it('far future (2027-06-01) does not throw and is flagged projected', () => {
     const c = context('2027-06-01');
-    expect(c.current.n).toBe(38);
+    expect(c.current.n).toBe(37); // cadence re-based on 2027-2 = Mon 4 Jan 2027
     expect(c.current.start).toBe('2027-05-24');
     expect(c.dayOfSprint).toBe(7);
     expect(c.current.projected).toBe(true);
-    expect(c.current.yearEndUnconfirmed).toBe(true);
     expect(() => actionsFor('2027-06-01', RULES)).not.toThrow();
     expect(() => upcoming('2027-06-01', RULES, 25)).not.toThrow();
   });
@@ -439,7 +450,7 @@ describe('edge exploration (QA)', () => {
   it('dayOfSprint is 1..10 on every working day and null on weekends, S5 to S40', () => {
     for (let d = sprintDates(5).start; d < sprintDates(41).start; d = addDays(d, 1)) {
       const c = context(d);
-      if (c.isWeekend) expect(c.dayOfSprint).toBeNull();
+      if (c.isWeekend || c.isBreak) expect(c.dayOfSprint).toBeNull();
       else {
         expect(c.dayOfSprint).toBeGreaterThanOrEqual(1);
         expect(c.dayOfSprint).toBeLessThanOrEqual(10);
@@ -477,25 +488,27 @@ describe('timezone independence (run with TZ=Europe/Tallinn and TZ=America/New_Y
 
 describe('OVERRIDES: start override (QA)', () => {
   it('a start override re-bases later sprints instead of overlapping them', () => {
+    // Scratch: push 2027-5 (internal 30, normally Mon 15 Feb 2027) back one week.
+    expect(sprintDates(30).start).toBe('2027-02-15');
     try {
-      OVERRIDES[28] = { start: '2027-01-11' };
-      expect(sprintDates(28)).toMatchObject({ start: '2027-01-11', end: '2027-01-22', planning: '2027-01-07', live: '2027-02-01', overridden: true });
-      // S29 must follow S28, not stay on the old grid (it used to start 2027-01-18, inside S28)
-      expect(sprintDates(29).start).toBe('2027-01-25');
-      expect(sprintDates(29).overridden).toBe(false);
-      expect(sprintForDate('2027-01-18')).toBe(28);
-      expect(context('2027-01-22').dayOfSprint).toBe(10);
-      expect(sprintForDate('2027-01-25')).toBe(29);
+      OVERRIDES[30] = { start: '2027-02-22' };
+      expect(sprintDates(30)).toMatchObject({ start: '2027-02-22', end: '2027-03-05', planning: '2027-02-18', live: '2027-03-15', overridden: true });
+      // S31 must follow S30, not stay on the old grid (it would start 2027-03-01, inside S30)
+      expect(sprintDates(31).start).toBe('2027-03-08');
+      expect(sprintDates(31).overridden).toBe(false);
+      expect(sprintForDate('2027-03-01')).toBe(30);
+      expect(context('2027-03-05').dayOfSprint).toBe(10);
+      expect(sprintForDate('2027-03-08')).toBe(31);
       // earlier sprints are untouched
-      expect(sprintDates(27).start).toBe('2026-12-21');
+      expect(sprintDates(29).start).toBe('2027-02-01');
       expect(sprintDates(22).live).toBe('2026-11-02');
-      for (let n = 27; n <= 35; n++) {
+      for (let n = 27; n <= 38; n++) {
         expect(sprintDates(n + 1).start > sprintDates(n).end, `S${n}/S${n + 1}`).toBe(true);
       }
     } finally {
-      delete OVERRIDES[28];
+      restoreOverride(30);
     }
-    expect(sprintDates(29).start).toBe('2027-01-18');
+    expect(sprintDates(31).start).toBe('2027-03-01');
   });
 
   it('a start override plus other keys: derived first, extra keys applied on top', () => {
@@ -508,7 +521,7 @@ describe('OVERRIDES: start override (QA)', () => {
       expect(s.live).toBe('2027-02-02'); // overridden
       expect(actionsFor('2027-02-02', RULES).find((a) => a.id === 'live-update')).toMatchObject({ sprintNumber: 28 });
     } finally {
-      delete OVERRIDES[28];
+      restoreOverride(28);
     }
   });
 });
@@ -524,7 +537,21 @@ describe('workingDaysIn', () => {
       expect(workingDaysIn(s)).toBe(15);
       expect(context('2027-01-08').dayOfSprint).toBeLessThanOrEqual(workingDaysIn(s));
     } finally {
-      delete OVERRIDES[27];
+      restoreOverride(27);
     }
+  });
+});
+
+describe('year-end break', () => {
+  it('21 Dec 2026 to 1 Jan 2027 is a break: no sprint day, 2027-1 still current, 2027-2 next', () => {
+    for (const d of ['2026-12-21', '2026-12-24', '2026-12-31', '2027-01-01']) {
+      const c = context(d);
+      expect(c.isBreak).toBe(true);
+      expect(c.dayOfSprint).toBeNull();
+      expect(c.current.label).toBe('2027-1');
+      expect(c.next.label).toBe('2027-2');
+    }
+    expect(context('2026-12-18').isBreak).toBe(false);
+    expect(context('2027-01-04')).toMatchObject({ isBreak: false, dayOfSprint: 1 });
   });
 });

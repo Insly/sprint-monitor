@@ -85,6 +85,8 @@ export const OVERRIDES = {
     demoStart: '2027-01-05', demoEnd: '2027-01-06', freezeEnd: '2027-01-06', uatStart: '2027-01-06',
     cutoff: '2027-01-11', live: '2027-01-11',
   },
+  // 2027-2 (Kaspar, 2026-10-01): starts Mon 4 Jan 2027 after the year-end break; cadence continues from here.
+  27: { start: '2027-01-04' },
 };
 
 /**
@@ -93,8 +95,8 @@ export const OVERRIDES = {
  */
 export const YEAR_STARTS = { 2026: 1, 2027: 26 };
 
-/** Internal sprint numbers from here on have unconfirmed year-end dates (2027-2 start not published). */
-export const UNCONFIRMED_FROM = 27;
+/** Internal sprint numbers from here on have unconfirmed year-end dates. None open since 2027-2's start was confirmed. */
+export const UNCONFIRMED_FROM = Infinity;
 
 function labelOf(n) {
   let year = null;
@@ -178,11 +180,15 @@ export function context(date) {
   const current = sprintDates(n);
   const idx = daysBetween(current.start, key); // 0..13 for a regular sprint
   const isWeekend = isWeekendDay(key);
+  // Year-end break: after the weekend that follows a sprint's end, before the next sprint starts
+  // (e.g. 21 Dec 2026 to 1 Jan 2027 between 2027-1 and 2027-2). No sprint day is counted then.
+  const isBreak = key > addDays(current.end, 2);
   return {
     date: key,
     isWeekend,
-    dayOfSprint: isWeekend ? null : workingDaysFrom(current.start, key),
-    weekOfSprint: idx < 7 ? 1 : 2,
+    isBreak,
+    dayOfSprint: isWeekend || isBreak ? null : workingDaysFrom(current.start, key),
+    weekOfSprint: isBreak ? null : idx < 7 ? 1 : 2,
     previous: sprintDates(n - 1),
     current,
     next: sprintDates(n + 1),
