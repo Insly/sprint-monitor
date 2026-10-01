@@ -141,7 +141,7 @@ h1, h2, h3 { line-height: 1.2; }
 /* ---------------------------------------------------------------- duty line */
 .duty { border-bottom: 1px solid var(--line); background: var(--surface); }
 .duty .wrap { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; padding-top: 10px; padding-bottom: 10px; min-height: 44px; font-size: 15px; }
-.duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 6px; }
+.duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 2px; }
 .duty .tonight { font-weight: 700; }
 .na { color: var(--muted); font-style: italic; font-weight: 400; }
 
@@ -188,8 +188,8 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .group > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
 .group > summary::-webkit-details-marker { display: none; }
 .group > summary b { font-size: 13px; color: var(--muted); min-width: 150px; }
-.group > summary .cnt { color: var(--muted); font-size: 13px; }
-.group > summary .chev { margin-left: auto; }
+.group > summary .cnt { color: var(--muted); font-size: 13px; flex: 1 1 auto; min-width: 0; }
+.group > summary .chev { margin-left: auto; flex: none; }
 .rows { list-style: none; margin: 0 0 8px; padding: 0; }
 .rows li { display: flex; gap: 10px; align-items: baseline; min-height: 40px; padding: 8px 0 8px 12px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
 .rows li b { font-size: 15px; }
@@ -351,7 +351,13 @@ footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap:
   .tl .tls { white-space: normal; }
   .sv-head h1 { font-size: 26px; }
   .gloss { grid-template-columns: 1fr; }
-  .viewdate .menu { right: auto; left: 0; }
+  .topbar .wrap { flex-wrap: nowrap; position: relative; }
+  .brand { min-width: 0; }
+  .controls { flex-wrap: nowrap; flex: none; }
+  .viewdate { position: static; }
+  .viewdate .menu { left: 16px; right: 16px; min-width: 0; top: calc(100% - 4px); }
+  .band--event .nextbox { display: none !important; } /* !important: the link carries an inline display:block */ /* mockup G and I: the day's items come first on mobile */
+  .group > summary .cnt-list { display: none; }
   .previewbar .back { margin-left: 0; }
 }
 
@@ -587,7 +593,9 @@ function renderBand(n, m) {
   band.className = `band band--${m.band}`;
   $('band-tag').textContent = m.tag || '';
   $('band-meta').textContent = m.meta || '';
-  if ($('headline-sr').textContent !== (m.srTag || '')) $('headline-sr').textContent = m.srTag || '';
+  // The hidden state tag is skipped when the headline already starts with it ("Cut-off passed. Cut-off passed. …").
+  const srTag = m.srTag && !m.headline.startsWith(m.srTag.trim()) ? `${m.srTag.trim()} ` : '';
+  if ($('headline-sr').textContent !== srTag) $('headline-sr').textContent = srTag;
   if ($('headline-text').textContent !== m.headline) $('headline-text').textContent = m.headline;
   $('band-sub').textContent = m.sub || '';
   $('band-sub').hidden = !m.sub;
@@ -631,14 +639,15 @@ function renderDuty(m) {
   const line = m.duty;
   $('duty').hidden = !line;
   if (!line) return;
-  const support = h('span', null, h('span', { class: 'dk' }, 'Support this week'), line.support.name || h('span', { class: 'na' }, NOT_ASSIGNED));
+  // A text space after each key keeps screen readers from running "London" and the name together.
+  const support = h('span', null, h('span', { class: 'dk' }, 'Support this week'), ' ', line.support.name || h('span', { class: 'na' }, NOT_ASSIGNED));
   const d = line.deploy;
   let dep = null;
   if (d) {
     const href = linkTo(`#sprint-${d.label}`);
-    if (line.state === 'tonight') dep = h('span', { class: 'tonight' }, h('span', { class: 'dk' }, `Tonight · ${d.kind} update `, h('a', { href }, d.label), ` · ${d.zones}`), personNodes(d.people));
-    else if (line.state === 'last-night') dep = h('span', null, h('span', { class: 'dk' }, `Last night · ${d.kind} update `, h('a', { href }, d.label)), personNodes(d.people));
-    else dep = h('span', null, h('span', { class: 'dk' }, `Next · ${d.kind} update ${fmtDay(d.date)} · ${d.zones} (`, h('a', { href }, d.label), ')'), personNodes(d.people));
+    if (line.state === 'tonight') dep = h('span', { class: 'tonight' }, h('span', { class: 'dk' }, `Tonight · ${d.kind} update `, h('a', { href }, d.label), ` · ${d.zones}`), ' ', personNodes(d.people));
+    else if (line.state === 'last-night') dep = h('span', null, h('span', { class: 'dk' }, `Last night · ${d.kind} update `, h('a', { href }, d.label)), ' ', personNodes(d.people));
+    else dep = h('span', null, h('span', { class: 'dk' }, `Next · ${d.kind} update ${fmtDay(d.date)} · ${d.zones} (`, h('a', { href }, d.label), ')'), ' ', personNodes(d.people));
   }
   fill($('duty-inner'), line.state === 'next' ? [support, dep] : [dep, support]);
 }
@@ -682,7 +691,7 @@ function itemNode(it, { everyoneView = false } = {}) {
   const tagText = it.tag ? (it.tag.text ? `${it.tag.label} · ${it.tag.text}` : it.tag.label) : null;
   return h('li', null, h('details', { class: cls, 'data-k': `item:${it.id}:${it.slot}` },
     h('summary', null,
-      h('span', { class: `when${/^\d\d:\d\d$|^Tonight$/.test(it.when || '') ? '' : ' soft'}` }, it.when || 'Today'),
+      h('span', { class: `when${/^\d\d:\d\d$|^Tonight$|^Now$/.test(it.when || '') ? '' : ' soft'}` }, it.when || 'Today'),
       h('span', { class: `chip ${chip.cls}` }, chip.text),
       h('span', { class: 'ttl' }, it.title, it.sub ? h('small', null, it.sub) : null),
       roles || (tagText ? h('span', { class: 'stag' }, tagText) : h('span')),
@@ -701,7 +710,8 @@ function renderYourDay(n, m) {
       h('h2', { id: 'picker-h' }, 'Show only what is yours'),
       h('p', null, 'Which of these are you? You can change it any time under "Viewing as".'),
       h('div', { class: 'grid' }, PICK_ORDER.map((r) => h('button', { type: 'button', title: ROLE_TIP[r] || null, onclick: () => setRole(r, { from: 'picker' }) }, roleLabel(r)))),
-      h('a', { class: 'new', href: '#cycle', onclick: () => { $('cycle').open = true; } }, 'New here? See how the 2-week cycle works ↓')));
+      // In-page jump without touching the hash: a hash change would end a preview (#date-…).
+      h('a', { class: 'new', href: '#cycle', onclick: (e) => { e.preventDefault(); $('cycle').open = true; const s = $('cycle').querySelector('summary'); s.scrollIntoView({ block: 'start' }); s.focus(); } }, 'New here? See how the 2-week cycle works ↓')));
   }
   const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
   kids.push(h('div', { class: 'sec-head' },
@@ -715,10 +725,18 @@ function renderYourDay(n, m) {
     return;
   }
   const everyoneView = role === 'Everyone';
+  // A lone "Today" group needs no slot heading (mockup H and J); it saves a row above the fold.
+  const loneToday = a.groups.length === 1 && a.groups[0].heading === 'Today';
   a.groups.forEach((g, i) => {
-    kids.push(h('div', { class: `slot${i === 0 && ['urgent', 'after', 'evening'].includes(m.band) ? ' hot' : ''}` }, g.heading));
+    if (!loneToday) kids.push(h('div', { class: `slot${i === 0 && ['urgent', 'after', 'evening'].includes(m.band) ? ' hot' : ''}` }, g.heading));
     kids.push(h('ul', { class: 'agenda' }, g.items.map((it) => itemNode(it, { everyoneView }))));
   });
+  // Gates for planning follow the day's items directly (mockup H; DESIGN §4.4 fold target for Lead).
+  if (a.gates && a.gates.items.length) {
+    kids.push(h('details', { class: 'group', open: true, 'data-k': 'gates' },
+      h('summary', null, h('b', null, a.gates.heading), h('span', { class: 'cnt' }, `due ${fmtDay(a.gates.due)}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, it.who.map(roleLabel).join(', ')))))));
+  }
   if (!a.groups.length) {
     const nf = a.nextFor;
     const next = nf ? ` Next: ${nf.items[0].title} ${fmtDay(nf.date)}${nf.items[0].time ? ` ${nf.items[0].time}` : ''}.` : '';
@@ -731,7 +749,7 @@ function renderYourDay(n, m) {
   }
   if (a.everyday.length) {
     kids.push(h('details', { class: 'group', 'data-k': 'everyday' },
-      h('summary', null, h('b', null, 'Every day this sprint'), h('span', { class: 'cnt' }, `${a.everyday.length} · ${a.everyday.map((x) => x.title).join(' · ')}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('summary', null, h('b', null, 'Every day this sprint'), h('span', { class: 'cnt' }, String(a.everyday.length), h('span', { class: 'cnt-list' }, ` · ${a.everyday.map((x) => x.title).join(' · ')}`)), h('i', { class: 'chev', 'aria-hidden': 'true' })),
       h('ul', { class: 'agenda' }, a.everyday.map((it) => itemNode({ ...it, chip: { text: 'Every day', cls: 'check' }, when: 'Daily' }, { everyoneView })))));
   }
   if (a.nextFor && a.groups.length) {
@@ -739,11 +757,6 @@ function renderYourDay(n, m) {
     const k = nf.date === addDays(a.day, 1) ? `Tomorrow, ${fmtDay(nf.date)}` : `Next for you · ${fmtDay(nf.date)}`;
     kids.push(h('div', { class: 'nextfor' }, h('b', { class: 'k' }, k),
       h('span', null, nf.items.flatMap((x, i) => [i ? ' · ' : null, x.time ? `${x.time} ` : null, x.title]))));
-  }
-  if (a.gates && a.gates.items.length) {
-    kids.push(h('details', { class: 'group', open: true, 'data-k': 'gates' },
-      h('summary', null, h('b', null, a.gates.heading), h('span', { class: 'cnt' }, `due ${fmtDay(a.gates.due)}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
-      h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, it.who.map(roleLabel).join(', ')))))));
   }
   if (a.also.length) {
     kids.push(h('details', { class: 'group', open: a.alsoOpen, 'data-k': 'also' },
@@ -1014,6 +1027,7 @@ let lastModel = null;
 let lastHref = null;
 let lastKey = null;
 let lastView = null;
+let lastSprint = null;
 
 function openKeys() { return new Set([...document.querySelectorAll('details[data-k][open]')].map((d) => d.dataset.k)); }
 function closedKeys() { return new Set([...document.querySelectorAll('details[data-k]:not([open])')].map((d) => d.dataset.k)); }
@@ -1057,7 +1071,10 @@ function render({ keepFocus = false } = {}) {
     if (opened.has(d.dataset.k)) d.open = true;
     else if (closed.has(d.dataset.k)) d.open = false;
   }
-  if (focusSel && view === lastView) { const el = document.querySelector(focusSel); if (el && el !== document.activeElement) el.focus(); }
+  if (focusSel && view === lastView && !(view === 'sprint' && n.route.sprintRaw !== lastSprint)) { const el = document.querySelector(focusSel); if (el && el !== document.activeElement) el.focus(); }
+  // ‹ › inside the sprint view load another sprint: focus its h1 as on any route entry (v2.1-A).
+  if (view === 'sprint' && lastView === 'sprint' && n.route.sprintRaw !== lastSprint) { const h1 = $('sv-h'); if (h1) h1.focus(); }
+  lastSprint = view === 'sprint' ? n.route.sprintRaw : null;
   if (view !== lastView) {
     if (view === 'sprint') { const h1 = $('sv-h'); if (h1) h1.focus(); }
     else if (lastView === 'sprint' && returnFocusTo) {
@@ -1087,6 +1104,12 @@ function tick() {
 document.addEventListener('click', (e) => {
   const a = e.target.closest && e.target.closest('a.lab[data-sprint]');
   if (a) returnFocusTo = a.dataset.sprint;
+});
+// Skip link: move focus to the Your day heading without changing the hash (that would end a preview).
+document.querySelector('.skip').addEventListener('click', (e) => {
+  e.preventDefault();
+  const target = $('today-view').hidden ? $('sv-h') : $('yourday-h');
+  if (target) { target.scrollIntoView({ block: 'start' }); target.focus(); }
 });
 $('viewdate-form').addEventListener('submit', (e) => {
   e.preventDefault();
