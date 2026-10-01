@@ -1,5 +1,9 @@
 # Progress log
 
+## 2026-10-01 — Rules: Bi-weekly plan additions (owner, 2026-10-01)
+- Rules: Bi-weekly plan additions (owner, 2026-10-01). 13 new IM/AM communication rules (source `biweeklyPlan`, review in docs/notes/bi-weekly-plan-review.md); `definition-of-ready`, `confirm-live-to-client` and `cutoff-reminder` extended (the proposed `release-check-live-list` merged into `cutoff-reminder`; owner confirmed the release check applies to all clients). 52 rules.
+- Sweep Aug 2026 to Jun 2027, all roles: no band, headline, tab or Next key moment changes, no new orange; only sub-lines changed. Fixtures updated (scenarios, STATES.md §8/§10 sub-lines and sprint view, engine-v21 counts 37/55, qa-oracle 28 Dec now allows the one IM/AM planning-prep task). 603 tests pass (Tallinn, New York).
+
 ## 2026-10-01 — owner feedback on the live redesign
 - Support duty removed from the page and data (differs per team). Duty line now shows only the Demo/Live deployers, same font size as labels.
 - Whole sprint block in the rail opens the sprint view. "Your day" tag renamed `<today>`.

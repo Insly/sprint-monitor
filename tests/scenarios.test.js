@@ -17,12 +17,15 @@ const BUILD_WINDOWS = ['analyst-sprint', 'autotest-review', 'code-review-24h', '
 const DAYS = {
   '2026-09-28': { // Mon, S21 day 1 (acceptance check 1)
     sprint: 21, day: 1,
-    today: { 'sprint-start': 21, 'bug-retro': 20, 'matrix-before-demo': 20 },
+    today: { 'sprint-start': 21, 'bug-retro': 20, 'matrix-before-demo': 20, 'tell-client-sprint-plan': 21 },
     windows: { 'code-freeze': 20, 'regression-run': 20, ...build(21) },
   },
   '2026-09-29': { // Tue, S20 Demo update (acceptance check 2)
     sprint: 21, day: 2,
-    today: { 'demo-update': 20, 'ready-for-demo': 20, 'release-page': 20 },
+    today: {
+      'demo-update': 20, 'ready-for-demo': 20, 'release-page': 20,
+      'release-check-demo-list': 20, 'prepare-uat-instructions': 20, 'describe-tasks-for-refinement': 22,
+    },
     windows: { 'code-freeze': 20, 'regression-run': 20, ...build(21) },
   },
   '2026-09-30': { // Wed, Demo day 2, UAT opens, freeze ends, week 1 refinement prep
@@ -35,12 +38,12 @@ const DAYS = {
   },
   '2026-10-01': { // Thu week 1: Full Refinement
     sprint: 21, day: 4,
-    today: { 'full-refinement': 22 },
+    today: { 'full-refinement': 22, 'collect-uat-feedback': 20 },
     windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
   '2026-10-02': { // Fri: cut-off reminder (acceptance check 3)
     sprint: 21, day: 5,
-    today: { 'cutoff-reminder': 20, 'matrix-before-live': 20 },
+    today: { 'cutoff-reminder': 20, 'matrix-before-live': 20, 'mid-sprint-check': 21, 'candidate-hours-vs-capacity': 22 },
     windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
   '2026-10-05': { // Mon: S20 cut-off and Live (acceptance check 4)
@@ -48,12 +51,13 @@ const DAYS = {
     today: {
       'cutoff-last-chase': 20, 'fix-cutoff': 20, 'revert-missed-fixes': 20, 'tell-client-revert': 20,
       'live-update': 20, 'golive-page': 20, 'confirm-live-to-client': 20,
+      'uat-tickets-queue-ready': 20, 'promised-tickets-queue-ready': 22,
     },
     windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
-  '2026-10-06': { // Tue week 2: nothing dated
+  '2026-10-06': { // Tue week 2: only the weekly refinement prep (Bi-weekly plan)
     sprint: 21, day: 7,
-    today: {},
+    today: { 'describe-tasks-for-refinement': 22 },
     windows: build(21),
   },
   '2026-10-07': { // Wed week 2: Pre-Refinement + S22 planning prep (acceptance check 5), no parked-questions
@@ -61,28 +65,31 @@ const DAYS = {
     today: {
       'pre-refinement': 22, 'rank-refinement-queue': 22,
       'priority-call-due': 22, 'definition-of-ready': 22, 'qa-estimate-present': 22,
-      'uat-findings-to-planning': 22,
+      'uat-findings-to-planning': 22, 'chase-estimate-approval': 22,
     },
     windows: build(21),
   },
   '2026-10-08': { // Thu week 2: S22 planning, S21 regression plans, NO Full Refinement
     sprint: 21, day: 9,
-    today: { 'sprint-planning': 22, 'regression-plans': 21 },
+    today: { 'sprint-planning': 22, 'regression-plans': 21, 'send-client-sprint-list': 22 },
     windows: build(21),
   },
   '2026-10-09': { // Fri: S21 last day, freeze starts
     sprint: 21, day: 10,
-    today: { 'bug-retro-prep': 21 },
+    today: { 'bug-retro-prep': 21, 'release-check-before-demo': 21, 'send-early-start-list': 22 },
     windows: { 'code-freeze': 21, 'regression-run': 21, ...build(21) },
   },
   '2026-10-12': { // Mon: S22 day 1, S21 bug retro
     sprint: 22, day: 1,
-    today: { 'sprint-start': 22, 'bug-retro': 21, 'matrix-before-demo': 21 },
+    today: { 'sprint-start': 22, 'bug-retro': 21, 'matrix-before-demo': 21, 'tell-client-sprint-plan': 22 },
     windows: { 'code-freeze': 21, 'regression-run': 21, ...build(22) },
   },
   '2026-10-13': { // Tue: S21 Demo update
     sprint: 22, day: 2,
-    today: { 'demo-update': 21, 'ready-for-demo': 21, 'release-page': 21 },
+    today: {
+      'demo-update': 21, 'ready-for-demo': 21, 'release-page': 21,
+      'release-check-demo-list': 21, 'prepare-uat-instructions': 21, 'describe-tasks-for-refinement': 23,
+    },
     windows: { 'code-freeze': 21, 'regression-run': 21, ...build(22) },
   },
   '2026-10-14': { // Wed: UAT opens for S21
@@ -95,12 +102,12 @@ const DAYS = {
   },
   '2026-10-15': { // Thu week 1 of S22: Full Refinement
     sprint: 22, day: 4,
-    today: { 'full-refinement': 23 },
+    today: { 'full-refinement': 23, 'collect-uat-feedback': 21 },
     windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
   '2026-10-16': { // Fri: S21 cut-off reminder
     sprint: 22, day: 5,
-    today: { 'cutoff-reminder': 21, 'matrix-before-live': 21 },
+    today: { 'cutoff-reminder': 21, 'matrix-before-live': 21, 'mid-sprint-check': 22, 'candidate-hours-vs-capacity': 23 },
     windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
   '2026-10-19': { // Mon: S21 cut-off and Live
@@ -108,6 +115,7 @@ const DAYS = {
     today: {
       'cutoff-last-chase': 21, 'fix-cutoff': 21, 'revert-missed-fixes': 21, 'tell-client-revert': 21,
       'live-update': 21, 'golive-page': 21, 'confirm-live-to-client': 21,
+      'uat-tickets-queue-ready': 21, 'promised-tickets-queue-ready': 23,
     },
     windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
@@ -205,15 +213,15 @@ describe('rules.js wording and SPEC consistency', () => {
     }
   });
 
-  it('who / sprint / source match the SPEC.md rule catalogue (39 rules)', () => {
+  it('who / sprint / source match the SPEC.md rule catalogue (52 rules)', () => {
     const spec = readFileSync(new URL('../docs/SPEC.md', import.meta.url), 'utf8');
     const rows = spec
       .split('\n')
       .filter((l) => /^\| [a-z0-9-]+ \| /.test(l))
       .map((l) => l.split('|').map((c) => c.trim()).filter(Boolean))
       .filter((cells) => cells[0] !== 'id');
-    expect(rows.length).toBe(39);
-    expect(RULES.length).toBe(39);
+    expect(rows.length).toBe(52);
+    expect(RULES.length).toBe(52);
     const REL = { prev: 'previous', cur: 'current', next: 'next' };
     for (const [id, who, when, source] of rows) {
       const r = RULES.find((x) => x.id === id);

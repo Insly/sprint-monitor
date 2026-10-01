@@ -125,27 +125,33 @@ describe('sprintDetail: #sprint-2026-21 on Thu 1 Oct 09:00, IM / AM (STATES.md ย
     ]);
   });
 
-  it('23 actions for IM / AM, 41 for Everyone', () => {
-    expect(det.actions.length).toBe(23);
-    expect(sprintDetail(21, '2026-10-01', RULES).actions.length).toBe(41);
-    expect(sprintDetail(21, '2026-10-01', RULES, { role: 'Everyone' }).actions.length).toBe(41);
+  it('37 actions for IM / AM, 55 for Everyone', () => {
+    expect(det.actions.length).toBe(37);
+    expect(sprintDetail(21, '2026-10-01', RULES).actions.length).toBe(55);
+    expect(sprintDetail(21, '2026-10-01', RULES, { role: 'Everyone' }).actions.length).toBe(55);
   });
 
   it('grouped Passed / Running / Coming as listed in STATES.md ยง10', () => {
     const group = (st) => det.actions.filter((a) => a.status === st).map((a) => `${a.date} ${a.id}`).sort();
     expect(group('passed')).toEqual([
-      '2026-09-16 answer-parked-questions', '2026-09-17 full-refinement',
-      '2026-09-23 definition-of-ready', '2026-09-23 priority-call-due', '2026-09-23 qa-estimate-present',
-      '2026-09-23 uat-findings-to-planning', '2026-09-24 sprint-planning', '2026-09-28 sprint-start',
+      '2026-09-15 describe-tasks-for-refinement', '2026-09-16 answer-parked-questions', '2026-09-17 full-refinement',
+      '2026-09-18 candidate-hours-vs-capacity', '2026-09-21 promised-tickets-queue-ready', '2026-09-22 describe-tasks-for-refinement',
+      '2026-09-23 chase-estimate-approval', '2026-09-23 definition-of-ready', '2026-09-23 priority-call-due', '2026-09-23 qa-estimate-present',
+      '2026-09-23 uat-findings-to-planning', '2026-09-24 send-client-sprint-list', '2026-09-24 sprint-planning',
+      '2026-09-25 send-early-start-list', '2026-09-28 sprint-start', '2026-09-28 tell-client-sprint-plan',
     ]);
     expect(group('running')).toEqual(['2026-09-28 log-time-daily', '2026-09-28 overrun-80']);
     expect(group('today')).toEqual([]);
     expect(group('coming')).toEqual([
-      '2026-10-09 code-freeze',
+      '2026-10-02 mid-sprint-check',
+      '2026-10-09 code-freeze', '2026-10-09 release-check-before-demo',
       '2026-10-12 bug-retro', '2026-10-12 matrix-before-demo',
+      '2026-10-13 prepare-uat-instructions', '2026-10-13 release-check-demo-list',
       '2026-10-14 check-own-items-demo', '2026-10-14 inform-client-uat', '2026-10-14 ready-for-live', '2026-10-14 uat-window',
+      '2026-10-15 collect-uat-feedback',
       '2026-10-16 cutoff-reminder', '2026-10-16 matrix-before-live',
       '2026-10-19 confirm-live-to-client', '2026-10-19 cutoff-last-chase', '2026-10-19 fix-cutoff', '2026-10-19 tell-client-revert',
+      '2026-10-19 uat-tickets-queue-ready',
     ]);
   });
 
@@ -180,7 +186,7 @@ describe('sprintDetail: other relations and timed milestones', () => {
   it('2027-1: the year-end sprint, with holidays on its release dates', () => {
     const d = sprintDetail(26, '2026-10-01', RULES, { role: 'IM/AM', holidays: HOLIDAYS });
     expect(d.sprint.label).toBe('2027-1');
-    expect(d.actions[0].date).toBe('2026-11-25');
+    expect(d.actions[0].date).toBe('2026-11-24'); // describe-tasks-for-refinement, weekly Tue while 2027-1 is next
     expect(d.holidays.map((h) => `${h.date} ${h.country}`)).toEqual([
       '2026-12-24 EE', '2026-12-24 PL', '2026-12-25 EE', '2026-12-25 PL',
       '2027-01-01 EE', '2027-01-01 PL', '2027-01-06 PL',

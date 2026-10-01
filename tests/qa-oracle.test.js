@@ -263,7 +263,12 @@ describe('owner spot checks', () => {
       expect(m.band, role).toBe('quiet');
       expect(m.headline, role).toBe('No deadlines today');
     }
-    expect(actionsFor('2026-12-28', RULES).filter((a) => a.status === 'today')).toEqual([]);
+    // Intent: no cut-off, deploy or other key event for any role. Since the Bi-weekly plan rules (2026-10-01)
+    // the IM/AM have one desk task for the next sprint's planning (Thu 31 Dec); it must not change band or headline.
+    const today = actionsFor('2026-12-28', RULES).filter((a) => a.status === 'today');
+    expect(today.filter((a) => a.kind === 'deploy' || ['fix-cutoff', 'sprint-start', 'sprint-planning', 'code-freeze'].includes(a.id))).toEqual([]);
+    expect(today.map((a) => `${a.id}:${sprintDates(a.sprintNumber).label}`)).toEqual(['promised-tickets-queue-ready:2027-2']);
+    expect(today.every((a) => a.who.join() === 'IM/AM' && a.relation === 'next')).toBe(true);
   });
 
   it('the 2027-1 code freeze starts Fri 1 Jan (holiday) and holds until the Demo update Tue 5 Jan', () => {

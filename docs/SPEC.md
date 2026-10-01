@@ -38,7 +38,7 @@ As defined in `CONTRACT.md`: anchor S17 = Mon 2026-08-03, 14-day sprints. `rules
 
 Weekly refinement mapping: sprint planning falls on Thursday of week 2 of the current sprint (next.start − 4). So the bi-weekly Full Refinement is Thursday of **week 1** (`{ weekly: 'Thu', week: 1 }`).
 
-## Rule catalogue (39 rules)
+## Rule catalogue (52 rules)
 
 Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation. Optional fields (DESIGN.md §14): `slot` orders an item within the day, `carryOver: 1` repeats it on the next working day under "From last night", `links` lists `SOURCES` keys shown in the expanded item, `time` is Tallinn time (Demo update 17:00, Live update 20:00: the owner's usual start times, 2026-10-01).
 
@@ -83,8 +83,23 @@ Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation.
 | live-update | Dev | prev: live (Mon) 20:00, slot evening, links matrix | lifecycle |
 | golive-page | Dev | prev: live (Mon), slot after-deploy, carryOver 1 | releasePage |
 | confirm-live-to-client | IM/AM | prev: live (Mon), slot after-deploy, carryOver 1 | lifecycle |
+| tell-client-sprint-plan | IM/AM | cur: start (Mon) | biweeklyPlan |
+| describe-tasks-for-refinement | IM/AM, Analyst | next: weekly Tue | biweeklyPlan |
+| mid-sprint-check | IM/AM, Lead | cur: start +4 (Fri, week 1) | biweeklyPlan |
+| candidate-hours-vs-capacity | IM/AM | next: planning −6 (Fri, week 1) | biweeklyPlan |
+| promised-tickets-queue-ready | IM/AM | next: planning −3 (Mon, week 2) | biweeklyPlan |
+| chase-estimate-approval | IM/AM | next: planning −1 (Wed) | biweeklyPlan |
+| send-client-sprint-list | IM/AM | next: planning (Thu) | biweeklyPlan |
+| release-check-before-demo | IM/AM, Lead, Dev | cur: end (Fri) 12:00 | biweeklyPlan |
+| send-early-start-list | IM/AM | next: start −3 (Fri) | biweeklyPlan |
+| release-check-demo-list | IM/AM | prev: demoStart (Tue) | biweeklyPlan |
+| prepare-uat-instructions | IM/AM | prev: demoStart (Tue) | biweeklyPlan |
+| collect-uat-feedback | IM/AM | prev: uatStart +1 (Thu) | biweeklyPlan |
+| uat-tickets-queue-ready | IM/AM | prev: live (Mon), slot after-cutoff | biweeklyPlan |
 
 Changed on 2026-10-01 (DESIGN.md §14): `code-freeze` now ends at `demoStart` (owner decision 2: the freeze ends with the Tuesday evening Demo update; Beta reopens Wednesday). `ready-for-live` ends at the cut-off. `revert-missed-fixes` is Dev only; the IM/AM part is the new `tell-client-revert`. New: `cutoff-last-chase`, `uat-findings-to-planning`.
+
+Added on 2026-10-01 (owner-approved, source `biweeklyPlan`: the IM/AM "Bi-weekly plan" delivery checklist, generalised; mapping and rationale in `docs/notes/bi-weekly-plan-review.md`): 13 IM/AM communication rules, the last 13 rows of the table. Extended: `definition-of-ready` (tasks must sit in Backlog, ranked high enough), `confirm-live-to-client` (send the list of what went live), and `cutoff-reminder` (now also the release check before Live: list what won't make Live, chase go/no-go; this replaced a separate proposed rule). The owner confirmed the release check applies to all clients.
 
 Note: the engine checks dated rules against all three sprints. So `code-freeze` and `regression-run` also show on the Friday the freeze starts, while that sprint is still "current".
 

@@ -167,7 +167,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Mon 28 Sep 09:00 (2026-21 day 1, Demo eve)
 - **Band:** heads-up E I D Q · event L A
 - **Headline (all):** `2026-21 starts today. Demo update tomorrow.`
-- **Sub-line:** I `Due today: Update Demo/Live matrix for Demo.` · D `Code freeze holds until the Demo update tomorrow evening.` · Q `Run regression until the Demo update tomorrow evening.` · L/A `Bug retro for 2026-20 today.` · E `Bug retro for 2026-20 today. IM/AM: Demo/Live matrix due.`
+- **Sub-line:** I `Due today: Update Demo/Live matrix for Demo. Also: Tell clients what this sprint delivers.` · D `Code freeze holds until the Demo update tomorrow evening.` · Q `Run regression until the Demo update tomorrow evening.` · L/A `Bug retro for 2026-20 today.` · E `Bug retro for 2026-20 today. IM/AM: Demo/Live matrix due.`
 - **Tab:** `Demo tomorrow · 2026-21 day 1 · Sprint Board`
 - **Rail:** `2026-20 [Freeze] Code freeze · Demo update Tue 29 Sep evening` · `2026-21 [Build] Sprint day 1 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Refinement · planning Thu 8 Oct`
 - **Duty:** `next`, Support Dev D. · Next Demo update Tue 29 Sep (2026-20): Dev A.
@@ -197,7 +197,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Thu 1 Oct (Full Refinement, week 1)
 - **Band:** event E I D Q A · **quiet L**
 - **Headline:** E I D Q A `Full Refinement at 14:00` · L `No deadlines today`
-- **Sub-line:** I `2026-20 is in UAT on Demo. Fix cut-off Mon 5 Oct 12:00.` · L `Next for Lead: Rank the refinement queue, Wed 7 Oct.`
+- **Sub-line:** I `Collect UAT feedback from clients.` · L `Next for Lead: Mid-sprint delivery check, Fri 2 Oct.`
 - **Tab:** E I D Q A `Refinement 14:00 · 2026-21 day 4 · Sprint Board` · L `2026-21 day 4 · Sprint Board`
 - **Rail:** `2026-20 [UAT] UAT on Demo · fix cut-off Mon 5 Oct 12:00` · `2026-21 [Build] Sprint day 4 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Refinement · planning Thu 8 Oct`
 - **Duty:** `next`, Support Dev D. · Next Live update Mon 5 Oct (2026-20): Dev B. (lead), Dev C. (backup)
@@ -249,7 +249,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Tue 6 Oct (morning after Live)
 - **Band:** event E I D · quiet Q L A
 - **Headline:** E `Morning after the 2026-20 Live update` · I `Confirm the Live update to clients` · D `Create the Golive Release 2026-20 page` · Q/L/A `No deadlines today`
-- **Sub-line:** I `Last night's 2026-20 Live update was scheduled. Confirm once the developers have.` · D `If it was not done last night.` · Q `Next for QA: Pre-Refinement Wed 7 Oct 14:00.` · L `Next for Lead: Rank the refinement queue, Wed 7 Oct.` · A `Next for Analyst: Answer parked refinement questions, Wed 14 Oct.`
+- **Sub-line:** I `Last night's 2026-20 Live update was scheduled. Confirm once the developers have.` · D `If it was not done last night.` · Q `Next for QA: Pre-Refinement Wed 7 Oct 14:00.` · L `Next for Lead: Rank the refinement queue, Wed 7 Oct.` · A `Describe and label tasks for refinement.`
 - **Tab:** I `Confirm Live to clients · 2026-21 day 7 · Sprint Board` · D `Golive page · 2026-21 day 7 · Sprint Board` · E `Morning after Live · 2026-21 day 7 · Sprint Board` · Q L A `2026-21 day 7 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Build] Sprint day 7 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Refinement · planning Thu 8 Oct`
 - **Duty:** `last-night`, Live update 2026-20: Dev B. (lead), Dev C. (backup) · Support Dev E.
@@ -257,7 +257,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Wed 7 Oct (planning eve; Pre-Refinement every Wednesday)
 - **Band:** event (all)
 - **Headline:** E D Q `Pre-Refinement at 14:00. Sprint planning tomorrow.` · I L A `Sprint planning tomorrow`
-- **Sub-line:** I `Due today: Check Definition of Ready. Also: priority calls, QA estimates, UAT findings.` · L `Rank the refinement queue before 14:00. Bring 2026-20 UAT findings to planning.` · Q `QA estimates on sprint candidates.` · A `Nothing due for Analyst today.`
+- **Sub-line:** I `Due today: Check Definition of Ready. Also: Chase client approval of estimates, priority calls, QA estimates, UAT findings.` · L `Rank the refinement queue before 14:00. Bring 2026-20 UAT findings to planning.` · Q `QA estimates on sprint candidates.` · A `Nothing due for Analyst today.`
 - **Tab:** E D Q `Pre-Refinement 14:00 · 2026-21 day 8 · Sprint Board` · I L A `Planning tomorrow · 2026-21 day 8 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Build] Sprint day 8 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Refinement · planning Thu 8 Oct`
 - **Duty:** `next`, Support Dev E. · Next Demo update Tue 13 Oct (2026-21): Dev C.
@@ -265,7 +265,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Thu 8 Oct (planning; B-2)
 - **Band:** event (all)
 - **Headline (all):** `Sprint planning today. Code freeze starts tomorrow.`
-- **Sub-line:** Q `Due today: Regression plans ready in TestRail.` · L `Plan 2/3 of capacity, keep 1/3 as buffer. Bug retro page due tomorrow.` · I D `Plan 2/3 of capacity, keep 1/3 as buffer.` · A `Nothing due for Analyst today.`
+- **Sub-line:** Q `Due today: Regression plans ready in TestRail.` · L `Plan 2/3 of capacity, keep 1/3 as buffer. Release check: revert what is not Ready for Demo due tomorrow. Bug retro page due tomorrow.` · I D `Plan 2/3 of capacity, keep 1/3 as buffer. Release check: revert what is not Ready for Demo due tomorrow.` · A `Nothing due for Analyst today.`
 - **Tab:** `Planning today · 2026-21 day 9 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Build] Sprint day 9 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Sprint planning today · starts Mon 12 Oct`
 - **Duty:** as Wed 7 Oct.
@@ -273,7 +273,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Fri 9 Oct (freeze starts, 2026-21)
 - **Band:** event (all)
 - **Headline (all):** `Code freeze starts today`
-- **Sub-line:** Q `Run regression opens today, until the Demo update Tue 13 Oct (evening).` · D `Only QA-approved bug fixes go to Beta until the Demo update Tue 13 Oct (evening).` · I `Config changes on Beta need QA approval until the Demo update Tue 13 Oct (evening).` · L `Due today: Prepare the bug retro page.` · A `Nothing due for Analyst today.`
+- **Sub-line:** Q `Run regression opens today, until the Demo update Tue 13 Oct (evening).` · D `Only QA-approved bug fixes go to Beta until the Demo update Tue 13 Oct (evening).` · I `Config changes on Beta need QA approval until the Demo update Tue 13 Oct (evening).` · L `Due today: Prepare the bug retro page. Also: Release check: revert what is not Ready for Demo.` · A `Nothing due for Analyst today.`
 - **Tab:** `Code freeze starts · 2026-21 day 10 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Freeze] Code freeze starts today · Demo update Tue 13 Oct evening` · `2026-22 [Plan] Planned · starts Mon 12 Oct`
 - **Items (Q):** `Run regression` promoted as a full item with the "Opens today" chip.
@@ -366,10 +366,10 @@ Fixture: `#sprint-2026-21` on Thu 1 Oct 09:00, IM / AM:
 | Fix cut-off | Mon 19 Oct 12:00 Tallinn · 11:00 Warsaw · 10:00 London | Coming | |
 | Live update | Mon 19 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London | Coming | Lead: not assigned yet · Backup: not assigned yet |
 
-Rules list for IM / AM (23 entries; Everyone = 41), grouped as Passed / Coming. Dates come from `sprintDetail(21, '2026-10-01', RULES)` with the v2 rule changes:
-Passed: Wed 16 Sep Answer parked refinement questions · Thu 17 Sep 14:00 Full Refinement · Wed 23 Sep Check Definition of Ready, Bring UAT findings to planning, Hold priority calls, QA estimates on sprint candidates · Thu 24 Sep Sprint planning · Mon 28 Sep Sprint starts.
+Rules list for IM / AM (37 entries; Everyone = 55), grouped as Passed / Coming. Dates come from `sprintDetail(21, '2026-10-01', RULES)` with the v2 rule changes and the Bi-weekly plan additions (2026-10-01):
+Passed: Tue 15 Sep Describe and label tasks for refinement · Wed 16 Sep Answer parked refinement questions · Thu 17 Sep 14:00 Full Refinement · Fri 18 Sep Total the next sprint's candidate hours · Mon 21 Sep Make promised tickets queue-ready · Tue 22 Sep Describe and label tasks for refinement · Wed 23 Sep Check Definition of Ready, Chase client approval of estimates, Bring UAT findings to planning, Hold priority calls, QA estimates on sprint candidates · Thu 24 Sep Sprint planning, Send clients the prioritised sprint list · Fri 25 Sep Send the dev team lead tasks to start early · Mon 28 Sep Sprint starts, Tell clients what this sprint delivers.
 Running: Flag overruns at 80% (28 Sep – 9 Oct) · Log time today.
-Coming: Fri 9 Oct Code freeze (until the Demo update Tue 13 Oct, evening) · Mon 12 Oct Update Demo/Live matrix for Demo, Bug retro · Wed 14 Oct Check your changes on Demo, Tell clients their items are on Demo, UAT window and Set tasks Ready for Live open · Fri 16 Oct Update Demo/Live matrix for Live, Chase UAT results before the cut-off · Mon 19 Oct Last chase of UAT results before 12:00, 12:00 Fix cut-off, Agree reverts and tell affected clients (if needed), Confirm Live update to clients (after the update).
+Coming: Fri 2 Oct Mid-sprint delivery check · Fri 9 Oct Code freeze (until the Demo update Tue 13 Oct, evening), 12:00 Release check: revert what is not Ready for Demo · Mon 12 Oct Update Demo/Live matrix for Demo, Bug retro · Tue 13 Oct Check the list going to Demo tonight, Prepare UAT instructions for clients · Wed 14 Oct Check your changes on Demo, Tell clients their items are on Demo, UAT window and Set tasks Ready for Live open · Thu 15 Oct Collect UAT feedback from clients · Fri 16 Oct Update Demo/Live matrix for Live, Chase UAT results and list what won't make Live · Mon 19 Oct Last chase of UAT results before 12:00, 12:00 Fix cut-off, Agree reverts and tell affected clients (if needed), Confirm Live update to clients (after the update), Make UAT tickets queue-ready (after the cut-off).
 
 Holidays line for 2026-21: `No public holidays (EE, PL) between planning and Live.`
 
