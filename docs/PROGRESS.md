@@ -1,5 +1,14 @@
 # Progress log
 
+## 2026-10-01 — v2.2 readability: Option B panels (owner-approved; developer, not pushed)
+- Spec: docs/ux/READABILITY.md (normative) + mockup-readability.html. Every collapsible section is a panel: white header strip with the orange tag, `--section-body` tray, white items and rail rows, 8 px radius; full bleed on ≤767. Headers 40 px (44 px on coarse pointers and ≤767).
+- Inline chevrons (§3.2): hidden on an open section until hover (tray tint) or keyboard focus (inset ring); always shown when folded, with "Folded · summary" (§3.1); small and quiet on touch / ≤767. Same header for the cycle explainer, which stays unboxed with a 2 px rule. Sprint view: Timeline and Actions panels; Holidays is a footer line in Timeline unless a holiday exists; `<deploys>` box on the tray.
+- Footer: one bar (meta facts + "Sources N" and "Home page setup" disclosures). Footer links use `--link-on-tint` (orange on the tray is 4.17:1).
+- Layout (owner): Today left, Sprints then Coming up right, down to 1024 px; one column below. At 1024–1199 Today's item rows drop the sprint tag to keep the cut-off fold.
+- Phone extras (≤767): Coming up 3 days (+N more to 7, then 10), no sprint labels (keeps "if needed"), Next for you as a list of 3 + "+N more", no repeated "Today" in the time column under a Today slot (kept on the urgent day, where slots are hidden).
+- New tokens `--radius-section`, `--section-edge`, `--section-body`, `--tag-on-tray` (DESIGN §10). Fold: Mon 5 Oct 09:10 IM/AM at 1093×614, 3rd "By 12:00" item ends at 610 px (was 629).
+- Checked in headless Chrome at 1440, 1093, 1024, 900, 390, light and dark, forced colours, touch: no horizontal scroll, no console errors, no external requests. 620 tests pass (Tallinn, New York); no test changes.
+
 ## 2026-10-01 — Rules: Bi-weekly plan additions (owner, 2026-10-01)
 - Rules: Bi-weekly plan additions (owner, 2026-10-01). 13 new IM/AM communication rules (source `biweeklyPlan`, review in docs/notes/bi-weekly-plan-review.md); `definition-of-ready`, `confirm-live-to-client` and `cutoff-reminder` extended (the proposed `release-check-live-list` merged into `cutoff-reminder`; owner confirmed the release check applies to all clients). 52 rules.
 - Sweep Aug 2026 to Jun 2027, all roles: no band, headline, tab or Next key moment changes, no new orange; only sub-lines changed. Fixtures updated (scenarios, STATES.md §8/§10 sub-lines and sprint view, engine-v21 counts 37/55, qa-oracle 28 Dec now allows the one IM/AM planning-prep task). 603 tests pass (Tallinn, New York).

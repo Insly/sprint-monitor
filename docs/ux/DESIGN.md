@@ -136,12 +136,13 @@ Unchanged from v1, and both reviewers agree. Every critical (C1) question is "wh
 
 ### 4.1 Desktop (≥ 1200 px)
 - Container max 1200 px, 32 px padding. Top bar 56 px. Band full width: text left, countdown or next milestone right (340 px). Duty line directly under the band (one line, 44 px).
-- Body: 7/5 columns. Left = Your day. Right = Sprint rail, then Coming up.
+- Body: 7/5 columns. Left = Your day. Right = Sprint rail at the top, then Coming up. **Owner (2026-10-01): this two-column body holds down to 1024 px.**
 
 ### 4.2 Laptop (768–1199 px), common at 125–150 % Windows scaling (1024–1093 CSS px)
 - Container fluid, 24 px padding. Top bar: the segmented role control stays if it fits, otherwise it becomes the select.
 - Band full width. On key days the countdown moves under the headline, and the order strip shows as one row.
-- **Single column:** Your day at full width (max 760 px text measure). Below it, a 2-column row: Sprint rail | Coming up.
+- **1024–1199:** the desktop 7/5 body (Today left; Sprints, then Coming up, right). The Today column is ~555–600 px, so item rows drop the sprint tag (it stays in the expanded item, as on phones); this keeps the cut-off fold (§4.4).
+- **768–1023:** one column at full width: Today, then Sprints, then Coming up. (v2.2; replaces the earlier "Your day, then a Sprint rail | Coming up row".)
 - Items are collapsed by default in every layout, because the band already carries the consequence line.
 
 ### 4.3 Mobile (≤ 767 px; designed at 390 px)
@@ -162,6 +163,8 @@ The fold is measured from the top of the page (top bar), with no browser chrome.
 | D: Mon 5 Oct 13:20, Dev, after (dark) | 390 × 844 | 359 px (duty to 442) | The revert item, shown expanded in the mockup. Collapsed (the default), the Live update item also fits |
 | E: Mon 5 Oct 20:00, Dev, evening | 390 × 844 | 330 px (duty to 414) | The Live update (expanded) and the Golive page |
 | G: Wed 30 Sep, IM/AM, event | 390 × 844 | 231 px (duty to 294) | "Check your changes" and "Tell clients" (expanded, with the UAT deadline and Copy). Collapsed: all 5 items |
+
+v2.2 panels (measured on the built page, preview bar hidden): frame B, the 3rd "By 12:00" item ends at **610 px** at 1093 × 614 (was 629 in v2.1); frame H unchanged (gates list to 673); 390 × 844 Mon 5 IM/AM, the 3 morning items end at 710.
 
 Target, met in every frame above: on key days the band, the duty line and every item that matches the band are above the fold.
 
@@ -302,6 +305,12 @@ Arial everywhere, `font-variant-numeric: tabular-nums`, minimum 13 px. 4 px radi
 | `--freeze-fill` / `--freeze-text` | `#00C8FF` / `#006E8F` | Freeze bar / text | charcoal 8.87 / 5.79 |
 | `--meeting-text` / `--meeting-soft` | `#784BAF` / `#F1EAF9` | Meeting chip | 6.13 / 5.22 |
 | `--preview-bg/fg` | `#1A1A1A` / `#FFFFFF` | Preview bar | 17.40 |
+| `--radius-section` | `8px` | Panels and the footer bar (v2.2, READABILITY.md option B) | — |
+| `--section-edge` | `#D6D6D6` (= `--bar-off`) | Panel edge, open-header rule, rules inside the tray (decorative) | — |
+| `--section-body` | `#F5F5F5` (derived, between white and Gray Row) | Panel tray, footer bar, sprint-view `<deploys>` box, header hover tint | `--text` 15.96 · `--text-2` 10.12 · `--muted` 6.63 · `--meeting-text` 5.63. **`#C35500` fails (4.17): no orange tag or orange link on the tray** |
+| `--tag-on-tray` | `#3C3C3C` | A `<tag>` that must sit on the tray (the sprint view's `<deploys>`), as on the weekend band | 10.12 |
+
+Panels (v2.2): white header strip (`--surface`) with the orange tag, tray body (`--section-body`), white items and rail rows. Links on the footer bar use `--link-on-tint`.
 
 Removed: `--accent-text-strong` (`#A84900`). Charcoal text on tints replaces it (R1 m-11).
 
@@ -322,6 +331,10 @@ Removed: `--accent-text-strong` (`#A84900`). Charcoal text on tints replaces it 
 | `--freeze-text` | `#00C8FF` | 7.91 |
 | `--meeting-text` | `#B48CE6` (lightened Purple 1) | 5.79. Purple 1 `#965FD7` fails: 4.07 on `#1A1A1A`, 3.95 on `#1D1D1D` |
 | `--preview-bg/fg` | `#FFFFFF` / `#1A1A1A` | 17.40 |
+| `--radius-section` | `8px` | — |
+| `--section-edge` | `#3C3C3C` (= `--line`) | — |
+| `--section-body` | `#1F1F1F` (derived, between `--bg` and `--surface`) | `--text` 16.48 · `--text-2` 13.83 · `--muted` 5.93 · `--meeting-text` 6.15 · `#FF7D00` 6.42 |
+| `--tag-on-tray` | `#FF7D00` | 6.42 on `#1F1F1F` |
 
 The urgent band is identical in both themes (`#FF7D00` + `#1A1A1A`).
 
@@ -340,11 +353,13 @@ The urgent band is identical in both themes (`#FF7D00` + `#1A1A1A`).
 | White preview bar (dark) | 17.40 | — | ✓ |
 | `#242424` / `#2E2E2E` | — | 15.52 / 13.4 | ✓ |
 
+Panel and cycle headers clip (`overflow: hidden`), so their summary draws the ring **inside**: `inset 0 0 0 2px #1A1A1A, inset 0 0 0 4px #FFFFFF` (reversed in dark). Forced colours: `outline: 2px solid Highlight; outline-offset: -2px`.
+
 ### 10.5 Favicon
 16×16, drawn inside the square. Normal: an orange square. Key-day states (`urgent`, `after`, `evening`): a charcoal square with an orange 2 px inner ring. Tested on light and dark tab strips. No dot outside the square.
 
 ### 10.6 Forced colours
-`@media (forced-colors: active)`: the band and the chips get `1px solid CanvasText` borders. The selected role gets `Highlight` / `HighlightText`. The "Now" tile keeps its word. Bars on the track get `CanvasText` outlines.
+`@media (forced-colors: active)`: the band and the chips get `1px solid CanvasText` borders. The selected role gets `Highlight` / `HighlightText`. The "Now" tile keeps its word. Bars on the track get `CanvasText` outlines. Panels, the footer bar and the `<deploys>` box get `1px solid CanvasText`; the tray becomes `Canvas`; folded headers keep their summary text.
 
 ## 11. Accessibility
 
