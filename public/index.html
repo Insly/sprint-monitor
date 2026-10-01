@@ -738,6 +738,7 @@ function renderYourDay(n, m) {
     h('h2', { id: 'yourday-h', tabindex: '-1' }, heading),
     a && a.weekend ? h('span', { class: 'aside' }, 'Next working day') : a && a.count ? h('span', { class: 'aside' }, `${a.count} item${a.count === 1 ? '' : 's'}`) : null));
   const out = () => fill($('yourday'), pre, foldable('today', head, kids));
+  if (m.holidayWarnings && m.holidayWarnings.length) kids.push(h('ul', { class: 'notices' }, m.holidayWarnings.map((w) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), w.text))));
 
   if (!a) {
     kids.push(h('p', { class: 'empty' }, 'The action list could not load. Sprint dates below are still correct.'));

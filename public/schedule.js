@@ -516,6 +516,37 @@ export function sprintDetail(n, date, rules, { role = null, time = '09:00', holi
   };
 }
 
+/**
+ * Heads-up for coming public holidays (owner, 2026-10-01). Nothing moves: a weekday holiday (EE or PL,
+ * treated the same) is announced on the working day before it, going back over weekends and further
+ * holidays, so Wed 23 Dec announces both Thu 24 and Fri 25 Dec. Weekend holidays are not announced.
+ * `holidays` is the HOLIDAYS list from holidays.js. Returns one entry per holiday date, in date order:
+ *   [{ holidayDate, countries: ['EE', 'PL'], names: ["New Year's Day"], text }]
+ * text: "Tomorrow, Fri 1 Jan, is a public holiday (EE, PL): New Year's Day." / "Fri 25 Dec is a public holiday (EE, PL): Christmas Day."
+ */
+export function holidayWarnings(date, holidays = []) {
+  const today = toKey(date);
+  const list = Array.isArray(holidays) ? holidays : [];
+  const isHoliday = (k) => list.some((h) => h.date === k);
+  const out = [];
+  if (isWeekendDay(today) || isHoliday(today)) return out;
+  // The next working day after today, then every weekday holiday up to it: those are announced today.
+  let d = addDays(today, 1);
+  const dates = [];
+  while (isWeekendDay(d) || isHoliday(d)) {
+    if (!isWeekendDay(d)) dates.push(d);
+    d = addDays(d, 1);
+  }
+  for (const holidayDate of dates) {
+    const rows = list.filter((h) => h.date === holidayDate);
+    const countries = [...new Set(rows.map((h) => h.country))].sort();
+    const names = [...new Set(rows.map((h) => h.name))];
+    const when = holidayDate === addDays(today, 1) ? `Tomorrow, ${fmtDay(holidayDate)},` : fmtDay(holidayDate);
+    out.push({ holidayDate, countries, names, text: `${when} is a public holiday (${countries.join(', ')}): ${names.join(', ')}.` });
+  }
+  return out;
+}
+
 /** STATES.md §11: a weekday holiday on planning or start day, or from freeze start to the Live update. */
 export function holidayTouchesKeyDates(sprint, dateKey) {
   if (isWeekendDay(dateKey)) return false;

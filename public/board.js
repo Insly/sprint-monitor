@@ -6,7 +6,7 @@
 import {
   context, actionsFor, upcoming, sprintDates, nextWorkingDay, previousWorkingDay, addDays,
   daysBetween, isWeekendDay, weekdayOf, workingDaysBetween, workingDaysIn, roleMatches, keyTimes,
-  sprintPhase, fmtDay, fmtDM, formatAcrossZones, holidayTouchesKeyDates, sprintForDate,
+  sprintPhase, fmtDay, fmtDM, formatAcrossZones, holidayTouchesKeyDates, sprintForDate, holidayWarnings,
   LAST_CONFIRMED, UNCONFIRMED_FROM,
 } from './schedule.js';
 
@@ -903,6 +903,7 @@ export function resolveDay({ date, time = '09:00', role = 'Everyone', rules, dut
       headline: 'Actions unavailable. Sprint dates below are still correct.', sub: null,
       countdown: null, order: null, next: null, tab: `${preview ? `Preview ${fmtDay(f.date)} · ` : ''}${BOARD}`,
       favicon: 'normal', duty: dutyLine(f.date, duty, R), agenda: null, rail, notices: railNotices(rail), comingUp: [],
+      holidayWarnings: holidayWarnings(f.date, holidays || []),
     };
   }
   const band = bandState(f, time, role);
@@ -933,5 +934,7 @@ export function resolveDay({ date, time = '09:00', role = 'Everyone', rules, dut
     rail,
     notices: railNotices(rail),
     comingUp: comingUp(f.date, R, role, holidays || []),
+    // Muted heads-up at the top of "Today": public holidays coming before the next working day. Nothing moves.
+    holidayWarnings: holidayWarnings(f.date, holidays || []),
   };
 }
