@@ -85,7 +85,7 @@ describe('calendar model', () => {
     expect(s.yearEndUnconfirmed).toBe(false);
   });
 
-  it('2027-2 starts Mon 4 Jan 2027 after the break (Kaspar, 2026-10-01) and the cadence continues from there', () => {
+  it('2027-2 starts Mon 4 Jan 2027, right after 2027-1 with no break (Kaspar, 2026-10-01) and the cadence continues from there', () => {
     expect(sprintDates(27).label).toBe('2027-2');
     expect(sprintDates(27).start).toBe('2027-01-04');
     expect(sprintDates(28).start).toBe('2027-01-18');
