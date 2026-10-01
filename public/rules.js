@@ -176,13 +176,13 @@ export const RULES = [
     source: 'lifecycle',
   },
 
-  // ---------------------------------------------------------------- CURRENT sprint: refinement
+  // ---------------------------------------------------------------- NEXT sprint: refinement (estimates feed the next sprint's planning)
   {
     id: 'rank-refinement-queue',
     title: 'Rank the refinement queue',
-    detail: 'Pre-Refinement takes tickets in Rank order from the LR backlog. Rank what must be estimated first before the session.',
+    detail: 'Pre-Refinement takes tickets in Rank order from the LR backlog. Rank what the next sprint needs estimated first.',
     who: ['Lead'],
-    sprint: 'current',
+    sprint: 'next',
     when: { weekly: 'Wed' },
     kind: 'reminder',
     source: 'refinement',
@@ -192,7 +192,7 @@ export const RULES = [
     title: 'Pre-Refinement',
     detail: 'Devs and QA estimate unassigned "Needs estimation" tickets in Rank order, led by this week\'s rotating dev. Unclear tickets get questions in Jira and go back to the reporter.',
     who: ['Dev', 'QA'],
-    sprint: 'current',
+    sprint: 'next',
     when: { weekly: 'Wed' },
     time: '14:00',
     kind: 'meeting',
@@ -203,7 +203,7 @@ export const RULES = [
     title: 'Answer parked refinement questions',
     detail: 'Tickets assigned back to you have open questions. Answer in Jira before tomorrow\'s Full Refinement, then unassign or bring the ticket to the session.',
     who: ['IM/AM', 'Analyst'],
-    sprint: 'current',
+    sprint: 'next',
     when: { weekly: 'Wed', week: 1 },
     kind: 'deadline',
     source: 'refinement',
@@ -211,9 +211,9 @@ export const RULES = [
   {
     id: 'full-refinement',
     title: 'Full Refinement',
-    detail: 'Devs, QA and reporters resolve tickets still assigned to a reporter and finalise estimates in Jira. No task should sit in refinement longer than one week.',
+    detail: 'Devs, QA and reporters resolve tickets still assigned to a reporter and finalise estimates in Jira, so they can get client approval before sprint planning the following week. No task should sit in refinement longer than one week.',
     who: ['Dev', 'QA', 'IM/AM', 'Analyst'],
-    sprint: 'current',
+    sprint: 'next',
     when: { weekly: 'Thu', week: 1 },
     time: '14:00',
     kind: 'meeting',

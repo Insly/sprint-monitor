@@ -29,13 +29,13 @@ const DAYS = {
     sprint: 21, day: 3,
     today: {
       'inform-client-uat': 20, 'check-own-items-demo': 20,
-      'pre-refinement': 21, 'rank-refinement-queue': 21, 'answer-parked-questions': 21,
+      'pre-refinement': 22, 'rank-refinement-queue': 22, 'answer-parked-questions': 22,
     },
     windows: { 'code-freeze': 20, 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
   '2026-10-01': { // Thu week 1: Full Refinement
     sprint: 21, day: 4,
-    today: { 'full-refinement': 21 },
+    today: { 'full-refinement': 22 },
     windows: { 'uat-window': 20, 'ready-for-live': 20, ...build(21) },
   },
   '2026-10-02': { // Fri: cut-off reminder (acceptance check 3)
@@ -56,7 +56,7 @@ const DAYS = {
   '2026-10-07': { // Wed week 2: Pre-Refinement + S22 planning prep (acceptance check 5), no parked-questions
     sprint: 21, day: 8,
     today: {
-      'pre-refinement': 21, 'rank-refinement-queue': 21,
+      'pre-refinement': 22, 'rank-refinement-queue': 22,
       'priority-call-due': 22, 'definition-of-ready': 22, 'qa-estimate-present': 22,
     },
     windows: build(21),
@@ -85,13 +85,13 @@ const DAYS = {
     sprint: 22, day: 3,
     today: {
       'inform-client-uat': 21, 'check-own-items-demo': 21,
-      'pre-refinement': 22, 'rank-refinement-queue': 22, 'answer-parked-questions': 22,
+      'pre-refinement': 23, 'rank-refinement-queue': 23, 'answer-parked-questions': 23,
     },
     windows: { 'code-freeze': 21, 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
   '2026-10-15': { // Thu week 1 of S22: Full Refinement
     sprint: 22, day: 4,
-    today: { 'full-refinement': 22 },
+    today: { 'full-refinement': 23 },
     windows: { 'uat-window': 21, 'ready-for-live': 21, ...build(22) },
   },
   '2026-10-16': { // Fri: S21 cut-off reminder

@@ -56,10 +56,10 @@ Sources: see `SOURCES` in `rules.js`. `prev` / `cur` / `next` = sprint relation.
 | autotest-review | QA | cur: start → end | automationReview |
 | log-time-daily | All | cur: start → end | timeLogging |
 | analyst-sprint | Analyst | cur: start → end | lifecycle |
-| rank-refinement-queue | Lead | weekly Wed | refinement |
-| pre-refinement | Dev, QA | weekly Wed 14:00 | refinement |
-| answer-parked-questions | IM/AM, Analyst | weekly Wed, week 1 | refinement |
-| full-refinement | Dev, QA, IM/AM, Analyst | weekly Thu 14:00, week 1 | refinement |
+| rank-refinement-queue | Lead | next: weekly Wed | refinement |
+| pre-refinement | Dev, QA | next: weekly Wed 14:00 | refinement |
+| answer-parked-questions | IM/AM, Analyst | next: weekly Wed, week 1 | refinement |
+| full-refinement | Dev, QA, IM/AM, Analyst | next: weekly Thu 14:00, week 1 | refinement |
 | regression-plans | QA | cur: freezeStart −1 (Thu) | lifecycle |
 | bug-retro-prep | Lead | cur: end (Fri) | bugRetro |
 | code-freeze | Dev, QA, IM/AM | prev: freezeStart → freezeEnd | calendar |
