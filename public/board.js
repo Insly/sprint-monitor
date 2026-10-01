@@ -29,6 +29,7 @@ const SHORT = {
   'uat-findings-to-planning': 'UAT findings',
   'bug-retro-prep': 'Bug retro page',
   'cutoff-reminder': 'Chase UAT results',
+  'release-check-before-demo': 'Release check 12:00',
 };
 
 const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
@@ -281,7 +282,9 @@ export function subLine(f, time, role, band) {
     if (R === 'QA') return evening ? 'Regression closes with the update.' : 'Before the update: all tasks tested and Ready for Demo.';
     if (R === 'IM/AM') return `Don't tell clients yet. Tomorrow: tell them, UAT deadline ${fmtDay(f.demo.cutoff)} ${T.cutoff}.`;
     if (R === 'Everyone') return 'QA: Ready for Demo before the update. IM/AM: tell clients tomorrow.';
-    return nothing;
+    // Lead / Analyst: name their own item if they have one today (e.g. the Tuesday refinement prep).
+    const own = f.acts.find((a) => a.status === 'today' && roleMatches(a, R) && !(a.who || []).includes('All'));
+    return own ? `Due today: ${own.title}.` : nothing;
   }
 
   const h = headsUp(f);

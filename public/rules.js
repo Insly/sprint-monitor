@@ -384,7 +384,7 @@ export const RULES = [
   {
     id: 'cutoff-reminder',
     title: "Chase UAT results and list what won't make Live",
-    detail: "Run your release check for tasks that have not passed UAT. Chase go/no-go decisions and have the revert list ready for Monday's 12:00 cut-off. A bugfix that misses the cut-off means a revert, not a fix.",
+    detail: "Run your release check for tasks that have not passed UAT. Chase go/no-go decisions and have the revert list ready for the 12:00 cut-off on Live update day. A bugfix that misses the cut-off means a revert, not a fix.",
     who: ['IM/AM'],
     sprint: 'previous',
     when: { on: 'cutoff', offset: -3 },

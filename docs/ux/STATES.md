@@ -265,7 +265,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Thu 8 Oct (planning; B-2)
 - **Band:** event (all)
 - **Headline (all):** `Sprint planning today. Code freeze starts tomorrow.`
-- **Sub-line:** Q `Due today: Regression plans ready in TestRail.` · L `Plan 2/3 of capacity, keep 1/3 as buffer. Release check: revert what is not Ready for Demo due tomorrow. Bug retro page due tomorrow.` · I D `Plan 2/3 of capacity, keep 1/3 as buffer. Release check: revert what is not Ready for Demo due tomorrow.` · A `Nothing due for Analyst today.`
+- **Sub-line:** Q `Due today: Regression plans ready in TestRail.` · L `Plan 2/3 of capacity, keep 1/3 as buffer. Release check 12:00 due tomorrow. Bug retro page due tomorrow.` · I D `Plan 2/3 of capacity, keep 1/3 as buffer. Release check 12:00 due tomorrow.` · A `Nothing due for Analyst today.`
 - **Tab:** `Planning today · 2026-21 day 9 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Build] Sprint day 9 of 10 · code freeze Fri 9 Oct` · `2026-22 [Plan] Sprint planning today · starts Mon 12 Oct`
 - **Duty:** as Wed 7 Oct.
@@ -273,7 +273,7 @@ Columns: **Band** per role (E = Everyone, I = IM/AM, D = Dev, Q = QA, L = Lead, 
 ### Fri 9 Oct (freeze starts, 2026-21)
 - **Band:** event (all)
 - **Headline (all):** `Code freeze starts today`
-- **Sub-line:** Q `Run regression opens today, until the Demo update Tue 13 Oct (evening).` · D `Only QA-approved bug fixes go to Beta until the Demo update Tue 13 Oct (evening).` · I `Config changes on Beta need QA approval until the Demo update Tue 13 Oct (evening).` · L `Due today: Prepare the bug retro page. Also: Release check: revert what is not Ready for Demo.` · A `Nothing due for Analyst today.`
+- **Sub-line:** Q `Run regression opens today, until the Demo update Tue 13 Oct (evening).` · D `Only QA-approved bug fixes go to Beta until the Demo update Tue 13 Oct (evening).` · I `Config changes on Beta need QA approval until the Demo update Tue 13 Oct (evening).` · L `Due today: Prepare the bug retro page. Also: Release check 12:00.` · A `Nothing due for Analyst today.`
 - **Tab:** `Code freeze starts · 2026-21 day 10 · Sprint Board`
 - **Rail:** `2026-20 [Live] Live update was Mon 5 Oct` · `2026-21 [Freeze] Code freeze starts today · Demo update Tue 13 Oct evening` · `2026-22 [Plan] Planned · starts Mon 12 Oct`
 - **Items (Q):** `Run regression` promoted as a full item with the "Opens today" chip.
