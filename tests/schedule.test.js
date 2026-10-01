@@ -34,7 +34,7 @@ const ids = (list) => list.map((a) => a.id);
 describe('calendar model', () => {
   it('anchors S17 on 2026-08-03', () => {
     expect(ANCHOR).toEqual({ number: 17, start: '2026-08-03' });
-    expect(LAST_CONFIRMED).toBe(22);
+    expect(LAST_CONFIRMED).toBe(27);
     expect(sprintDates(17).start).toBe('2026-08-03');
   });
 
@@ -134,9 +134,9 @@ describe('calendar model', () => {
     }
   });
 
-  it('flags sprints after S22 as projected', () => {
-    expect(sprintDates(22).projected).toBe(false);
-    expect(sprintDates(23).projected).toBe(true);
+  it('flags sprints after 2027-2 as projected (dates through 2027-2 come from Confluence, the rota sheet and the owner)', () => {
+    expect(sprintDates(27).projected).toBe(false);
+    expect(sprintDates(28).projected).toBe(true);
   });
 });
 

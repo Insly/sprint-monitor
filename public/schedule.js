@@ -4,7 +4,8 @@
 // See CONTRACT.md for the calendar model.
 
 export const ANCHOR = { number: 17, start: '2026-08-03' };
-export const LAST_CONFIRMED = 22;
+// Confirmed through 2027-2: Confluence calendar to S22, rota sheet to 2026-25, owner for 2027-1/2027-2.
+export const LAST_CONFIRMED = 27;
 export const SPRINT_LENGTH_DAYS = 14;
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

@@ -25,7 +25,7 @@ Fixes covered: **B-1** (the cut-off-passed state is reachable), **B-2** (an even
 | State | Treatment (both themes; tokens in DESIGN.md §10) | Who can get it |
 |---|---|---|
 | `urgent` | Full Insly Orange fill, charcoal text, large countdown | Cut-off Monday before 12:00 (all roles). Demo Tuesday before 17:00 (**Dev, QA only**) |
-| `after` | Charcoal fill (`#1A1A1A`; dark `#0F0F0F` + 2 px orange outline), white text, orange state tag | Cut-off Monday 12:00–16:59 (all roles) |
+| `after` | Charcoal fill (`#1A1A1A`; dark `#0F0F0F` + 2 px orange outline), white text, orange state tag | Cut-off Monday 12:00–19:59 (all roles) |
 | `evening` | Surface background + **8 px Green 1 left bar** + green `<tonight>` tag + order strip | Live Monday ≥ 20:00 (Everyone, IM/AM, Dev). Demo Tuesday ≥ 17:00 (Dev, QA) |
 | `heads-up` | Light Orange wash (`#FFF1E5`; dark `#3A2410`) + 4 px orange **left** bar + "Tomorrow"/"Monday" tag | The working day before a Demo or a cut-off, only for that key day's **actors** (§3.3) |
 | `event` | Plain surface, no colour bar. The headline carries the event | Any other day with an event or a minor heads-up |
@@ -349,7 +349,6 @@ Route: `#sprint-{label}`, e.g. `#sprint-2026-21`. Combined with a preview date: 
 | `upcoming` | `n = next` or later | e.g. `Refinement · planning Thu 8 Oct`. The marker sits before the first milestone. Projected sprints get the `projected` tag |
 | `past` | `today > live` | `Live update was Mon 5 Oct`. All milestones show `Passed` |
 | `unknown` | Label does not parse, or `n < ANCHOR.number` | h1 `No sprint 2026-99`, with links to Today and to the current sprint |
-| `break` | `today` is between `end + 2 days` and the next sprint's start, beyond a normal weekend (year end) | Status `Year-end break · next sprint starts Mon 4 Jan` |
 
 Milestone status uses only dates and the Tallinn clock: `Passed` (date before today, or a timed milestone today whose time has passed), `Today`, `Coming · in N working days`. **Never "done".**
 
@@ -380,17 +379,14 @@ Data: `public/holidays.js` (DESIGN.md §v2.1). A notice is shown **only** when a
 
 | Case | Notice |
 |---|---|
-| 2027-1 rail row (from the day 2027-1 is in play, i.e. from Mon 23 Nov 2026) | `ⓘ Holidays during release: 24–25 Dec (EE, PL), 1 Jan (EE, PL), 6 Jan (PL, UAT opens)` (26 Dec is a Saturday, so it is ignored) |
+| 2027-1 rail row (from the day 2027-1 is in play, i.e. from Mon 23 Nov 2026) | `ⓘ Holidays during release: 1 Jan (EE, PL, code freeze starts), 6 Jan (PL, UAT opens)` (24–25 Dec are build days in the long sprint) |
 | Sprint view `#sprint-2027-1` | Holiday block listing each date with country and name, plus `Key date affected: UAT opens Wed 6 Jan (PL holiday)` |
 | Any sprint with no holiday on a key date | No notice on the rail. The sprint view says `No public holidays (EE, PL) between planning and Live.` |
 | Coming up | A day row that is a holiday gets a muted suffix: `Wed 6 Jan · PL holiday` |
 
-## 12. Year end 2026/27 (v2.1, owner)
+## 12. Year end 2026/27 (owner, superseded v2.1 draft)
 
-- `OVERRIDES[26]` (2027-1) stays as it is (Demo Tue 5 Jan, Live Mon 11 Jan). The nominal Live update on Mon 28 Dec does not happen, and no rule fires on 28 Dec.
-- Add `OVERRIDES[27] = { start: '2027-01-04' }` (2027-2). The engine then gives 2027-2: start Mon 4 Jan, end Fri 15 Jan, Demo Tue 19 Jan, cut-off/Live Mon 25 Jan. 2027-3: planning Thu 14 Jan, start Mon 18 Jan, Live Mon 8 Feb. Verified by running the engine.
-- **2027-2 planning** would compute to **Thu 31 Dec** (start − 4). Owner to confirm the real date, then add it as `planning` in `OVERRIDES[27]`.
-- **Year-end break** Mon 21 Dec – Thu 31 Dec: the engine gives "2027-1 day 11–19". The page must show the `break` state instead: band `weekend` treatment, headline `Year-end break. 2027-2 starts Mon 4 Jan.`, and no day counter. Engine: `context().isBreak = !isWeekend && dayOfSprint > workingDaysIn(current)`.
-- Move `UNCONFIRMED_FROM` to 28.
-- **2027-1 bug retro** computes to Mon 21 Dec (end + 3), which is inside the break. Owner to confirm, or override `bugRetro`. The sprint view shows it with "falls in the year-end break; owner to confirm".
-- **2027-1 matrix-for-Demo** reminder falls on Mon 4 Jan (Demo − 1), the same day 2027-2 starts. That is correct, so no change.
+- **No year-end break.** 2027-1 is one long sprint: Mon 7 Dec 2026 to Fri 1 Jan 2027 (20 working days; 28 Dec = "day 16 of 20"). `OVERRIDES[26] = { end: '2027-01-01' }`; all other keys derive: freeze from Fri 1 Jan, bug retro Mon 4 Jan, Demo Tue 5 Jan 17:00, UAT from Wed 6 Jan, cut-off and Live Mon 11 Jan.
+- `OVERRIDES[27] = { start: '2027-01-04' }` (2027-2): Demo Tue 19 Jan, Live Mon 25 Jan.
+- **2027-2 planning** computes to Thu 31 Dec; owner says it will probably be held earlier. Add `planning` to `OVERRIDES[27]` when the date is fixed.
+- Open (owner): Full Refinement fires only on Thu 10 Dec in the 4-week 2027-1.
