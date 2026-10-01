@@ -70,13 +70,15 @@ describe('calendar model', () => {
     expect(sprintDates(22).live).toBe('2026-11-02');
   });
 
-  it('2027-1 starts Mon 7 Dec 2026 and goes Live Mon 11 Jan 2027 (Kaspar, 2026-10-01)', () => {
+  it('2027-1 runs Mon 7 Dec 2026 to Fri 1 Jan 2027 and goes Live Mon 11 Jan 2027 (owner, 2026-10-01)', () => {
     const s = sprintDates(26);
     expect(s.label).toBe('2027-1');
     expect(s.start).toBe('2026-12-07');
-    expect(s.end).toBe('2026-12-18');
-    expect(s.freezeStart).toBe('2026-12-18');
-    expect(s.demoStart).toBe('2027-01-05'); // Tue evening, Live - 6 like every other sprint
+    expect(s.end).toBe('2027-01-01');
+    expect(s.freezeStart).toBe('2027-01-01');
+    expect(s.bugRetro).toBe('2027-01-04');
+    expect(s.demoStart).toBe('2027-01-05'); // Tue evening, derived from end like every other sprint
+    expect(s.uatStart).toBe('2027-01-06');
     expect(s.freezeEnd).toBe('2027-01-06');
     expect(s.cutoff).toBe('2027-01-11');
     expect(s.live).toBe('2027-01-11');
@@ -87,7 +89,9 @@ describe('calendar model', () => {
     expect(sprintDates(27).label).toBe('2027-2');
     expect(sprintDates(27).start).toBe('2027-01-04');
     expect(sprintDates(28).start).toBe('2027-01-18');
-    for (const n of [25, 26, 27, 28]) expect(sprintDates(n).yearEndUnconfirmed).toBe(false);
+    for (const n of [25, 26, 27]) expect(sprintDates(n).yearEndUnconfirmed).toBe(false);
+    // 2027-3 onwards are plain projections (UNCONFIRMED_FROM = 28)
+    for (const n of [28, 29, 40]) expect(sprintDates(n).yearEndUnconfirmed).toBe(true);
   });
 
   it('numbering resets per release year (2026-25 is followed by 2027-1)', () => {
@@ -385,11 +389,10 @@ describe('Confluence calendar oracle (table-driven)', () => {
 
   it('sprints are back to back with no gap or overlap', () => {
     for (let n = 5; n <= 40; n++) {
-      if (n === 26) continue; // the year-end break, asserted below
       expect(sprintDates(n + 1).start).toBe(addDays(sprintDates(n).end, 3));
     }
-    // 2027-1 ends Fri 18 Dec; 2027-2 starts Mon 4 Jan after the break (owner, 2026-10-01).
-    expect(sprintDates(26).end).toBe('2026-12-18');
+    // No year-end break (owner, 2026-10-01): 2027-1 ends Fri 1 Jan, 2027-2 starts Mon 4 Jan.
+    expect(sprintDates(26).end).toBe('2027-01-01');
     expect(sprintDates(27).start).toBe('2027-01-04');
   });
 
@@ -447,13 +450,14 @@ describe('edge exploration (QA)', () => {
     expect(() => upcoming('2027-06-01', RULES, 25)).not.toThrow();
   });
 
-  it('dayOfSprint is 1..10 on every working day and null on weekends, S5 to S40', () => {
+  it('dayOfSprint is 1..workingDaysIn on every working day and null on weekends, S5 to S40', () => {
     for (let d = sprintDates(5).start; d < sprintDates(41).start; d = addDays(d, 1)) {
       const c = context(d);
-      if (c.isWeekend || c.isBreak) expect(c.dayOfSprint).toBeNull();
+      if (c.isWeekend) expect(c.dayOfSprint).toBeNull();
       else {
         expect(c.dayOfSprint).toBeGreaterThanOrEqual(1);
-        expect(c.dayOfSprint).toBeLessThanOrEqual(10);
+        expect(c.dayOfSprint).toBeLessThanOrEqual(workingDaysIn(c.current));
+        if (c.current.n !== 26) expect(c.dayOfSprint).toBeLessThanOrEqual(10);
       }
     }
   });
@@ -542,16 +546,34 @@ describe('workingDaysIn', () => {
   });
 });
 
-describe('year-end break', () => {
-  it('21 Dec 2026 to 1 Jan 2027 is a break: no sprint day, 2027-1 still current, 2027-2 next', () => {
-    for (const d of ['2026-12-21', '2026-12-24', '2026-12-31', '2027-01-01']) {
-      const c = context(d);
-      expect(c.isBreak).toBe(true);
-      expect(c.dayOfSprint).toBeNull();
-      expect(c.current.label).toBe('2027-1');
-      expect(c.next.label).toBe('2027-2');
-    }
-    expect(context('2026-12-18').isBreak).toBe(false);
-    expect(context('2027-01-04')).toMatchObject({ isBreak: false, dayOfSprint: 1 });
+describe('year-end sprint 2027-1 (owner, 2026-10-01: no break)', () => {
+  it('2027-1 spans Mon 7 Dec to Fri 1 Jan with 20 working days', () => {
+    const s = sprintDates(26);
+    expect([s.start, s.end]).toEqual(['2026-12-07', '2027-01-01']);
+    expect(workingDaysIn(s)).toBe(20);
+  });
+
+  it('28 Dec is a normal sprint day: day 16 of 20', () => {
+    const c = context('2026-12-28');
+    expect(c.current.label).toBe('2027-1');
+    expect(c.isWeekend).toBe(false);
+    expect(c.dayOfSprint).toBe(16);
+    expect(c).not.toHaveProperty('isBreak');
+    expect(context('2027-01-01').dayOfSprint).toBe(20); // a holiday still counts as a sprint day
+  });
+
+  it('2027-2 starts Mon 4 Jan, right after 2027-1; planning computes to Thu 31 Dec', () => {
+    expect(sprintDates(27).start).toBe('2027-01-04');
+    expect(sprintDates(27).planning).toBe('2026-12-31');
+    expect(context('2027-01-04')).toMatchObject({ dayOfSprint: 1 });
+    expect(context('2027-01-04').current.label).toBe('2027-2');
+    expect(context('2027-01-04').previous.label).toBe('2027-1');
+  });
+
+  it('no rule fires on the nominal Live Monday 28 Dec', () => {
+    const ids28 = actionsFor('2026-12-28', RULES).map((a) => a.id);
+    expect(ids28).not.toContain('live-update');
+    expect(ids28).not.toContain('fix-cutoff');
+    expect(actionsFor('2027-01-11', RULES).find((a) => a.id === 'live-update')).toMatchObject({ sprintNumber: 26 });
   });
 });
