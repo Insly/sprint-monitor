@@ -4,12 +4,14 @@
   "private": true,
   "description": "MGA Sprint Board: which sprint is active and what is due today. Static site on Render.",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "vitest run",
     "serve": "npx --yes serve public"
   },
   "devDependencies": {
-    "vitest": "^2.1.9"
+    "vitest": "5.0.2"
   }
 }
