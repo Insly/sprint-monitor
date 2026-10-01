@@ -4,368 +4,467 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>MGA Sprint Board</title>
-<meta name="description" content="Which MGA sprint is active, where today sits in it, and what to do today.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230E7C6B'/%3E%3Crect x='5' y='14' width='22' height='4' rx='2' fill='%23fff'/%3E%3Ccircle cx='9' cy='16' r='3.5' fill='%23fff'/%3E%3Ccircle cx='23' cy='16' r='3.5' fill='%23fff'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<title>Sprint Board</title>
+<meta name="description" content="MGA Sprint Board: what kind of day it is, what is yours today, and the three sprints in play. Tallinn time.">
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23FF7D00'/%3E%3C/svg%3E">
 <style>
+/* =====================================================================
+   Tokens (DESIGN.md §10.2 light, §10.3 dark). Arial only, no external resources.
+   ===================================================================== */
 :root {
-  --paper: #F4F6F3;
-  --surface: #FFFFFF;
-  --ink: #18212B;
-  --muted: #5B6672;
-  --rule: #D9DED8;
-  --accent: #0E7C6B;
-  --accent-soft: #DCEFEA;
-  --freeze: #3569C9;
-  --freeze-soft: #E1E9F8;
-  --deadline: #B86E00;
-  --deadline-soft: #F6E8D2;
-  --live: #2E8540;
-  --live-soft: #E0F0E3;
-  --danger: #B3261E;
-  --danger-soft: #F8E1DF;
-  --reminder: #5B6672;
-  --reminder-soft: #E8EBE7;
-  --weekend: #ECEFEB;
-  --on-accent: #FFFFFF;
-
-  --font-display: "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-
-  --day: 22px;
-  --radius: 6px;
+  --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #EDEDED; --line: #EBEBEB; --control: #8A8A8A;
+  --text: #1A1A1A; --text-2: #3C3C3C; --muted: #575757;
+  --accent: #FF7D00; --on-accent: #1A1A1A; --accent-text: #C35500; --link-on-tint: #1A1A1A;
+  --accent-soft: #FFF1E5; --accent-light: #FFBE91;
+  --after-bg: #1A1A1A; --after-fg: #FFFFFF; --after-muted: #BDBDBD; --after-outline: transparent;
+  --evening-bar: #00D7A5; --evening-tag: #007A5E;
+  --update-fill: #00D7A5; --freeze-fill: #00C8FF; --freeze-text: #006E8F;
+  --meeting-text: #784BAF; --meeting-soft: #F1EAF9;
+  --preview-bg: #1A1A1A; --preview-fg: #FFFFFF;
+  --bar-off: #D6D6D6; --bar-edge: #1A1A1A;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #10161C;
-    --surface: #172028;
-    --ink: #E7ECEF;
-    --muted: #9AA6B1;
-    --rule: #2A3540;
-    --accent: #3CC2A8;
-    --accent-soft: #16352F;
-    --freeze: #7FA7F0;
-    --freeze-soft: #1B2A45;
-    --deadline: #E3A23B;
-    --deadline-soft: #3A2C14;
-    --live: #6CC47D;
-    --live-soft: #1A3320;
-    --danger: #F08A80;
-    --danger-soft: #3D1F1C;
-    --reminder: #9AA6B1;
-    --reminder-soft: #222C35;
-    --weekend: #141C23;
-    --on-accent: #10161C;
+  :root {
+    --bg: #1A1A1A; --surface: #242424; --surface-2: #2E2E2E; --line: #3C3C3C; --control: #9B9B9B;
+    --text: #FFFFFF; --text-2: #EBEBEB; --muted: #9B9B9B;
+    --accent-text: #FF7D00; --link-on-tint: #FFFFFF;
+    --accent-soft: #3A2410;
+    --after-bg: #0F0F0F; --after-fg: #FFFFFF; --after-muted: #9B9B9B; --after-outline: #FF7D00;
+    --evening-tag: #00D7A5; --freeze-text: #00C8FF;
+    --meeting-text: #B48CE6; --meeting-soft: #2A2140;
+    --preview-bg: #FFFFFF; --preview-fg: #1A1A1A;
+    --bar-off: #3C3C3C; --bar-edge: #FFFFFF;
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --paper: #10161C;
-  --surface: #172028;
-  --ink: #E7ECEF;
-  --muted: #9AA6B1;
-  --rule: #2A3540;
-  --accent: #3CC2A8;
-  --accent-soft: #16352F;
-  --freeze: #7FA7F0;
-  --freeze-soft: #1B2A45;
-  --deadline: #E3A23B;
-  --deadline-soft: #3A2C14;
-  --live: #6CC47D;
-  --live-soft: #1A3320;
-  --danger: #F08A80;
-  --danger-soft: #3D1F1C;
-  --reminder: #9AA6B1;
-  --reminder-soft: #222C35;
-  --weekend: #141C23;
-  --on-accent: #10161C;
-  color-scheme: dark;
-}
 
-*, *::before, *::after { box-sizing: border-box; }
+* { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 400 15px/1.5 var(--font-body);
-  overflow-x: hidden;
-}
-a { color: var(--accent); text-underline-offset: 2px; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
-.mono, time, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Arial, "Helvetica Neue", Helvetica, sans-serif; font-variant-numeric: tabular-nums; }
+a { color: var(--accent-text); text-underline-offset: 2px; }
+button, select, input { font: inherit; color: inherit; }
+h1, h2, h3 { line-height: 1.2; }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
 
-.wrap { max-width: 1160px; margin: 0 auto; padding-inline: max(16px, 3vw); padding-block: 20px 40px; }
+/* One focus ring for every surface (DESIGN.md §10.4) */
+:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #1A1A1A; border-radius: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+[tabindex="-1"]:focus { box-shadow: none; outline: none; } /* headings that receive focus on route change or role pick */
 
-h1, h2, h3 { margin: 0; }
-h2 {
-  font: 600 13px/1.2 var(--font-body);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-section { margin-top: 32px; }
-.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 12px; }
+.skip { position: absolute; left: 8px; top: -60px; z-index: 10; background: var(--surface); color: var(--text); padding: 10px 14px; border: 1px solid var(--control); border-radius: 4px; }
+.skip:focus { top: 8px; }
 
-/* Preview note */
-.preview {
-  display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center;
-  padding: 8px 12px; margin-bottom: 16px;
-  background: var(--deadline-soft); color: var(--ink);
-  border-left: 3px solid var(--deadline); border-radius: var(--radius);
-  font-size: 14px;
-}
-.preview[hidden] { display: none; }
+.wrap { max-width: 1200px; margin: 0 auto; }
+.pad { padding-left: 32px; padding-right: 32px; }
 
-/* Today bar */
-.today { border-bottom: 1px solid var(--rule); padding-bottom: 20px; }
-.today-date { font-size: 15px; color: var(--muted); }
-.today-date strong { color: var(--ink); font-weight: 500; }
-.today-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; margin-top: 2px; }
-.today h1 {
-  font: 700 clamp(34px, 7vw, 56px)/1.05 var(--font-display);
-  letter-spacing: -.01em;
-  font-variant-numeric: tabular-nums;
-}
-.today h1 .sep { color: var(--muted); font-weight: 600; margin-inline: .12em; }
-.today-range { color: var(--muted); font-size: 15px; }
-.tag {
-  display: inline-block; padding: 1px 7px; border-radius: 999px;
-  font: 500 11px/1.6 var(--font-body); letter-spacing: .03em;
-  background: var(--reminder-soft); color: var(--muted); vertical-align: middle;
-}
-.meter { display: grid; grid-template-columns: repeat(5, 1fr) 10px repeat(5, 1fr); gap: 3px; margin-top: 14px; max-width: 520px; }
-.meter span { height: 6px; border-radius: 2px; background: var(--rule); }
-.meter span.done { background: var(--accent); opacity: .45; }
-.meter span.now { background: var(--accent); }
-.meter span.gap { background: none; }
-.meter-legend { display: flex; justify-content: space-between; max-width: 520px; font-size: 12px; color: var(--muted); margin-top: 4px; }
-.weekend-note { margin: 12px 0 0; font-size: 15px; }
-.phases { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
-.phases b { color: var(--ink); font-weight: 500; }
+/* ---------------------------------------------------------------- preview bar */
+.previewbar { background: var(--preview-bg); color: var(--preview-fg); }
+.previewbar .wrap { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+.previewbar a { color: inherit; }
+.pbtn { min-height: 34px; min-width: 34px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; font-size: 13px; cursor: pointer; text-decoration: none; }
+.previewbar input[type=date] { min-height: 34px; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; padding: 0 6px; color-scheme: dark; }
+@media (prefers-color-scheme: dark) { .previewbar input[type=date] { color-scheme: light; } }
+.previewbar .back { margin-left: auto; text-decoration: underline; }
 
-/* Role filter */
-.roles { display: flex; flex-wrap: wrap; gap: 6px; }
-.roles button {
-  font: 500 13px/1 var(--font-body);
-  padding: 7px 12px; border-radius: 999px;
-  border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
-  cursor: pointer; min-height: 32px;
-}
-.roles button:hover { border-color: var(--muted); }
-.roles button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+/* ---------------------------------------------------------------- top bar */
+.topbar { border-bottom: 1px solid var(--line); background: var(--surface); }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; }
+.brand { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; }
+.mark { width: 12px; height: 12px; background: var(--accent); border-radius: 2px; align-self: center; flex: none; }
+.brand .date { font-weight: 700; margin: 0; font-size: 15px; }
+.brand .sub { font-size: 13px; color: var(--muted); }
+.d-short { display: none; }
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seg-label { font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--control); border-radius: 4px; overflow: hidden; flex-wrap: wrap; }
+.seg label { position: relative; display: inline-flex; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { padding: 0 12px; min-height: 34px; display: inline-flex; align-items: center; font-size: 13px; border-left: 1px solid var(--line); cursor: pointer; }
+.seg label:first-child span { border-left: 0; }
+.seg input:checked + span { background: var(--text); color: var(--bg); font-weight: 700; }
+.seg input:focus-visible + span { box-shadow: inset 0 0 0 2px #FFFFFF, inset 0 0 0 4px #1A1A1A; }
+.role-select { display: none; min-height: 44px; border: 1px solid var(--control); border-radius: 4px; background: var(--surface); padding: 0 10px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border: 1px solid var(--control); border-radius: 4px; background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer; text-decoration: none; }
+.viewdate { position: relative; }
+.viewdate > summary { list-style: none; }
+.viewdate > summary::-webkit-details-marker { display: none; }
+.viewdate .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 5; background: var(--surface); border: 1px solid var(--control); border-radius: 4px; padding: 12px; display: grid; gap: 8px; min-width: 240px; }
+.viewdate .menu label { font-size: 13px; color: var(--muted); }
+.viewdate .menu input { min-height: 36px; border: 1px solid var(--control); border-radius: 4px; background: var(--surface); padding: 0 8px; }
+.viewdate .row { display: flex; gap: 8px; }
+.vd-m { display: none; }
 
-/* Action columns */
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 20px; }
-.col-head { padding-bottom: 8px; border-bottom: 2px solid var(--rule); margin-bottom: 10px; }
-.col.is-current .col-head { border-bottom-color: var(--accent); }
-.col-head h3 { font: 600 20px/1.2 var(--font-display); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.col-head h3 .rel { font: 500 12px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.col-head .phase { font-size: 13px; color: var(--muted); margin-top: 2px; }
-.acts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.act {
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-left: 4px solid var(--k, var(--muted));
-  border-radius: var(--radius);
-  padding: 10px 12px 10px 12px;
-}
-.act-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
-.chip {
-  display: inline-block; padding: 1px 7px; border-radius: 4px;
-  font: 500 11px/1.6 var(--font-body); letter-spacing: .04em; text-transform: uppercase;
-  background: var(--k-soft, var(--reminder-soft)); color: var(--ink);
-}
-.act-title { font: 600 16px/1.3 var(--font-body); margin-top: 4px; }
-.act-detail { margin: 3px 0 0; font-size: 14px; color: var(--muted); }
-.act-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; }
-.who { padding: 1px 6px; border-radius: 4px; border: 1px solid var(--rule); color: var(--ink); }
-.who.all { border-style: dashed; color: var(--muted); }
-.src { margin-left: auto; font-size: 12px; }
-.empty { margin: 0; font-size: 14px; color: var(--muted); padding: 6px 0; }
-.error {
-  padding: 10px 12px; border-radius: var(--radius);
-  background: var(--danger-soft); border-left: 3px solid var(--danger); color: var(--ink);
+/* ---------------------------------------------------------------- brand tag */
+.ltag { font-weight: 700; font-size: 13px; color: var(--accent-text); }
+
+/* ---------------------------------------------------------------- headline band */
+.band { border-bottom: 1px solid var(--line); position: relative; }
+.band .wrap { display: grid; grid-template-columns: 1fr 340px; gap: 14px 36px; align-items: start; padding-top: 20px; padding-bottom: 22px; }
+.band h1 { margin: 6px 0 6px; font-size: 34px; line-height: 1.12; font-weight: 700; }
+.band .subl { margin: 0; font-size: 17px; color: var(--text-2); max-width: 62ch; }
+.band .meta { font-size: 13px; color: var(--muted); }
+.band .blinks { margin-top: 8px; font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; }
+.band--urgent { background: #FF7D00; color: #1A1A1A; border-bottom: 0; }
+.band--urgent .subl, .band--urgent .meta, .band--urgent .ltag, .band--urgent a { color: #1A1A1A; }
+.band--after { background: var(--after-bg); color: var(--after-fg); border-bottom: 0; box-shadow: inset 0 0 0 2px var(--after-outline); }
+.band--after .subl { color: var(--after-fg); } .band--after .meta { color: var(--after-muted); } .band--after .ltag { color: #FF7D00; } .band--after a { color: #FFFFFF; }
+.band--evening { background: var(--surface); box-shadow: inset 8px 0 0 var(--evening-bar); }
+.band--evening .ltag { color: var(--evening-tag); }
+.band--heads-up { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); }
+.band--heads-up .ltag, .band--heads-up a { color: var(--link-on-tint); }
+.band--weekend, .band--error { background: var(--surface-2); }
+.band--weekend .ltag { color: var(--text-2); }
+.nextbox { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--surface); color: var(--text); }
+.nextbox .k { font-size: 13px; color: var(--muted); }
+.nextbox .big { font-size: 24px; font-weight: 700; line-height: 1.15; margin: 4px 0 2px; }
+.nextbox .what { font-size: 15px; }
+.band--heads-up .nextbox { background: var(--bg); }
+.band--urgent .nextbox { background: #FFBE91; border-color: #FFBE91; color: #1A1A1A; }
+.band--urgent .nextbox .k { color: #1A1A1A; }
+.countdown .big { font-size: 44px; font-weight: 700; line-height: 1; }
+.countdown .lbl { font-size: 15px; margin-top: 4px; }
+.countdown .tz { font-size: 13px; margin-top: 4px; }
+.seq { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; list-style: none; padding: 0; }
+.seq li { display: flex; flex-direction: column; padding: 7px 12px; border-radius: 4px; min-width: 150px; font-size: 13px; border: 1px solid transparent; }
+.seq li b { font-size: 15px; }
+.band--urgent .seq li { background: #FFBE91; color: #1A1A1A; }
+.band--urgent .seq li[aria-current] { background: #1A1A1A; color: #FFFFFF; }
+.band--after .seq li { border-color: #575757; color: var(--after-fg); }
+.band--after .seq li.earlier { color: var(--after-muted); border-style: dashed; }
+.band--after .seq li[aria-current] { background: #FF7D00; border-color: #FF7D00; color: #1A1A1A; }
+.band--evening .seq li { border-color: var(--line); background: var(--bg); }
+.band--evening .seq li.earlier { color: var(--muted); border-style: dashed; }
+.band--evening .seq li[aria-current] { background: var(--text); color: var(--bg); }
+
+/* ---------------------------------------------------------------- duty line */
+.duty { border-bottom: 1px solid var(--line); background: var(--surface); }
+.duty .wrap { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; padding-top: 10px; padding-bottom: 10px; min-height: 44px; font-size: 15px; }
+.duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 6px; }
+.duty .tonight { font-weight: 700; }
+.na { color: var(--muted); font-style: italic; font-weight: 400; }
+
+/* ---------------------------------------------------------------- body */
+.body { display: grid; grid-template-columns: 7fr 5fr; gap: 28px 40px; padding-top: 22px; padding-bottom: 8px; }
+.lower { display: block; min-width: 0; }
+.lower > section + section { margin-top: 22px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+.sec-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.sec-head .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+.slot { font-size: 13px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; display: flex; gap: 8px; align-items: center; }
+.slot::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.slot.hot { color: var(--text); }
+.agenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.item { border: 1px solid var(--line); border-left: 4px solid var(--surface-2); border-radius: 4px; background: var(--surface); }
+.item.due { border-left-color: var(--accent); }
+.item.meet { border-left-color: var(--meeting-text); }
+.item.upd { border-left-color: var(--update-fill); }
+.item.key { background: var(--accent-soft); border-left-width: 6px; }
+.item.key a { color: var(--link-on-tint); }
+.item > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 74px auto 1fr auto 16px; gap: 10px; align-items: center; padding: 9px 12px; min-height: 44px; }
+.item > summary::-webkit-details-marker { display: none; }
+.when { font-weight: 700; font-size: 15px; }
+.when.soft { font-weight: 400; font-size: 13px; color: var(--muted); }
+.ttl { font-size: 16px; font-weight: 700; }
+.ttl small { display: block; font-size: 13px; font-weight: 400; color: var(--text-2); }
+.chev { width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; justify-self: center; display: inline-block; }
+details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
+.chip { display: inline-block; font-size: 13px; line-height: 20px; padding: 0 7px; border-radius: 3px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.chip.due { background: var(--accent-soft); color: var(--text); border-color: var(--accent); }
+.item.key .chip.due { background: var(--accent); color: #1A1A1A; }
+.chip.meet { background: var(--meeting-soft); color: var(--meeting-text); }
+.chip.upd { background: var(--update-fill); color: #1A1A1A; }
+.chip.check, .chip.other, .chip.passed { background: var(--surface-2); color: var(--text-2); }
+.chip.outl { background: transparent; color: var(--text); border-color: var(--text); font-weight: 400; }
+.stag { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.roles { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.roles span { font-size: 13px; border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; color: var(--text-2); }
+.more { padding: 0 12px 12px 96px; font-size: 15px; color: var(--text-2); }
+.more p { margin: 0 0 8px; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.fact { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-2); border-radius: 4px; padding: 6px 10px; font-size: 15px; margin-bottom: 8px; color: var(--text); }
+.group { margin-top: 12px; border-top: 1px solid var(--line); }
+.group > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary b { font-size: 13px; color: var(--muted); min-width: 150px; }
+.group > summary .cnt { color: var(--muted); font-size: 13px; }
+.group > summary .chev { margin-left: auto; }
+.rows { list-style: none; margin: 0 0 8px; padding: 0; }
+.rows li { display: flex; gap: 10px; align-items: baseline; min-height: 40px; padding: 8px 0 8px 12px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
+.rows li b { font-size: 15px; }
+.rows li span { font-size: 13px; color: var(--muted); }
+.nextfor { display: flex; gap: 10px; align-items: baseline; min-height: 44px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; margin-top: 12px; }
+.nextfor b.k { font-size: 13px; color: var(--muted); min-width: 150px; }
+.empty { padding: 12px 0; color: var(--text-2); }
+.picker { border: 2px solid var(--accent); border-radius: 4px; padding: 14px; background: var(--surface); margin-bottom: 16px; }
+.picker h2 { margin: 0 0 4px; font-size: 18px; }
+.picker p { margin: 0 0 10px; color: var(--text-2); }
+.picker .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.picker .grid button { min-height: 44px; border: 1px solid var(--control); border-radius: 4px; font-weight: 700; background: var(--surface); cursor: pointer; }
+.picker .new { display: inline-block; margin-top: 10px; }
+
+/* ---------------------------------------------------------------- rail */
+.rail { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rail > li { background: var(--surface-2); border-radius: 4px; padding: 10px 12px; box-shadow: inset 4px 0 0 transparent; }
+.rail > li.hot { box-shadow: inset 4px 0 0 var(--accent); }
+.rail .r1 { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.rail a.lab { font-weight: 700; font-size: 16px; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.rail .st { font-size: 15px; }
+.steps { display: flex; gap: 3px; margin: 8px 0 0; padding: 0; list-style: none; }
+.steps li { flex: 1; font-size: 13px; color: var(--muted); border-top: 4px solid var(--bar-off); padding-top: 3px; text-align: center; }
+.steps li.now { border-top-color: var(--accent); color: var(--text); font-weight: 700; }
+.note { margin: 8px 0 0; font-size: 13px; color: var(--text-2); }
+.notices { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.notices li { background: var(--surface-2); border-radius: 4px; padding: 6px 10px; margin-top: 6px; color: var(--text-2); }
+
+/* ---------------------------------------------------------------- coming up */
+.cu { list-style: none; margin: 0; padding: 0; }
+.cu > li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.cu .d { font-size: 13px; color: var(--muted); }
+.cu .d b { display: block; color: var(--text); font-size: 15px; }
+.cu ul { list-style: none; margin: 0; padding: 0 0 0 16px; display: grid; gap: 3px; }
+.cu ul li { font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.cu ul li .t { font-size: 13px; font-weight: 700; min-width: 40px; color: var(--text-2); }
+.cu ul li .s { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; padding-left: 6px; }
+.cu ul li.unit { font-weight: 700; }
+.cu ul li.unit::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; align-self: center; margin-left: -16px; }
+.cu-more { margin-top: 8px; }
+
+/* ---------------------------------------------------------------- sprint view */
+.sv-nav { border-bottom: 1px solid var(--line); }
+.sv-nav .wrap { display: flex; gap: 10px 22px; align-items: center; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; font-size: 15px; min-height: 44px; }
+.sv-nav a { color: var(--text); font-weight: 700; }
+.sv-arrows { display: inline-flex; gap: 16px; }
+.sv-nav .btn { margin-left: auto; }
+.sv-head { border-bottom: 1px solid var(--line); }
+.sv-head .wrap { display: grid; grid-template-columns: 1fr 460px; gap: 12px 32px; padding-top: 18px; padding-bottom: 18px; align-items: start; }
+.sv-head h1 { margin: 0 0 4px; font-size: 32px; }
+.sv-status { margin: 0; font-size: 17px; }
+.muted { color: var(--muted); }
+.sv-duty { display: grid; gap: 8px; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; font-size: 15px; }
+.sv-duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); }
+.sv-note { background: var(--surface-2); border-radius: 4px; padding: 8px 10px; font-size: 14px; margin-top: 8px; }
+.tl { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.tl li { display: grid; grid-template-columns: 220px 1fr auto; gap: 4px 12px; padding: 8px 0 8px 14px; position: relative; align-items: baseline; }
+.tl li::before { content: ""; position: absolute; left: -7px; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 2px solid var(--text-2); }
+.tl li.past { color: var(--muted); }
+.tl li.past::before { border-color: var(--line); }
+.tl li.now { background: var(--accent-soft); border-radius: 0 4px 4px 0; }
+.tl li.now::before { background: var(--accent); border-color: var(--accent); }
+.tl .tld { font-size: 15px; }
+.tl small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+.tl b { font-size: 16px; }
+.tl .tls { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.seg2 { display: inline-flex; border: 1px solid var(--control); border-radius: 4px; overflow: hidden; margin-left: auto; }
+.seg2 button { border: 0; background: var(--surface); min-height: 34px; padding: 0 12px; font-size: 13px; cursor: pointer; }
+.seg2 button + button { border-left: 1px solid var(--line); }
+.seg2 button[aria-checked="true"] { background: var(--text); color: var(--bg); font-weight: 700; }
+
+/* ---------------------------------------------------------------- cycle, footer */
+.cycle { border-top: 1px solid var(--line); margin-top: 8px; }
+.cycle > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: baseline; padding: 12px 0; min-height: 44px; flex-wrap: wrap; }
+.cycle > summary::-webkit-details-marker { display: none; }
+.cycle > summary h2 { margin: 0; font-size: 18px; }
+.cycle > summary .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+.track-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+.track { position: relative; height: 328px; background-image: linear-gradient(to right, transparent 80px, var(--surface-2) 80px, var(--surface-2) 112px, transparent 112px); background-size: 112px 100%; }
+.axis { position: absolute; left: 0; right: 0; top: 0; height: 28px; border-bottom: 1px solid var(--line); }
+.axis span { position: absolute; top: 7px; font-size: 13px; color: var(--muted); padding-left: 4px; border-left: 1px solid var(--line); height: 21px; white-space: nowrap; }
+.lane { position: absolute; left: 0; right: 0; height: 100px; border-bottom: 1px solid var(--line); }
+.lane .ln { position: absolute; top: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.lane .ln b { color: var(--text); font-size: 15px; margin-right: 6px; }
+.bar { position: absolute; top: 44px; height: 14px; border-radius: 3px; border: 1px solid var(--bar-edge); }
+.bar.build { background: var(--surface-2); }
+.bar.freeze { background: var(--freeze-fill); }
+.bar.uat { background: var(--accent-light); }
+.blab { position: absolute; top: 26px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.stn { position: absolute; top: 42px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--surface); border: 3px solid var(--text-2); }
+.stn.plan { border-color: var(--meeting-text); }
+.stn.live { border-color: var(--text); background: var(--update-fill); }
+.ref { position: absolute; top: 46px; width: 10px; height: 10px; margin-left: -5px; background: var(--meeting-text); transform: rotate(45deg); }
+.stl { position: absolute; top: 64px; transform: translateX(-50%); font-size: 13px; white-space: nowrap; color: var(--text-2); }
+.env { position: absolute; top: 80px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.todayline { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); }
+.todayline span { position: absolute; top: 6px; left: 6px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--surface); padding: 0 3px; white-space: nowrap; }
+.gloss { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 28px; margin: 14px 0 6px; }
+.gloss div { font-size: 15px; }
+.gloss dt { font-weight: 700; }
+.gloss dd { margin: 0; color: var(--text-2); }
+footer.foot { margin-top: 8px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap: 10px; }
+.foot-row { display: flex; gap: 6px 22px; flex-wrap: wrap; }
+.foot details > summary { cursor: pointer; color: var(--text-2); min-height: 32px; display: inline-flex; align-items: center; }
+.foot ul { margin: 6px 0; padding-left: 18px; }
+.howto-body { max-width: 70ch; display: grid; gap: 6px; padding-top: 6px; color: var(--text-2); font-size: 14px; }
+.howto-body p { margin: 0; }
+.howto-body code { font-family: Consolas, "Courier New", monospace; color: var(--text); overflow-wrap: anywhere; background: var(--surface-2); padding: 1px 4px; border-radius: 3px; }
+
+/* ---------------------------------------------------------------- laptop 768–1199 (DESIGN.md §4.2) */
+@media (max-width: 1199px) {
+  .pad { padding-left: 24px; padding-right: 24px; }
+  .band .wrap { grid-template-columns: 1fr 280px; padding-top: 18px; padding-bottom: 20px; }
+  .band h1 { font-size: 30px; }
+  .countdown .big { font-size: 38px; }
+  .body { grid-template-columns: 1fr; gap: 22px; padding-top: 18px; }
+  .body > .main { max-width: 760px; }
+  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .lower > section + section { margin-top: 0; }
+  .sv-head .wrap { grid-template-columns: 1fr; }
+  .gloss { grid-template-columns: repeat(2, 1fr); }
+  .d-long-sub { display: none; }
 }
 
-.k-deploy   { --k: var(--live);     --k-soft: var(--live-soft); }
-.k-deadline { --k: var(--deadline); --k-soft: var(--deadline-soft); }
-.k-meeting  { --k: var(--accent);   --k-soft: var(--accent-soft); }
-.k-window   { --k: var(--freeze);   --k-soft: var(--freeze-soft); }
-.k-reminder { --k: var(--reminder); --k-soft: var(--reminder-soft); }
-
-.ongoing { margin-top: 10px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
-.ongoing summary { cursor: pointer; padding: 8px 12px; font-size: 13px; font-weight: 500; color: var(--muted); }
-.ongoing summary:hover { color: var(--ink); }
-.ongoing ul { list-style: none; margin: 0; padding: 0 12px 6px; }
-.ongoing li { padding: 6px 0; border-top: 1px solid var(--rule); }
-.og-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-size: 12px; }
-.og-title { font-size: 14px; font-weight: 500; margin-right: 2px; }
-.og-detail { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
-.notice {
-  margin: 12px 0 0; padding: 8px 12px; font-size: 14px;
-  background: var(--deadline-soft); border-left: 3px solid var(--deadline); border-radius: var(--radius);
+/* ---------------------------------------------------------------- mobile ≤767 (DESIGN.md §4.3) */
+@media (max-width: 767px) {
+  .pad { padding-left: 16px; padding-right: 16px; }
+  .d-long { display: none; } .d-short { display: inline; }
+  .seg, .seg-label { display: none; }
+  .role-select { display: inline-block; }
+  .vd-d { display: none; } .vd-m { display: inline; }
+  .btn { min-height: 44px; min-width: 44px; font-size: 15px; }
+  .mark { display: none; }
+  .band .wrap { grid-template-columns: 1fr; gap: 10px; padding-top: 16px; padding-bottom: 18px; }
+  .band h1 { font-size: 26px; }
+  .band .subl { font-size: 15px; }
+  .countdown .big { font-size: 32px; }
+  .band--urgent .seq { display: none; }
+  .seq li { min-width: 0; flex: 1 1 40%; padding: 6px 10px; }
+  .duty .wrap { flex-direction: column; gap: 2px; font-size: 14px; }
+  .body { padding-top: 14px; }
+  .lower { grid-template-columns: 1fr; gap: 22px; }
+  .sec-head h2 { font-size: 18px; }
+  .item > summary { grid-template-columns: 58px 1fr 14px; gap: 3px 10px; }
+  .item > summary .when { grid-row: 1 / span 3; align-self: start; padding-top: 2px; }
+  .item > summary .ttl { grid-column: 2; grid-row: 1; }
+  .item > summary .chip { grid-column: 2; grid-row: 2; justify-self: start; }
+  .item > summary .roles { grid-column: 2; grid-row: 3; justify-self: start; }
+  .item > summary .stag { display: none; } /* the sprint link stays in the expanded item */
+  #body[data-band="urgent"] .slot { display: none; } /* on mobile Your day is the sequence (DESIGN.md §4.3) */
+  .item > summary .chev { grid-column: 3; grid-row: 1; }
+  .more { padding: 0 12px 12px 80px; }
+  .group > summary b, .nextfor b.k { min-width: 0; }
+  .nextfor b.k { width: 100%; }
+  .picker .grid { grid-template-columns: repeat(2, 1fr); }
+  .rail .steps { display: none; }
+  .tl li { grid-template-columns: 1fr; }
+  .tl .tls { white-space: normal; }
+  .sv-head h1 { font-size: 26px; }
+  .gloss { grid-template-columns: 1fr; }
+  .viewdate .menu { right: auto; left: 0; }
+  .previewbar .back { margin-left: 0; }
 }
-.tag.warn { background: var(--deadline-soft); color: var(--ink); }
 
-/* Release track */
-.track-scroll { overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
-.track {
-  position: relative;
-  background-image: linear-gradient(to right,
-    transparent calc(5 * var(--day)), var(--weekend) calc(5 * var(--day)),
-    var(--weekend) calc(7 * var(--day)), transparent calc(7 * var(--day)));
-  background-size: calc(7 * var(--day)) 100%;
+/* ---------------------------------------------------------------- forced colours (DESIGN.md §10.6) */
+@media (forced-colors: active) {
+  .band, .chip, .item, .rail > li, .seq li, .bar, .previewbar, .nextbox { border: 1px solid CanvasText; }
+  .seg input:checked + span, .seg2 button[aria-checked="true"] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
+  .steps li.now { border-top-color: Highlight; }
+  :focus-visible { outline: 2px solid Highlight; }
 }
-.axis { position: relative; height: 28px; border-bottom: 1px solid var(--rule); }
-.axis .tick { position: absolute; top: 7px; font: 400 11px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); padding-left: 3px; border-left: 1px solid var(--rule); height: 21px; }
-.lane { position: relative; height: 84px; border-bottom: 1px solid var(--rule); }
-.lane:last-child { border-bottom: 0; }
-.lane-label { position: absolute; top: 8px; font-size: 13px; white-space: nowrap; color: var(--muted); }
-.lane-label b { font: 700 15px/1 var(--font-display); color: var(--ink); margin-right: 6px; }
-.lane.is-current .lane-label b { color: var(--accent); }
-.seg { position: absolute; top: 36px; height: 10px; }
-.seg-lead { top: 40px; height: 2px; background: var(--rule); }
-.seg-dev { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 3px; }
-.seg-freeze { background: var(--freeze-soft); border: 1px solid var(--freeze); border-radius: 3px; }
-.seg-uat { background: var(--deadline-soft); border: 1px solid var(--deadline); border-radius: 3px; }
-.stn { position: absolute; top: 34px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--surface); border: 3px solid var(--c, var(--muted)); }
-.stn-label { position: absolute; top: 54px; transform: translateX(-50%); font-size: 11px; line-height: 1.2; white-space: nowrap; color: var(--ink); text-align: center; }
-.stn-label small { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); font-size: 10px; }
-.today-line { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ink); pointer-events: none; }
-.today-line span { position: absolute; top: 6px; left: 5px; font: 600 10px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); background: var(--surface); padding: 2px 3px; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted); }
-.legend i { display: inline-block; width: 18px; height: 8px; border-radius: 2px; vertical-align: middle; margin-right: 6px; border: 1px solid; }
-
-/* Coming up */
-.up { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 28px; }
-.up-day { padding: 8px 0; border-top: 1px solid var(--rule); }
-.up-date { font: 500 13px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
-.up-day ul { list-style: none; margin: 4px 0 0; padding: 0; }
-.up-day li { display: grid; grid-template-columns: 44px 8px 1fr auto; gap: 8px; align-items: baseline; font-size: 14px; padding: 2px 0; }
-.up-time { font: 400 12px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--k, var(--muted)); align-self: center; }
-.up-sprint { font: 400 12px/1 var(--font-mono); color: var(--muted); }
-
-/* Footer */
-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
-footer ul { margin: 6px 0 12px; padding-left: 18px; }
-footer p { margin: 4px 0; }
-
-@media (max-width: 820px) {
-  .cols { grid-template-columns: 1fr; gap: 24px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
-}
-.howto { margin-block: 2rem 1rem; border-top: 1px solid var(--rule); padding-block-start: 1rem; color: var(--muted); }
-.howto summary { cursor: pointer; font-weight: 500; color: var(--ink); }
-.howto summary:focus-visible, .howto button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.howto-body { max-width: 65ch; display: grid; gap: .5rem; padding-block-start: .75rem; }
-.howto code { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); overflow-wrap: anywhere; }
-.howto button { font: inherit; font-size: .85em; padding: .15rem .6rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--ink); cursor: pointer; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <p class="preview" id="preview" hidden></p>
+<a class="skip" href="#yourday">Skip to your day</a>
+<div id="preview" class="previewbar" role="region" aria-label="Preview" hidden></div>
 
-  <header class="today" id="today" aria-live="polite">
-    <p class="today-date">Loading the sprint calendar…</p>
-  </header>
-
-  <section aria-labelledby="actions-h">
-    <div class="section-head">
-      <h2 id="actions-h">Today</h2>
-      <div class="roles" id="roles" role="group" aria-label="Filter by role"></div>
+<header class="topbar">
+  <div class="wrap pad">
+    <div class="brand">
+      <i class="mark" aria-hidden="true"></i>
+      <p class="date"><span class="d-long" id="date-long"></span><span class="d-short" id="date-short"></span></p>
+      <span class="sub"><span class="d-long d-long-sub">MGA Sprint Board</span><span class="d-short" id="day-short"></span></span>
     </div>
-    <div id="actions"></div>
-  </section>
-
-  <section aria-labelledby="track-h">
-    <div class="section-head"><h2 id="track-h">Release track</h2></div>
-    <div class="track-scroll" id="track-scroll" tabindex="0" aria-label="Release track, scrolls sideways"></div>
-    <div class="legend" aria-hidden="true">
-      <span><i style="background:var(--accent-soft);border-color:var(--accent)"></i>Sprint (10 working days)</span>
-      <span><i style="background:var(--freeze-soft);border-color:var(--freeze)"></i>Code freeze, Demo update</span>
-      <span><i style="background:var(--deadline-soft);border-color:var(--deadline)"></i>UAT on Demo until cut-off</span>
+    <div class="controls">
+      <span class="seg-label" id="viewing-as">Viewing as</span>
+      <div class="seg" role="radiogroup" aria-labelledby="viewing-as" id="role-seg"></div>
+      <label class="sr" for="role-select">Viewing as</label>
+      <select class="role-select" id="role-select"></select>
+      <details class="viewdate" id="viewdate">
+        <summary class="btn"><span class="vd-d">View date</span><span class="vd-m" aria-hidden="true">⋯</span><span class="sr vd-m">View date</span></summary>
+        <form class="menu" id="viewdate-form">
+          <label for="viewdate-input">Show the board for a date</label>
+          <input type="date" id="viewdate-input" required>
+          <div class="row"><button class="btn" type="submit">Show</button><button class="btn" type="button" id="viewdate-today">Today</button></div>
+        </form>
+      </details>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section aria-labelledby="up-h">
-    <div class="section-head"><h2 id="up-h">Coming up</h2><span class="today-range" id="up-range"></span></div>
-    <div id="upcoming"></div>
-  </section>
-
-  <details class="howto" id="howto">
-    <summary>Make this your browser home page</summary>
-    <div class="howto-body">
-      <p>Page address: <code id="howto-url">https://insly-sprint-monitor.onrender.com</code> <button type="button" id="howto-copy">Copy</button></p>
-      <p><strong>Edge:</strong> Settings &gt; Start, home, and new tabs &gt; When Edge starts &gt; Open these pages &gt; Add a new page &gt; paste the address. For the Home button, set Home button to the same address.</p>
-      <p><strong>Chrome:</strong> Settings &gt; On startup &gt; Open a specific page or set of pages &gt; Add a new page &gt; paste the address. For the Home button: Settings &gt; Appearance &gt; Show home button &gt; enter the address.</p>
-      <p>Neither browser lets you choose a custom new tab page in settings. Your IT admin can set one for everyone.</p>
+<main id="main">
+  <div id="today-view">
+    <section class="band" id="band" aria-labelledby="headline">
+      <div class="wrap pad">
+        <div>
+          <span class="ltag" id="band-tag"></span> <span class="meta" id="band-meta"></span>
+          <h1 id="headline" aria-live="polite"><span class="sr" id="headline-sr"></span><span id="headline-text"></span></h1>
+          <p class="subl" id="band-sub"></p>
+          <div class="blinks" id="band-links"></div>
+        </div>
+        <div id="band-right"></div>
+        <ol class="seq" id="band-order" aria-label="Today in order" hidden></ol>
+      </div>
+    </section>
+    <div class="duty" id="duty" hidden><div class="wrap pad" id="duty-inner"></div></div>
+    <div class="wrap pad body" id="body">
+      <div class="main" id="yourday"></div>
+      <div class="lower">
+        <section aria-labelledby="rail-h" id="rail-sec"></section>
+        <section aria-labelledby="cu-h" id="cu-sec"></section>
+      </div>
     </div>
+  </div>
+  <div id="sprint-view" hidden></div>
+</main>
+
+<div class="wrap pad">
+  <details class="cycle" id="cycle">
+    <summary><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><span class="aside">Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></summary>
+    <div id="cycle-body"></div>
   </details>
-  <footer id="footer">
-    <noscript><p>This page needs JavaScript to compute today's sprint.</p></noscript>
-  </footer>
 </div>
+
+<footer class="foot" id="footer">
+  <div class="wrap pad">
+    <div class="foot-row" id="foot-row"></div>
+    <details id="sources"><summary>Sources</summary><ul id="sources-list"></ul></details>
+    <details class="howto" id="howto">
+      <summary>Make this your browser home page</summary>
+      <div class="howto-body">
+        <p>Page address: <code id="howto-url">https://insly-sprint-monitor.onrender.com</code> <button type="button" class="btn" id="howto-copy">Copy</button></p>
+        <p><strong>Edge:</strong> Settings &gt; Start, home, and new tabs &gt; When Edge starts &gt; Open these pages &gt; Add a new page &gt; paste the address. For the Home button, set Home button to the same address.</p>
+        <p><strong>Chrome:</strong> Settings &gt; On startup &gt; Open a specific page or set of pages &gt; Add a new page &gt; paste the address. For the Home button: Settings &gt; Appearance &gt; Show home button &gt; enter the address.</p>
+        <p>Neither browser lets you choose a custom new tab page in settings. Your IT admin can set one for everyone.</p>
+      </div>
+    </details>
+    <noscript><p>This page needs JavaScript to compute today's sprint.</p></noscript>
+  </div>
+</footer>
+<div id="status" class="sr" role="status" aria-live="polite"></div>
 
 <script type="module">
 import {
-  context, actionsFor, upcoming, nextWorkingDay, toKey, addDays, daysBetween, sprintDates,
-  LAST_CONFIRMED, workingDaysIn,
+  context, sprintDates, sprintByLabel, sprintDetail, keyTimes, zonedNow, formatAcrossZones,
+  deviceDiffersFromTallinn, toKey, addDays, fmtDay, fmtDM, isWeekendDay, workingDaysIn, actionsFor,
+  ANCHOR, LAST_CONFIRMED, ROLES,
 } from './schedule.js';
+import { resolveDay, deployPeople, holidayNotice, NOT_ASSIGNED, dayFacts, untilText, sortWithinDay } from './board.js';
 
-let RULES = [];
-let SOURCES = {};
-let UPDATED = null;
-let rulesError = null;
-try {
-  const mod = await import('./rules.js');
-  RULES = Array.isArray(mod.RULES) ? mod.RULES : [];
-  SOURCES = mod.SOURCES && typeof mod.SOURCES === 'object' ? mod.SOURCES : {};
-  UPDATED = typeof mod.UPDATED === 'string' ? mod.UPDATED : null;
-} catch (err) {
-  rulesError = err;
-  console.error('rules.js failed to load', err);
-}
+// ---------------------------------------------------------------- data (each file may fail on its own)
+let RULES = null, SOURCES = {}, DUTY = null, HOLIDAYS = [];
+try { const m = await import('./rules.js'); RULES = Array.isArray(m.RULES) ? m.RULES : null; SOURCES = m.SOURCES || {}; }
+catch (err) { console.error('rules.js failed to load', err); }
+try { DUTY = await import('./duty.js'); } catch { DUTY = null; }
+try { const m = await import('./holidays.js'); HOLIDAYS = Array.isArray(m.HOLIDAYS) ? m.HOLIDAYS : []; } catch { HOLIDAYS = []; }
 
-// ---------- helpers ----------
-const ROLES = ['All', 'Dev', 'QA', 'IM/AM', 'Analyst', 'Lead'];
-const ROLE_KEY = 'mgaSprintBoard.role';
-const DAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const REL_LABEL = { previous: 'Previous', current: 'Current', next: 'Next' };
-const DAY_PX = 22;
-
-function parts(key) {
-  const [y, m, d] = key.split('-').map(Number);
-  return { y, m, d, wd: new Date(y, m - 1, d).getDay() };
-}
-const fmtShort = (k) => { const p = parts(k); return `${DAYS[p.wd]} ${p.d} ${MONTHS[p.m - 1]}`; };
-const fmtDM = (k) => { const p = parts(k); return `${p.d} ${MONTHS[p.m - 1]}`; };
-const fmtLong = (k) => { const p = parts(k); return `${DAYS_LONG[p.wd]} ${p.d} ${MONTHS_LONG[p.m - 1]} ${p.y}`; };
-function fmtRange(a, b) {
-  const pa = parts(a), pb = parts(b);
-  if (pa.m === pb.m && pa.y === pb.y) return `${pa.d}–${pb.d} ${MONTHS[pb.m - 1]}`;
-  return `${fmtDM(a)} – ${fmtDM(b)}`;
-}
-
+// ---------------------------------------------------------------- helpers
+const $ = (id) => document.getElementById(id);
 function h(tag, attrs, ...kids) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (v == null || v === false) continue;
     if (k === 'class') el.className = v;
-    else if (k === 'style') el.style.cssText = v;
     else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
     else el.setAttribute(k, v === true ? '' : String(v));
   }
@@ -375,324 +474,636 @@ function h(tag, attrs, ...kids) {
   }
   return el;
 }
-const L = (n) => sprintDates(n).label;
-const ONGOING_MIN_DAYS = 7; // windows at least this long go into the collapsed "Ongoing" group
-const isOngoing = (a) => a.status === 'active-window' && daysBetween(a.dates.from, a.dates.to) >= ONGOING_MIN_DAYS;
-// replaceChildren would print "null" for skipped parts, so drop them first.
 const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
-const safeUrl = (u) => (typeof u === 'string' && /^https?:\/\//i.test(u) ? u : null);
+const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//i.test(u) ? u : null);
+const ext = (href, text) => (safeUrl(href) ? h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, `${text} ↗`) : null);
+const DAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function fmtLong(key) { const [y, m, d] = key.split('-').map(Number); const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); return `${DAYS_LONG[wd]} ${d} ${MONTHS_LONG[m - 1]} ${y}`; }
+const ROLE_LABEL = { 'IM/AM': 'IM / AM' };
+const roleLabel = (r) => ROLE_LABEL[r] || r;
+const ROLE_TIP = { 'IM/AM': 'IM, AM and project managers', Lead: 'Dev team leads and delivery leads', Everyone: 'All roles' };
+const ROLE_PARAM = { imam: 'IM/AM', dev: 'Dev', qa: 'QA', lead: 'Lead', analyst: 'Analyst', everyone: 'Everyone' };
+const PICK_ORDER = ['IM/AM', 'Dev', 'QA', 'Lead', 'Analyst', 'Everyone'];
+const confluenceSearch = (text) => `https://insly.atlassian.net/wiki/search?text=${encodeURIComponent(`"${text}"`)}`;
+const TALLINN_NOTE = () => (deviceDiffersFromTallinn() ? ' (Tallinn time)' : '');
 
+// ---------------------------------------------------------------- role (one stored key)
+const ROLE_KEY = 'mgaSprintBoard.role';
 function loadRole() {
   try {
     const r = localStorage.getItem(ROLE_KEY);
-    return ROLES.includes(r) ? r : 'All';
-  } catch { return 'All'; }
+    if (r === 'All') return 'Everyone'; // v1 stored "All"
+    return ROLES.includes(r) ? r : null;
+  } catch { return null; }
 }
-function saveRole(r) {
-  try { localStorage.setItem(ROLE_KEY, r); } catch { /* storage unavailable: filter still works for this visit */ }
-}
-let role = loadRole();
+function saveRole(r) { try { localStorage.setItem(ROLE_KEY, r); } catch { /* storage blocked: the role holds for this visit */ } }
+const paramRole = ROLE_PARAM[(new URLSearchParams(location.search).get('role') || '').toLowerCase()] || null;
+if (paramRole) saveRole(paramRole);
+let storedRole = paramRole || loadRole();
+const firstVisit = storedRole == null;
+let role = storedRole || 'Everyone';
+let sprintViewEveryone = false; // the sprint view's own toggle; never stored, never in the URL
 
-const roleMatch = (a) => role === 'All' || !Array.isArray(a.who) || a.who.includes('All') || a.who.includes(role);
-const relOf = (a) => a.relation ?? 'current';
-
-// Preview date: ?date=YYYY-MM-DD or #date-YYYY-MM-DD (hash wins).
-const SAFE_HASH = /^[A-Za-z0-9._~-]+$/;
-function readPreview() {
-  let raw = null;
-  const hash = location.hash.slice(1);
-  if (hash && SAFE_HASH.test(hash) && hash.startsWith('date-')) raw = hash.slice(5);
-  if (!raw) {
-    const q = new URLSearchParams(location.search).get('date');
-    if (q && SAFE_HASH.test(q)) raw = q;
-  }
-  if (!raw) return null;
-  try { return toKey(raw); } catch { return null; }
-}
-
-function phaseOf(s, d) {
-  if (d < s.start) return `Starts ${fmtShort(s.start)}`;
-  if (d < s.end) return `In development until ${fmtShort(s.end)}`;
-  if (d < s.demoStart) return `Code freeze, Demo update ${fmtShort(s.demoStart)}`;
-  if (d === s.demoStart) return 'Code freeze, Demo update tonight';
-  if (d < s.cutoff) return `UAT on Demo, cut-off ${fmtShort(s.cutoff)} 12:00`;
-  if (d === s.live) return 'Cut-off 12:00, goes Live tonight';
-  return `Live since ${fmtShort(s.live)}`;
-}
-
-// ---------- rendering ----------
-const $ = (id) => document.getElementById(id);
-let renderedFor = null;
-
-function render() {
-  const realToday = toKey(new Date());
-  const preview = readPreview();
-  const today = preview ?? realToday;
-  renderedFor = realToday;
-
-  const ctxToday = context(today);
-  const actDate = nextWorkingDay(today);
-  const ctx = context(actDate);
-  const acts = rulesError ? [] : actionsFor(actDate, RULES);
-  const soon = rulesError ? [] : upcoming(actDate, RULES, 10);
-  const later = rulesError ? [] : upcoming(actDate, RULES, 25);
-
-  renderPreview(preview, realToday);
-  renderToday(today, ctxToday, actDate, ctx);
-  renderRoles();
-  renderActions(acts, later, ctx, actDate, today);
-  renderTrack(ctx, today);
-  renderUpcoming(soon, actDate);
-  renderFooter();
-}
-
-function renderPreview(preview, realToday) {
-  const el = $('preview');
-  if (!preview || preview === realToday) { el.hidden = true; fill(el); return; }
-  el.hidden = false;
-  fill(el, 
-    h('span', null, 'Previewing ', h('time', { datetime: preview }, fmtLong(preview))),
-    h('a', { href: location.pathname, onclick: (e) => {
-      e.preventDefault();
-      history.replaceState(null, '', location.pathname);
-      render();
-    } }, 'Back to today'),
-  );
-}
-
-function renderToday(today, c, actDate, ctx) {
-  const s = c.current;
-  const meter = h('div', { class: 'meter', 'aria-hidden': 'true' });
-  const total = workingDaysIn(s);
-  const done = c.dayOfSprint ?? (c.weekOfSprint === 1 ? 5 : total) + 0.5;
-  for (let i = 1; i <= total; i++) {
-    if (i > 1 && i % 5 === 1) meter.append(h('span', { class: 'gap' }));
-    meter.append(h('span', { class: i < done ? 'done' : i === c.dayOfSprint ? 'now' : '' }));
-  }
-  const title = c.isWeekend
-    ? h('h1', null, s.label, h('span', { class: 'sep' }, '·'), 'Weekend')
-    : h('h1', null, s.label, h('span', { class: 'sep' }, '·'), `Day ${c.dayOfSprint} of ${total}`);
-
-  const phaseLine = h('p', { class: 'phases' },
-    h('b', null, ctx.previous.label), `: ${phaseOf(ctx.previous, today)}. `,
-    h('b', null, ctx.next.label), `: planning ${today === ctx.next.planning ? 'today' : today < ctx.next.planning ? fmtShort(ctx.next.planning) : 'done'}.`);
-
-  fill($('today'), 
-    h('p', { class: 'today-date' }, h('strong', null, h('time', { datetime: today }, fmtLong(today)))),
-    h('div', { class: 'today-main' },
-      title,
-      h('span', { class: 'today-range' },
-        h('time', { datetime: s.start }, fmtRange(s.start, s.end)),
-        ` · week ${c.weekOfSprint} of 2 `,
-        s.projected ? h('span', { class: 'tag', title: `Confluence confirms dates up to ${L(LAST_CONFIRMED)}` }, 'projected') : null),
-    ),
-    meter,
-    h('div', { class: 'meter-legend', 'aria-hidden': 'true' },
-      h('span', { class: 'mono' }, fmtShort(s.start)), h('span', { class: 'mono' }, fmtShort(s.end))),
-    c.isWeekend
-      ? h('p', { class: 'weekend-note' }, 'Weekend. Next working day is ',
-          h('strong', null, h('time', { datetime: actDate }, fmtShort(actDate))),
-          ctx.current.n !== s.n ? `, day 1 of ${ctx.current.label}.` : '.',
-          ' The actions below are for that day.')
-      : null,
-    phaseLine,
-    [ctx.previous, ctx.current, ctx.next, s].some((x) => x.yearEndUnconfirmed)
-      ? h('p', { class: 'notice', role: 'note' }, 'Dates from 2027-2 onward are not confirmed yet (the start after the year-end break is not published).')
-      : null,
-  );
-  document.title = c.isWeekend ? `${s.label} weekend · MGA Sprint Board` : `${s.label} day ${c.dayOfSprint} · MGA Sprint Board`;
-}
-
-function renderRoles() {
-  fill($('roles'), ...ROLES.map((r) =>
-    h('button', { type: 'button', 'aria-pressed': String(r === role), onclick: () => {
-      role = r; saveRole(r); render();
-    } }, r)));
-}
-
-function whenText(a, actDate) {
-  if (a.status === 'active-window') {
-    const { from, to } = a.dates;
-    if (from === to) return 'Today only';
-    if (from === actDate) return `Opens today, until ${fmtShort(to)}`;
-    if (to === actDate) return 'Last day';
-    return `Until ${fmtShort(to)}`;
-  }
-  return null;
-}
-
-function actionCard(a, actDate) {
-  const src = SOURCES[a.source];
-  const url = src && safeUrl(src.url);
-  const when = whenText(a, actDate);
-  return h('li', { class: `act k-${a.kind}` },
-    h('div', { class: 'act-top' },
-      h('span', { class: 'chip' }, a.kind),
-      a.time ? h('time', { class: 'num' }, a.time) : null,
-      when ? h('span', null, when) : null),
-    h('h3', { class: 'act-title' }, a.title),
-    a.detail ? h('p', { class: 'act-detail' }, a.detail) : null,
-    h('div', { class: 'act-foot' },
-      (a.who || []).map((w) => h('span', { class: w === 'All' ? 'who all' : 'who' }, w === 'All' ? 'Everyone' : w)),
-      url ? h('a', { class: 'src', href: url, target: '_blank', rel: 'noopener noreferrer' }, src.title || 'Source') : null),
-  );
-}
-
-function renderActions(acts, later, ctx, actDate, today) {
-  $('actions-h').textContent = actDate === today ? 'Today' : `Actions for ${fmtShort(actDate)}`;
-  const box = $('actions');
-  if (rulesError) {
-    fill(box, h('p', { class: 'error' },
-      'The rules file (rules.js) did not load, so actions are unavailable. The sprint dates and release track are still correct.'));
-    return;
-  }
-  const dayWord = actDate === today ? 'today' : `on ${fmtShort(actDate)}`;
-  const cols = ['previous', 'current', 'next'].map((rel) => {
-    const s = ctx[rel];
-    const all = acts.filter((a) => relOf(a) === rel && roleMatch(a));
-    const dated = all.filter((a) => !isOngoing(a));
-    const ongoing = all.filter(isOngoing);
-    let body;
-    if (dated.length) {
-      body = h('ul', { class: 'acts' }, dated.map((a) => actionCard(a, actDate)));
-    } else {
-      // Look ahead for this same sprint (its column label shifts as days pass).
-      const nextUp = later.find((a) => a.sprintNumber === s.n && roleMatch(a) && !isOngoing(a));
-      body = h('p', { class: 'empty' }, `No actions ${dayWord}. `,
-        nextUp ? `Next for ${s.label}: ${nextUp.title}, ${fmtShort(nextUp.date)}${nextUp.time ? ` ${nextUp.time}` : ''}.`
-          : actDate > s.live ? `${s.label} is live, nothing left to do for it.`
-          : 'Nothing scheduled for it in the next five weeks.');
+// ---------------------------------------------------------------- route: #date-YYYY-MM-DD, #sprint-LABEL, combined with "~"
+const SAFE = /^[A-Za-z0-9._~-]+$/;
+function readRoute() {
+  const out = { date: null, sprint: null, sprintRaw: null };
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && SAFE.test(hash)) {
+    for (const seg of hash.split('~')) {
+      if (seg.startsWith('date-')) { try { out.date = toKey(seg.slice(5)); } catch { /* ignore */ } }
+      else if (seg.startsWith('sprint-')) { out.sprintRaw = seg.slice(7); out.sprint = sprintByLabel(out.sprintRaw); }
     }
-    const group = ongoing.length
-      ? h('details', { class: 'ongoing' },
-          h('summary', null, `Ongoing this sprint `, h('span', { class: 'num' }, `(${ongoing.length})`)),
-          h('ul', null, ongoing.map((a) => {
-            const src = SOURCES[a.source];
-            const url = src && safeUrl(src.url);
-            return h('li', null,
-              h('div', { class: 'og-top' },
-                h('span', { class: 'og-title' }, a.title),
-                (a.who || []).map((w) => h('span', { class: w === 'All' ? 'who all' : 'who' }, w === 'All' ? 'Everyone' : w))),
-              a.detail ? h('p', { class: 'og-detail' }, a.detail, ' ',
-                url ? h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Source') : null) : null);
-          })))
-      : null;
-    return h('div', { class: `col${rel === 'current' ? ' is-current' : ''}` },
-      h('div', { class: 'col-head' },
-        h('h3', null, h('span', { class: 'rel' }, REL_LABEL[rel]), `Sprint ${s.label}`,
-          s.projected ? h('span', { class: 'tag' }, 'projected') : null,
-          s.yearEndUnconfirmed ? h('span', { class: 'tag warn' }, 'unconfirmed') : null),
-        h('p', { class: 'phase' }, phaseOf(s, actDate))),
-      body, group);
-  });
-  fill(box, h('div', { class: 'cols' }, cols));
-}
-
-function renderTrack(ctx, today) {
-  const sprints = [ctx.previous, ctx.current, ctx.next];
-  const axisStart = addDays(ctx.previous.start, -7); // a Monday, so weekend shading lines up
-  const axisEnd = addDays(ctx.next.live, 6);
-  const nDays = daysBetween(axisStart, axisEnd) + 1;
-  const x = (k) => daysBetween(axisStart, k) * DAY_PX;
-  const mid = (k) => x(k) + DAY_PX / 2;
-  const span = (a, b, cls, label) => h('div', {
-    class: `seg ${cls}`, title: label,
-    style: `left:${x(a) + 1}px;width:${(daysBetween(a, b) + 1) * DAY_PX - 2}px`,
-  });
-
-  const axis = h('div', { class: 'axis' });
-  for (let i = 0; i < nDays; i += 7) {
-    const k = addDays(axisStart, i);
-    axis.append(h('span', { class: 'tick', style: `left:${x(k)}px` }, fmtDM(k)));
   }
-
-  const lanes = sprints.map((s) => {
-    const isCur = s.n === ctx.current.n;
-    const stations = [
-      [s.planning, 'Plan', 'var(--muted)'],
-      [s.start, 'Start', 'var(--accent)'],
-      [s.freezeStart, 'Freeze', 'var(--freeze)'],
-      [s.demoStart, 'Demo', 'var(--freeze)'],
-      [s.live, 'Cut-off · Live', 'var(--live)'],
-    ];
-    return h('div', { class: `lane${isCur ? ' is-current' : ''}` },
-      h('div', { class: 'lane-label', style: `left:${x(s.planning)}px` },
-        h('b', null, s.label), fmtRange(s.start, s.end),
-        isCur ? ' · current' : '', s.projected ? ' · projected' : '', s.yearEndUnconfirmed ? ' · unconfirmed' : ''),
-      h('div', { class: 'seg seg-lead', style: `left:${mid(s.planning)}px;width:${mid(s.start) - mid(s.planning)}px` }),
-      h('div', { class: 'seg seg-lead', style: `left:${mid(s.cutoff) - 4 * DAY_PX}px;width:${4 * DAY_PX}px` }),
-      span(s.start, addDays(s.end, -1), 'seg-dev', `${s.label} sprint ${fmtRange(s.start, s.end)}`),
-      span(s.freezeStart, s.freezeEnd, 'seg-freeze', `${s.label} code freeze ${fmtRange(s.freezeStart, s.freezeEnd)}`),
-      span(s.uatStart, addDays(s.cutoff, -1), 'seg-uat', `${s.label} UAT ${fmtRange(s.uatStart, s.cutoff)}`),
-      stations.map(([k, label, c]) => [
-        h('span', { class: 'stn', style: `left:${mid(k)}px;--c:${c}`, title: `${label} ${fmtShort(k)}` }),
-        h('span', { class: 'stn-label', style: `left:${mid(k)}px` }, label, h('small', null, fmtDM(k))),
-      ]),
-    );
-  });
-
-  const inRange = today >= axisStart && today <= axisEnd;
-  const track = h('div', {
-    class: 'track', style: `width:${nDays * DAY_PX}px`,
-    role: 'img',
-    'aria-label': sprints.map((s) =>
-      `Sprint ${s.label}: planning ${fmtShort(s.planning)}, runs ${fmtRange(s.start, s.end)}, code freeze ${fmtShort(s.freezeStart)} to ${fmtShort(s.freezeEnd)}, Demo update ${fmtShort(s.demoStart)}, cut-off and Live ${fmtShort(s.live)}.`).join(' '),
-  },
-    axis, lanes,
-    inRange ? h('div', { class: 'today-line', style: `left:${mid(today)}px` }, h('span', null, 'Today')) : null,
-  );
-
-  const scroller = $('track-scroll');
-  fill(scroller, track);
-  if (inRange) scroller.scrollLeft = Math.max(0, mid(today) - scroller.clientWidth / 3);
+  if (!out.date) {
+    const q = new URLSearchParams(location.search).get('date');
+    if (q && SAFE.test(q)) { try { out.date = toKey(q); } catch { /* ignore */ } }
+  }
+  return out;
+}
+function routeHref({ date = null, sprint = null } = {}) {
+  const parts = [];
+  if (date) parts.push(`date-${date}`);
+  if (sprint) parts.push(`sprint-${sprint}`);
+  return parts.length ? `#${parts.join('~')}` : '#';
 }
 
-function renderUpcoming(list, actDate) {
-  const box = $('upcoming');
-  const endKey = (() => { let d = actDate, n = 0; while (n < 10) { d = addDays(d, 1); const wd = parts(d).wd; if (wd !== 0 && wd !== 6) n++; } return d; })();
-  $('up-range').textContent = `Next 10 working days, to ${fmtShort(endKey)}`;
-  if (rulesError) { fill(box, h('p', { class: 'empty' }, 'Unavailable until rules.js loads.')); return; }
-  const mine = list.filter((a) => roleMatch(a) && !isOngoing(a));
-  if (!mine.length) {
-    fill(box, h('p', { class: 'empty' }, `Nothing scheduled in the next 10 working days${role === 'All' ? '' : ` for ${role}`}.`));
+// ---------------------------------------------------------------- clock
+let previewTime = null; // "Show after 12:00" toggle on a previewed cut-off day
+function now() {
+  const route = readRoute();
+  const real = zonedNow();
+  const preview = route.date && route.date !== real.date ? route.date : null;
+  return { route, real, preview, date: preview || real.date, time: preview ? (previewTime || '09:00') : real.time };
+}
+
+// ---------------------------------------------------------------- favicon
+function setFavicon(kind) {
+  const svg = kind === 'key'
+    ? "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='#1A1A1A'/><rect x='3' y='3' width='10' height='10' rx='1' fill='none' stroke='#FF7D00' stroke-width='2'/></svg>"
+    : "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='#FF7D00'/></svg>";
+  $('favicon').href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+// ---------------------------------------------------------------- top bar and role controls
+function renderTop(n, model) {
+  $('date-long').textContent = fmtLong(n.date);
+  $('date-short').textContent = fmtDay(n.date);
+  const c = context(n.date);
+  $('day-short').textContent = c.dayOfSprint ? `${c.current.label} · day ${c.dayOfSprint}` : `${c.current.label} · weekend`;
+  const seg = $('role-seg');
+  if (!seg.childElementCount) {
+    for (const r of ROLES) {
+      const id = `role-${r.replace(/\W/g, '')}`;
+      seg.append(h('label', { title: ROLE_TIP[r] || null },
+        h('input', { type: 'radio', name: 'role', value: r, id, onchange: () => setRole(r, { from: 'control' }) }),
+        h('span', null, roleLabel(r))));
+    }
+    const sel = $('role-select');
+    for (const r of ROLES) sel.append(h('option', { value: r }, roleLabel(r)));
+    sel.addEventListener('change', () => setRole(sel.value, { from: 'control' }));
+  }
+  for (const input of seg.querySelectorAll('input')) input.checked = input.value === role;
+  $('role-select').value = role;
+  $('viewdate-input').value = n.date;
+  void model;
+}
+
+function setRole(r, { from } = {}) {
+  role = r;
+  storedRole = r;
+  saveRole(r);
+  render({ keepFocus: from === 'control' });
+  const m = lastModel;
+  const count = m && m.agenda ? m.agenda.count : 0;
+  $('status').textContent = `Showing ${count} item${count === 1 ? '' : 's'} for ${roleLabel(r)}`;
+  if (from === 'picker') { const h2 = $('yourday-h'); if (h2) h2.focus(); }
+}
+
+// ---------------------------------------------------------------- band (persistent skeleton, h1 text node only when changed)
+function renderBand(n, m) {
+  const band = $('band');
+  band.className = `band band--${m.band}`;
+  $('band-tag').textContent = m.tag || '';
+  $('band-meta').textContent = m.meta || '';
+  if ($('headline-sr').textContent !== (m.srTag || '')) $('headline-sr').textContent = m.srTag || '';
+  if ($('headline-text').textContent !== m.headline) $('headline-text').textContent = m.headline;
+  $('band-sub').textContent = m.sub || '';
+  $('band-sub').hidden = !m.sub;
+  fill($('band-links'), (m.blinks || []).map((k) => SOURCES[k] && ext(SOURCES[k].url, 'Demo/Live matrix')));
+
+  const right = $('band-right');
+  if (m.countdown && !n.preview) {
+    const diff = deviceDiffersFromTallinn();
+    let yours = null;
+    if (diff) {
+      const t = new Date(Date.now() + m.countdown.minutes * 60000);
+      yours = `${m.countdown.until} Tallinn time = ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')} your time`;
+    }
+    fill(right, h('div', { class: 'countdown' },
+      h('div', { class: 'big' }, m.countdown.text.replace(/ left$/, '')),
+      h('div', { class: 'lbl' }, `left until ${m.countdown.until}`),
+      yours && h('div', { class: 'tz' }, yours)));
+  } else if (m.countdown && n.preview) {
+    fill(right, h('div', { class: 'nextbox' }, h('div', { class: 'k' }, 'Cut-off'), h('div', { class: 'big' }, `${m.countdown.until} today`), h('div', { class: 'what' }, 'No live countdown in a preview')));
+  } else if (m.next) {
+    fill(right, h('a', { class: 'nextbox', href: linkTo(m.next.href), style: 'display:block;text-decoration:none' },
+      h('div', { class: 'k' }, m.next.kicker),
+      h('div', { class: 'big' }, m.next.big, /,\s\d\d:\d\d$/.test(m.next.big) ? TALLINN_NOTE() : ''),
+      h('div', { class: 'what' }, m.next.what, m.next.extra ? [h('br'), m.next.extra] : null)));
+  } else fill(right);
+
+  const ol = $('band-order');
+  if (m.order) {
+    ol.hidden = false;
+    fill(ol, m.order.map((s) => h('li', { class: s.state === 'earlier' ? 'earlier' : null, 'aria-current': s.state === 'current' ? 'step' : null },
+      h('span', null, s.when), h('b', null, s.what))));
+  } else { ol.hidden = true; fill(ol); }
+}
+
+// ---------------------------------------------------------------- duty line
+function personNodes(people) {
+  if (people.every((p) => !p.name)) return [h('span', { class: 'na' }, NOT_ASSIGNED)];
+  return people.flatMap((p, i) => [i ? ', ' : null, p.name ? p.name : h('span', { class: 'na' }, NOT_ASSIGNED), p.role ? ` (${p.role})` : null]);
+}
+function renderDuty(m) {
+  const line = m.duty;
+  $('duty').hidden = !line;
+  if (!line) return;
+  const support = h('span', null, h('span', { class: 'dk' }, 'Support this week'), line.support.name || h('span', { class: 'na' }, NOT_ASSIGNED));
+  const d = line.deploy;
+  let dep = null;
+  if (d) {
+    const href = linkTo(`#sprint-${d.label}`);
+    if (line.state === 'tonight') dep = h('span', { class: 'tonight' }, h('span', { class: 'dk' }, `Tonight · ${d.kind} update `, h('a', { href }, d.label), ` · ${d.zones}`), personNodes(d.people));
+    else if (line.state === 'last-night') dep = h('span', null, h('span', { class: 'dk' }, `Last night · ${d.kind} update `, h('a', { href }, d.label)), personNodes(d.people));
+    else dep = h('span', null, h('span', { class: 'dk' }, `Next · ${d.kind} update ${fmtDay(d.date)} · ${d.zones} (`, h('a', { href }, d.label), ')'), personNodes(d.people));
+  }
+  fill($('duty-inner'), line.state === 'next' ? [support, dep] : [dep, support]);
+}
+
+// ---------------------------------------------------------------- your day
+let currentDate = null;
+const linkTo = (href) => {
+  // Keep the previewed date on in-page links (#sprint-… becomes #date-…~sprint-…).
+  const r = readRoute();
+  const realToday = zonedNow().date;
+  if (!href.startsWith('#sprint-') || !r.date || r.date === realToday) return href;
+  return routeHref({ date: r.date, sprint: href.slice(8) });
+};
+
+function itemLinks(it) {
+  const links = [];
+  for (const k of it.links || []) if (SOURCES[k]) links.push(ext(SOURCES[k].url, SOURCES[k].title.replace(/ \(.*\)$/, '')));
+  if (it.releasePages) {
+    links.push(ext(confluenceSearch(`Release ${it.releasePages.release}`), `Release ${it.releasePages.release} page`));
+    if (it.releasePages.golive) links.push(ext(confluenceSearch(`Golive Release ${it.releasePages.release}`), `Golive Release ${it.releasePages.release} page`));
+  }
+  if (it.id === 'revert-missed-fixes' && SOURCES.lifecycle) links.push(ext(SOURCES.lifecycle.url, 'Revert procedure'));
+  if (it.tag) links.push(h('a', { href: linkTo(it.tag.href) }, `Sprint ${it.tag.label} ›`));
+  if (it.source && SOURCES[it.source]) links.push(ext(SOURCES[it.source].url, 'Source'));
+  return links.filter(Boolean);
+}
+
+function copyButton(text) {
+  return h('button', { type: 'button', class: 'btn', onclick: async (e) => {
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; $('status').textContent = 'Copied'; }
+    catch { e.target.textContent = 'Select and copy'; }
+    setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
+  } }, 'Copy');
+}
+
+const KIND_CLASS = { Due: 'due', Meeting: 'meet', Update: 'upd' };
+function itemNode(it, { everyoneView = false } = {}) {
+  const chip = it.chip || { text: 'Check', cls: 'check' };
+  const cls = ['item', it.other || chip.cls === 'passed' || chip.cls === 'outl' ? null : KIND_CLASS[chip.text], it.key ? 'key' : null].filter(Boolean).join(' ');
+  const roles = everyoneView && Array.isArray(it.who) ? h('span', { class: 'roles' }, it.who.map((w) => h('span', null, w === 'All' ? 'Everyone' : roleLabel(w)))) : null;
+  const tagText = it.tag ? (it.tag.text ? `${it.tag.label} · ${it.tag.text}` : it.tag.label) : null;
+  return h('li', null, h('details', { class: cls, 'data-k': `item:${it.id}:${it.slot}` },
+    h('summary', null,
+      h('span', { class: `when${/^\d\d:\d\d$|^Tonight$/.test(it.when || '') ? '' : ' soft'}` }, it.when || 'Today'),
+      h('span', { class: `chip ${chip.cls}` }, chip.text),
+      h('span', { class: 'ttl' }, it.title, it.sub ? h('small', null, it.sub) : null),
+      roles || (tagText ? h('span', { class: 'stag' }, tagText) : h('span')),
+      h('i', { class: 'chev', 'aria-hidden': 'true' })),
+    h('div', { class: 'more' },
+      it.facts.map((f) => h('div', { class: 'fact' }, h('span', null, f.text, TALLINN_NOTE()), copyButton(f.copy))),
+      h('p', null, it.detail),
+      h('div', { class: 'links' }, itemLinks(it)))));
+}
+
+function renderYourDay(n, m) {
+  const a = m.agenda;
+  const kids = [];
+  if (firstVisit && storedRole == null) {
+    kids.push(h('div', { class: 'picker', role: 'group', 'aria-labelledby': 'picker-h' },
+      h('h2', { id: 'picker-h' }, 'Show only what is yours'),
+      h('p', null, 'Which of these are you? You can change it any time under "Viewing as".'),
+      h('div', { class: 'grid' }, PICK_ORDER.map((r) => h('button', { type: 'button', title: ROLE_TIP[r] || null, onclick: () => setRole(r, { from: 'picker' }) }, roleLabel(r)))),
+      h('a', { class: 'new', href: '#cycle', onclick: () => { $('cycle').open = true; } }, 'New here? See how the 2-week cycle works ↓')));
+  }
+  const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
+  kids.push(h('div', { class: 'sec-head' },
+    h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<your day>'),
+    h('h2', { id: 'yourday-h', tabindex: '-1' }, heading),
+    a && a.weekend ? h('span', { class: 'aside' }, 'Next working day') : a && a.count ? h('span', { class: 'aside' }, `${a.count} item${a.count === 1 ? '' : 's'}`) : null));
+
+  if (!a) {
+    kids.push(h('p', { class: 'empty' }, 'The action list could not load. Sprint dates below are still correct.'));
+    fill($('yourday'), kids);
     return;
   }
-  const byDate = new Map();
-  for (const a of mine) {
-    if (!byDate.has(a.date)) byDate.set(a.date, []);
-    byDate.get(a.date).push(a);
+  const everyoneView = role === 'Everyone';
+  a.groups.forEach((g, i) => {
+    kids.push(h('div', { class: `slot${i === 0 && ['urgent', 'after', 'evening'].includes(m.band) ? ' hot' : ''}` }, g.heading));
+    kids.push(h('ul', { class: 'agenda' }, g.items.map((it) => itemNode(it, { everyoneView }))));
+  });
+  if (!a.groups.length) {
+    const nf = a.nextFor;
+    const next = nf ? ` Next: ${nf.items[0].title} ${fmtDay(nf.date)}${nf.items[0].time ? ` ${nf.items[0].time}` : ''}.` : '';
+    kids.push(h('p', { class: 'empty' }, `Nothing due for ${roleLabel(role)} ${a.weekend ? `on ${a.heading}` : 'today'}.${next}`));
   }
-  fill(box, h('div', { class: 'up' }, [...byDate].map(([d, items]) =>
-    h('div', { class: 'up-day' },
-      h('h3', { class: 'up-date' }, h('time', { datetime: d }, fmtShort(d))),
-      h('ul', null, items.map((a) => h('li', { class: `k-${a.kind}` },
-        h('span', { class: 'up-time' }, a.time || ''),
-        h('span', { class: 'dot', title: a.kind }),
-        h('span', null, a.status === 'active-window' ? `${a.title} opens, until ${fmtShort(a.dates.to)}` : a.title),
-        h('span', { class: 'up-sprint' }, a.sprintNumber ? L(a.sprintNumber) : ''))))))));
+  if (a.running.length) {
+    kids.push(h('details', { class: 'group', open: true, 'data-k': 'running' },
+      h('summary', null, h('b', null, 'Running'), h('span', { class: 'cnt' }, String(a.running.length)), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('ul', { class: 'rows' }, a.running.map((it) => h('li', null, h('b', null, it.title), h('span', null, [it.tag?.label, it.sub].filter(Boolean).join(' · ')))))));
+  }
+  if (a.everyday.length) {
+    kids.push(h('details', { class: 'group', 'data-k': 'everyday' },
+      h('summary', null, h('b', null, 'Every day this sprint'), h('span', { class: 'cnt' }, `${a.everyday.length} · ${a.everyday.map((x) => x.title).join(' · ')}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('ul', { class: 'agenda' }, a.everyday.map((it) => itemNode({ ...it, chip: { text: 'Every day', cls: 'check' }, when: 'Daily' }, { everyoneView })))));
+  }
+  if (a.nextFor && a.groups.length) {
+    const nf = a.nextFor;
+    const k = nf.date === addDays(a.day, 1) ? `Tomorrow, ${fmtDay(nf.date)}` : `Next for you · ${fmtDay(nf.date)}`;
+    kids.push(h('div', { class: 'nextfor' }, h('b', { class: 'k' }, k),
+      h('span', null, nf.items.flatMap((x, i) => [i ? ' · ' : null, x.time ? `${x.time} ` : null, x.title]))));
+  }
+  if (a.gates && a.gates.items.length) {
+    kids.push(h('details', { class: 'group', open: true, 'data-k': 'gates' },
+      h('summary', null, h('b', null, a.gates.heading), h('span', { class: 'cnt' }, `due ${fmtDay(a.gates.due)}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, it.who.map(roleLabel).join(', ')))))));
+  }
+  if (a.also.length) {
+    kids.push(h('details', { class: 'group', open: a.alsoOpen, 'data-k': 'also' },
+      h('summary', null, h('b', null, 'Also today'), h('span', { class: 'cnt' }, `${a.also.length} for other roles`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+      h('ul', { class: 'rows' }, a.also.map((it) => h('li', null, h('span', { class: 'chip other' }, it.chip?.text || 'Check'), h('b', null, it.title), h('span', null, it.who.map((w) => (w === 'All' ? 'Everyone' : roleLabel(w))).join(', ')))))));
+  }
+  fill($('yourday'), kids);
+  $('body').dataset.band = m.band;
 }
 
+// ---------------------------------------------------------------- rail and coming up
+function stepsBar(phase) {
+  return h('ol', { class: 'steps', 'aria-label': 'Release steps' }, ['Plan', 'Build', 'Freeze', 'UAT', 'Live'].map((p) =>
+    h('li', { class: p === phase ? 'now' : null, 'aria-current': p === phase ? 'step' : null }, p)));
+}
+function renderRail(m) {
+  fill($('rail-sec'),
+    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<sprints>'), h('h2', { id: 'rail-h' }, 'Three sprints in play')),
+    h('ul', { class: 'rail' }, m.rail.map((r) => h('li', { class: r.hot ? 'hot' : null },
+      h('div', { class: 'r1' },
+        h('a', { class: 'lab', href: linkTo(r.href), 'data-sprint': r.label }, r.label),
+        h('span', { class: 'st' }, r.phaseLabel),
+        r.unconfirmed ? h('span', { class: 'chip outl' }, 'plain projection') : r.projected ? h('span', { class: 'chip outl' }, 'projected') : null),
+      stepsBar(r.phase),
+      r.holidayNotice ? h('p', { class: 'note' }, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), r.holidayNotice) : null))),
+    m.notices.length ? h('ul', { class: 'notices' }, m.notices.map((t) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), t))) : null);
+}
+
+let cuExpanded = false;
+function renderComingUp(m) {
+  const days = m.comingUp;
+  const visible = cuExpanded ? days : days.filter((d) => d.index < 7);
+  const hiddenDays = days.filter((d) => d.index >= 7);
+  fill($('cu-sec'),
+    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<coming up>'), h('h2', { id: 'cu-h' }, `Next ${cuExpanded ? 10 : 7} working days`), h('span', { class: 'aside' }, roleLabel(role))),
+    visible.length ? h('ul', { class: 'cu' }, visible.map((d) => h('li', null,
+      h('div', { class: 'd' }, h('b', null, d.label), d.cutoff ? 'cut-off' : null, d.holiday ? h('span', null, ` · ${d.holiday}`) : null),
+      h('ul', null, d.items.map((x) => h('li', { class: x.unit ? 'unit' : null },
+        x.unit ? h('span', { class: 'sr' }, 'Unit milestone: ') : null,
+        x.time ? h('span', { class: 't' }, x.time) : null,
+        x.title,
+        h('span', { class: 's' }, x.ifNeeded ? 'if needed' : x.label || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
+    hiddenDays.length && !cuExpanded ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuExpanded = true; renderComingUp(lastModel); } }, `+${hiddenDays.length} more day${hiddenDays.length === 1 ? '' : 's'} to ${hiddenDays[hiddenDays.length - 1].label}`) : null);
+}
+
+// ---------------------------------------------------------------- preview bar
+function renderPreview(n) {
+  const el = $('preview');
+  if (!n.preview) { el.hidden = true; fill(el); previewTime = null; return; }
+  el.hidden = false;
+  const r = n.route;
+  const go = (d) => { previewTime = null; location.hash = routeHref({ date: d, sprint: r.sprintRaw && r.sprint != null ? r.sprintRaw : null }); };
+  const f = RULES ? dayFacts(n.date, RULES) : null;
+  const isCut = f && f.cut;
+  const T = keyTimes(RULES || []);
+  const cycle = [T.cutoff > '09:00' ? '09:00' : '08:00', '13:00', T.live];
+  const nextTime = cycle[(cycle.indexOf(n.time) + 1) % cycle.length];
+  fill(el, h('div', { class: 'wrap pad' },
+    h('span', null, 'Preview · ', h('b', null, fmtLong(n.date)), isCut ? ` · ${n.time} Tallinn` : null),
+    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Previous day', onclick: () => go(addDays(n.date, -1)) }, '‹'),
+    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Next day', onclick: () => go(addDays(n.date, 1)) }, '›'),
+    h('label', { class: 'sr', for: 'pv-date' }, 'Pick a date'),
+    h('input', { type: 'date', id: 'pv-date', value: n.date, onchange: (e) => { if (e.target.value) go(e.target.value); } }),
+    isCut ? h('button', { type: 'button', class: 'pbtn', onclick: () => { previewTime = nextTime; render(); } }, `Show at ${nextTime}`) : null,
+    h('a', { class: 'back', href: r.sprintRaw ? `#sprint-${r.sprintRaw}` : location.pathname, onclick: (e) => {
+      if (!r.sprintRaw) { e.preventDefault(); history.pushState(null, '', location.pathname); render(); }
+    } }, 'Back to today')));
+}
+
+// ---------------------------------------------------------------- sprint view (#sprint-LABEL)
+const MILESTONE_NAME = { planning: 'Sprint planning', start: 'Sprint starts', freezeStart: 'Code freeze starts', bugRetro: 'Bug retro', demoStart: 'Demo update', uatStart: 'UAT opens, Beta reopens', cutoff: 'Fix cut-off', live: 'Live update' };
+let returnFocusTo = null;
+
+function renderSprintView(n) {
+  const view = $('sprint-view');
+  const r = n.route;
+  const todayHref = n.preview ? routeHref({ date: n.date }) : '#';
+  const sNum = r.sprint;
+  const bad = sNum == null || sNum < ANCHOR.number;
+  const ctx = context(n.date);
+  if (bad) {
+    const label = r.sprintRaw || '';
+    document.title = `No sprint ${label} · Sprint Board`;
+    fill(view, h('div', { class: 'sv-head' }, h('div', { class: 'wrap pad' }, h('div', null,
+      h('h1', { tabindex: '-1', id: 'sv-h' }, `No sprint ${label}`),
+      h('p', null, h('a', { href: todayHref }, '← Today'), ' · ', h('a', { href: linkTo(`#sprint-${ctx.current.label}`) }, `Current sprint ${ctx.current.label}`))))));
+    return;
+  }
+  const det = sprintDetail(sNum, n.date, RULES || [], { role: sprintViewEveryone ? null : role, time: n.time, holidays: HOLIDAYS });
+  const s = det.sprint;
+  const T = keyTimes(RULES || []);
+  document.title = `${n.preview ? `Preview ${fmtDay(n.date)} · ` : ''}Sprint ${s.label} · Sprint Board`;
+  const prev = sNum - 1 >= ANCHOR.number ? sprintDates(sNum - 1) : null;
+  const next = sprintDates(sNum + 1);
+  const svHref = (label) => (n.preview ? routeHref({ date: n.date, sprint: label }) : `#sprint-${label}`);
+  const demoPeople = DUTY ? deployPeople(DUTY, 'Demo', s.demoStart) : null;
+  const livePeople = DUTY ? deployPeople(DUTY, 'Live', s.live) : null;
+
+  const nav = h('nav', { class: 'sv-nav', 'aria-label': 'Sprint navigation' }, h('div', { class: 'wrap pad' },
+    h('a', { href: todayHref }, '← Today'),
+    h('span', { class: 'sv-arrows' },
+      prev ? h('a', { href: svHref(prev.label), 'aria-label': `Previous sprint ${prev.label}` }, `‹ ${prev.label}`) : null,
+      h('a', { href: svHref(next.label), 'aria-label': `Next sprint ${next.label}` }, `${next.label} ›`)),
+    h('button', { type: 'button', class: 'btn', onclick: async () => {
+      const url = `${location.origin}${location.pathname}#sprint-${s.label}`;
+      try { await navigator.clipboard.writeText(url); $('status').textContent = 'Link copied'; } catch { $('status').textContent = url; }
+    } }, 'Copy link')));
+
+  const flags = [];
+  if (s.yearEndUnconfirmed) flags.push(h('span', { class: 'chip outl' }, 'plain projection'));
+  else if (s.projected) flags.push(h('span', { class: 'chip outl' }, 'projected'));
+  const notes = [];
+  if (s.n === 26) notes.push('2027-1 is the longer year-end sprint (owner): Mon 7 Dec to Fri 1 Jan, 20 working days. There is no release on 28 Dec.');
+  if (s.yearEndUnconfirmed) notes.push('Dates from 2027-3 on are plain projections of the 2-week cadence. Nobody has confirmed them yet.');
+  const notice = holidayNotice(s, HOLIDAYS);
+
+  const head = h('section', { class: 'sv-head' }, h('div', { class: 'wrap pad' },
+    h('div', null,
+      h('h1', { tabindex: '-1', id: 'sv-h' }, `Sprint ${s.label}`),
+      h('p', { class: 'sv-status' }, det.phase.label, ' · ', h('span', { class: 'muted' }, `${fmtDay(s.start)} – ${fmtDay(s.end)} · release ${fmtDay(s.live)}`), ' ', flags),
+      h('div', { style: 'max-width:520px' }, stepsBar(det.phase.phase)),
+      notes.map((t) => h('p', { class: 'muted', style: 'margin:6px 0 0;font-size:13px' }, t))),
+    h('div', null,
+      DUTY ? h('div', { class: 'sv-duty' },
+        h('div', null, h('span', { class: 'dk' }, `Demo update · ${fmtDay(s.demoStart)} · ${formatAcrossZones(s.demoStart, T.demo)}`), h('br'), personNodes(demoPeople)),
+        h('div', null, h('span', { class: 'dk' }, `Live update · ${fmtDay(s.live)} · ${formatAcrossZones(s.live, T.live)}`), h('br'),
+          'Lead ', livePeople[0].name || h('span', { class: 'na' }, NOT_ASSIGNED), ' · Backup ', livePeople[1].name || h('span', { class: 'na' }, NOT_ASSIGNED))) : null,
+      notice ? h('div', { class: 'sv-note' }, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), notice) : null)));
+
+  // Timeline with a Today marker as its own list item.
+  const holidayOn = (d) => HOLIDAYS.filter((x) => x.date === d);
+  const items = [];
+  let markerPlaced = false;
+  const marker = () => h('li', { class: 'now', 'aria-current': 'step' },
+    h('span', { class: 'tld' }, fmtDay(n.date)),
+    h('b', null, det.relation === 'current' && ctx.dayOfSprint ? `Today · sprint day ${ctx.dayOfSprint} of ${workingDaysIn(s)}` : 'Today'),
+    h('span', { class: 'tls' }, 'Today'));
+  let firstComing = true;
+  for (const ms of det.milestones) {
+    if (!markerPlaced && ms.status !== 'passed') { items.push(marker()); markerPlaced = true; }
+    const hol = holidayOn(ms.date);
+    let extra = null;
+    if (ms.key === 'freezeStart') extra = `until the Demo update ${fmtDay(s.demoStart)} (evening)`;
+    if (ms.key === 'uatStart') extra = `UAT deadline ${fmtDay(s.cutoff)} ${T.cutoff}`;
+    if (ms.key === 'demoStart' && demoPeople) extra = ['Deployer: ', personNodes(demoPeople)];
+    if (ms.key === 'live' && livePeople) extra = livePeople.every((p) => !p.name) ? 'Lead and backup: not assigned yet' : ['Lead: ', livePeople[0].name || NOT_ASSIGNED, ' · Backup: ', livePeople[1].name || NOT_ASSIGNED];
+    if (ms.key === 'bugRetro' && s.n === 26) extra = 'Owner to confirm the date';
+    const status = ms.status === 'passed' ? 'Passed' : ms.status === 'today' ? 'Today'
+      : firstComing ? `Coming · in ${ms.workingDaysAway} working day${ms.workingDaysAway === 1 ? '' : 's'}` : 'Coming';
+    if (ms.status === 'coming') firstComing = false;
+    items.push(h('li', { class: ms.status === 'passed' ? 'past' : null },
+      h('span', { class: 'tld' }, fmtDay(ms.date), ms.time ? h('small', null, formatAcrossZones(ms.date, ms.time)) : null),
+      h('b', null, MILESTONE_NAME[ms.key], extra ? h('small', null, extra) : null,
+        hol.length ? h('small', null, `ⓘ ${[...new Set(hol.map((x) => x.country))].join(', ')} holiday (${hol[0].name})`) : null),
+      h('span', { class: 'tls' }, status)));
+  }
+  if (!markerPlaced) items.push(marker());
+
+  // Actions, grouped Passed / Today / Running / Coming.
+  const groups = [['passed', 'Passed', false], ['today', 'Today', true], ['running', 'Running', true], ['coming', 'Coming', true]];
+  const toggle = role === 'Everyone' ? null : h('div', { class: 'seg2', role: 'radiogroup', 'aria-label': 'Show actions for' },
+    h('button', { type: 'button', role: 'radio', 'aria-checked': String(!sprintViewEveryone), onclick: () => { sprintViewEveryone = false; render(); } }, roleLabel(role)),
+    h('button', { type: 'button', role: 'radio', 'aria-checked': String(sprintViewEveryone), onclick: () => { sprintViewEveryone = true; render(); } }, 'Everyone'));
+  const byDate = (list) => {
+    const dates = [...new Set(list.map((a) => a.date))];
+    return h('ul', { class: 'cu', style: 'margin-top:4px' }, dates.map((d) => h('li', null,
+      h('div', { class: 'd' }, h('b', null, fmtDay(d))),
+      h('ul', null, sortWithinDay(list.filter((a) => a.date === d)).map((a) => h('li', null,
+        a.time ? h('span', { class: 't' }, a.time) : null,
+        a.dates && a.dates.to ? `${a.title}, ${untilText(a, T)}` : a.title,
+        h('span', { class: 's' }, a.slot === 'after-cutoff' ? 'if needed' : a.slot === 'after-deploy' ? 'after the update' : '')))))));
+  };
+  const actions = h('div', null,
+    h('div', { class: 'sec-head' }, h('h2', null, `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`), toggle),
+    RULES ? groups.map(([st, label, open]) => {
+      const list = det.actions.filter((a) => a.status === st);
+      if (!list.length) return null;
+      return h('details', { class: 'group', open: open || null, 'data-k': `sv-${st}` },
+        h('summary', null, h('b', null, label), h('span', { class: 'cnt' }, String(list.length)), h('i', { class: 'chev', 'aria-hidden': 'true' })),
+        byDate(list));
+    }) : h('p', { class: 'empty' }, 'Actions unavailable.'));
+
+  const hols = h('div', null,
+    h('div', { class: 'sec-head', style: 'margin-top:18px' }, h('h2', null, 'Holidays')),
+    det.holidays.length
+      ? h('ul', { class: 'rows' }, det.holidays.map((x) => h('li', null, h('b', null, fmtDay(x.date)), h('span', null, `${x.name} · ${x.country}`))))
+      : h('p', { class: 'muted', style: 'margin:0' }, 'No public holidays (EE, PL) between planning and Live.'),
+    det.holidaysAffecting.length ? h('p', { class: 'note' }, 'Key dates affected: ', [...new Set(det.holidaysAffecting.map((x) => x.date))].map((d) => {
+      const k = Object.entries(MILESTONE_NAME).find(([key]) => s[key] === d);
+      const c = [...new Set(det.holidaysAffecting.filter((x) => x.date === d).map((x) => x.country))].join(', ');
+      return `${k ? `${k[1]} ` : ''}${fmtDay(d)} (${c} holiday)`;
+    }).join(' · ')) : null);
+
+  fill(view, nav, head, h('div', { class: 'wrap pad body' },
+    h('div', null, h('div', { class: 'sec-head' }, h('h2', null, 'Timeline'), h('span', { class: 'aside' }, 'Tallinn time')), h('ol', { class: 'tl' }, items), hols),
+    actions));
+}
+
+// ---------------------------------------------------------------- cycle explainer
+function renderCycle(n) {
+  const c = context(isWeekendDay(n.date) ? addDays(n.date, 2) : n.date);
+  const sprints = [c.previous, c.current, c.next];
+  const PX = 16;
+  const start = (() => { let d = sprints[0].planning; while (new Date(`${d}T12:00:00Z`).getUTCDay() !== 1) d = addDays(d, -1); return d; })();
+  const dx = (d) => Math.round((Date.parse(`${d}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000) * PX;
+  const endKey = addDays(sprints[2].live, 7);
+  const width = dx(endKey);
+  const axis = [];
+  for (let d = start; d <= endKey; d = addDays(d, 7)) axis.push(h('span', { style: `left:${dx(d)}px` }, fmtDM(d)));
+  const lanes = sprints.map((s, i) => {
+    const kids = [
+      h('span', { class: 'ln', style: `left:${Math.max(4, dx(s.planning) - 40)}px` }, h('b', null, s.label), i === 0 ? 'release' : i === 1 ? 'building' : 'being refined'),
+      h('span', { class: 'bar build', style: `left:${dx(s.start)}px;width:${dx(addDays(s.end, 1)) - dx(s.start) - 2}px` }),
+      h('span', { class: 'blab', style: `left:${dx(s.start) + 30}px` }, 'Build on Beta'),
+      h('span', { class: 'bar freeze', style: `left:${dx(s.freezeStart)}px;width:${dx(addDays(s.demoStart, 1)) - dx(s.freezeStart) - 2}px` }),
+      h('span', { class: 'blab', style: `left:${dx(s.freezeStart) + 2}px` }, 'Freeze'),
+      h('span', { class: 'bar uat', style: `left:${dx(s.uatStart)}px;width:${dx(addDays(s.cutoff, 1)) - dx(s.uatStart) - 2}px` }),
+      h('span', { class: 'blab', style: `left:${dx(s.uatStart) + 6}px` }, 'UAT'),
+      h('span', { class: 'stn plan', style: `left:${dx(s.planning) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.planning) + 8}px` }, `Plan ${fmtDM(s.planning)}`),
+      h('span', { class: 'stn', style: `left:${dx(s.demoStart) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.demoStart) + 8}px;top:84px` }, `Demo ${fmtDM(s.demoStart)}`),
+      h('span', { class: 'stn live', style: `left:${dx(s.live) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.live) + 30}px` }, `Live ${fmtDM(s.live)}`),
+    ];
+    if (RULES) {
+      // Refinement sessions that feed this sprint's planning.
+      for (let d = sprintDates(s.n - 1).start; d < s.planning; d = addDays(d, 1)) {
+        if (actionsFor(d, RULES).some((a) => (a.id === 'pre-refinement' || a.id === 'full-refinement') && a.sprintNumber === s.n)) kids.push(h('span', { class: 'ref', style: `left:${dx(d) + 8}px` }));
+      }
+    }
+    return h('div', { class: 'lane', style: `top:${28 + i * 100}px` }, kids);
+  });
+  const today = h('div', { class: 'todayline', style: `left:${dx(n.date) + 8}px` }, h('span', null, fmtDay(n.date)));
+  const alt = sprints.map((s) => `${s.label}: planning ${fmtDay(s.planning)}, built on Beta ${fmtDM(s.start)} to ${fmtDM(s.end)}, code freeze from ${fmtDay(s.freezeStart)} until the Demo update ${fmtDay(s.demoStart)} evening, UAT on Demo from ${fmtDay(s.uatStart)}, fix cut-off and Live update ${fmtDay(s.live)}.`).join(' ');
+  fill($('cycle-body'),
+    h('div', { class: 'track-wrap', tabindex: '0', role: 'region', 'aria-label': 'Cycle timeline, scrolls sideways' },
+      h('div', { class: 'track', role: 'img', 'aria-label': alt, style: `width:${width}px` }, h('div', { class: 'axis' }, axis), lanes, today)),
+    h('p', { class: 'muted', style: 'font-size:13px;margin:8px 0 0' }, 'Bars: outlined grey = build on Beta (10 working days) · blue "Freeze" = code freeze until the Demo update (Tue evening) · light orange "UAT" = clients test on Demo until the fix cut-off · ◆ = refinement sessions, which feed the next sprint\'s planning · weekends shaded.'),
+    h('dl', { class: 'gloss' }, [
+      ['Beta → Demo → Live', 'The three environments. A sprint is built on Beta, moves to Demo on Tuesday evening, and to Live on Monday evening.'],
+      ['Code freeze', 'From the sprint\'s last Friday until the Demo update on Tuesday evening. Beta reopens Wednesday.'],
+      ['Demo update / Live update', 'The 2-weekly deploys, usually 17:00 and 20:00 Tallinn time. Client project go-lives are not on this board.'],
+      ['Demo/Live matrix', 'Per-tenant configuration switches. Code always deploys to all tenants.'],
+      ['UAT', 'Clients test on Demo from Wednesday until the fix cut-off.'],
+      ['Fix cut-off', 'Monday 12:00 Tallinn time. After it: reverts, not fixes.'],
+      ['Ready for Demo / Ready for Live', 'Task states set by QA before the Demo update, and by IM / AM after the client signs off.'],
+      ['Release / Golive Release page', 'Confluence pages "Release 2026-NN" and "Golive Release 2026-NN", written by developers after each update.'],
+      ['Pre-Refinement / Full Refinement', 'Wednesday 14:00 every week / Thursday 14:00 in week 1. Both estimate work for the next sprint.'],
+      ['Definition of Ready, priority call', 'What a ticket needs before planning; the call where each client fixes its priorities.'],
+      ['Bug retro', 'Monday after a sprint ends: review its bugs and escaped defects.'],
+      ['Hotfix', 'The only change that bypasses the freeze. Event-driven, not on this calendar.'],
+    ].map(([t, d]) => h('div', null, h('dt', null, t), h('dd', null, d)))));
+}
+
+// ---------------------------------------------------------------- footer
 function renderFooter() {
-  const entries = Object.values(SOURCES).filter((s) => s && safeUrl(s.url));
-  const now = new Date();
-  const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  fill($('footer'), 
-    h('p', null, 'Sources'),
-    entries.length
-      ? h('ul', null, entries.map((s) => h('li', null, h('a', { href: s.url, target: '_blank', rel: 'noopener noreferrer' }, s.title || s.url))))
-      : h('p', null, 'No sources listed.'),
-    h('p', null, `Confluence confirms sprint dates up to ${L(LAST_CONFIRMED)}. Dates after ${L(LAST_CONFIRMED)} are projected from the 2-week cadence.`),
-    h('p', null, UPDATED ? `Rules last updated ${UPDATED}. ` : '', 'Page refreshed at ', h('time', { class: 'num' }, hhmm), '. It updates itself when the date changes.'),
-  );
+  const diff = deviceDiffersFromTallinn();
+  const rota = DUTY && DUTY.ROTA_UPDATED ? `Rota updated ${fmtDM(DUTY.ROTA_UPDATED)}` : null;
+  fill($('foot-row'),
+    h('span', null, diff ? 'Times are Tallinn time (your device is in another time zone)' : 'Times are Tallinn time'),
+    h('span', null, `Confluence confirms dates up to ${sprintDates(LAST_CONFIRMED).label}`),
+    rota ? h('span', null, rota) : null);
+  const list = $('sources-list');
+  if (!list.childElementCount) {
+    for (const s of Object.values(SOURCES)) if (s && safeUrl(s.url)) list.append(h('li', null, ext(s.url, s.title)));
+  }
 }
 
-// ---------- boot + keep "today" fresh ----------
-function refreshIfDayChanged() {
-  if (toKey(new Date()) !== renderedFor) render();
+// ---------------------------------------------------------------- render
+let lastModel = null;
+let lastHref = null;
+let lastKey = null;
+let lastView = null;
+
+function openKeys() { return new Set([...document.querySelectorAll('details[data-k][open]')].map((d) => d.dataset.k)); }
+function closedKeys() { return new Set([...document.querySelectorAll('details[data-k]:not([open])')].map((d) => d.dataset.k)); }
+
+function render({ keepFocus = false } = {}) {
+  const n = now();
+  currentDate = n.date;
+  const opened = openKeys();
+  const closed = closedKeys();
+  // Keep focus on the same control across a re-render (nodes are rebuilt).
+  const ae = document.activeElement;
+  const focusSel = !ae || ae === document.body ? null
+    : ae.id ? `#${CSS.escape(ae.id)}`
+      : ae.matches('a.lab[data-sprint]') ? `a.lab[data-sprint="${ae.dataset.sprint}"]`
+        : ae.matches('details[data-k] > summary') ? `details[data-k="${ae.parentElement.dataset.k}"] > summary` : null;
+  void keepFocus;
+  const view = n.route.sprintRaw != null ? 'sprint' : 'today';
+
+  const m = resolveDay({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS, preview: !!n.preview });
+  lastModel = m;
+  renderPreview(n);
+  renderTop(n, m);
+  setFavicon(m.favicon);
+
+  $('today-view').hidden = view !== 'today';
+  $('sprint-view').hidden = view !== 'sprint';
+  if (view === 'today') {
+    document.title = m.tab;
+    renderBand(n, m);
+    renderDuty(m);
+    renderYourDay(n, m);
+    renderRail(m);
+    renderComingUp(m);
+  } else {
+    renderSprintView(n);
+  }
+  renderCycle(n);
+  renderFooter();
+
+  for (const d of document.querySelectorAll('details[data-k]')) {
+    if (opened.has(d.dataset.k)) d.open = true;
+    else if (closed.has(d.dataset.k)) d.open = false;
+  }
+  if (focusSel && view === lastView) { const el = document.querySelector(focusSel); if (el && el !== document.activeElement) el.focus(); }
+  if (view !== lastView) {
+    if (view === 'sprint') { const h1 = $('sv-h'); if (h1) h1.focus(); }
+    else if (lastView === 'sprint' && returnFocusTo) {
+      const back = document.querySelector(`a.lab[data-sprint="${returnFocusTo}"]`);
+      if (back) back.focus();
+    }
+    lastView = view;
+  }
+  lastHref = location.href;
+  lastKey = JSON.stringify([n.date, n.preview, m.band, m.headline, m.sub, m.tab, m.order, m.rail.map((r) => r.phaseLabel), m.agenda && m.agenda.groups.map((g) => [g.slot, g.items.length])]);
 }
-// Home-page help: show the address this page is actually served from.
+
+// Every 20 s: a full render only when something visible changed (state, phase, day); otherwise just the countdown.
+function tick() {
+  const n = now();
+  if (n.preview) return;
+  const m = resolveDay({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS });
+  const key = JSON.stringify([n.date, n.preview, m.band, m.headline, m.sub, m.tab, m.order, m.rail.map((r) => r.phaseLabel), m.agenda && m.agenda.groups.map((g) => [g.slot, g.items.length])]);
+  if (key !== lastKey) { render(); return; }
+  if (m.countdown && $('today-view').hidden === false) {
+    const big = document.querySelector('#band-right .countdown .big');
+    if (big) big.textContent = m.countdown.text.replace(/ left$/, '');
+  }
+}
+
+// ---------------------------------------------------------------- wiring
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a.lab[data-sprint]');
+  if (a) returnFocusTo = a.dataset.sprint;
+});
+$('viewdate-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = $('viewdate-input').value;
+  if (!v) return;
+  const r = readRoute();
+  $('viewdate').open = false;
+  location.hash = routeHref({ date: v, sprint: r.sprintRaw && r.sprint != null ? r.sprintRaw : null });
+});
+$('viewdate-today').addEventListener('click', () => {
+  $('viewdate').open = false;
+  history.pushState(null, '', location.pathname + location.search.replace(/([?&])date=[^&]*&?/, '$1').replace(/[?&]$/, ''));
+  render();
+});
 {
-  const url = location.origin.startsWith('http') ? location.origin + '/' : 'https://insly-sprint-monitor.onrender.com';
+  const url = location.origin.startsWith('http') ? `${location.origin}/` : 'https://insly-sprint-monitor.onrender.com';
   $('howto-url').textContent = url;
   $('howto-copy').addEventListener('click', async (e) => {
     try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; }
@@ -700,11 +1111,14 @@ function refreshIfDayChanged() {
     setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
   });
 }
+$('cycle').open = firstVisit; // open on a first visit only; not persisted
+
 render();
-setInterval(refreshIfDayChanged, 60_000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshIfDayChanged(); });
-window.addEventListener('hashchange', render);
-window.addEventListener('popstate', render);
+setInterval(tick, 20_000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
+// hashchange and popstate both fire on Back; render once per route.
+window.addEventListener('hashchange', () => { if (location.href !== lastHref) { cuExpanded = false; render(); } });
+window.addEventListener('popstate', () => { if (location.href !== lastHref) render(); });
 </script>
 </body>
 </html>

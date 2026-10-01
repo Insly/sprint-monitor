@@ -555,7 +555,8 @@ export function dutyTexts(line) {
 
 // ---------------------------------------------------------------- agenda ("Your day")
 
-function untilText(a, times) {
+/** 'until the Demo update Tue 13 Oct (evening)' / 'until Mon 5 Oct 12:00' / 'by Mon 5 Oct 12:00' for a window action. */
+export function untilText(a, times) {
   const s = sprintDates(a.sprintNumber ?? context(a.dates.from).current.n);
   const to = a.dates.to;
   const by = a.id === 'ready-for-live' ? 'by' : 'until';
@@ -649,7 +650,7 @@ export function agenda(date, time, role, rules) {
       if (!opts.other) m.chip = { text: first ? 'Opens today' : 'Last day', cls: 'outl' };
       m.slot = last && a.dates.to === (a.sprintNumber != null && sprintDates(a.sprintNumber).cutoff) ? 'morning' : 'today';
       m.when = m.slot === 'morning' ? `by ${T.cutoff}` : 'Today';
-      if (last && a.id === 'code-freeze') m.sub = 'until the Demo update tonight';
+      if (last) m.sub = a.id === 'code-freeze' ? 'until the Demo update tonight' : null; // the "when" column already says "by 12:00"/"Today"
       list.push(m);
       return;
     }
@@ -658,6 +659,7 @@ export function agenda(date, time, role, rules) {
     if (!opts.other) {
       m.chip = a.slot === 'after-cutoff' ? { text: 'If needed', cls: 'outl' } : { text: CHIP[a.kind] || 'Check', cls: a.kind === 'deadline' ? 'due' : a.kind === 'meeting' ? 'meet' : a.kind === 'deploy' ? 'upd' : 'check' };
       if (a.id === 'fix-cutoff' && phase === 'before') m.key = true;
+      if (a.slot === 'after-cutoff' && phase === 'after') m.when = 'Now';
       if (a.slot === 'after-deploy') m.sub = 'Tonight or tomorrow morning';
     }
     list.push(m);
@@ -801,6 +803,16 @@ export function nextKeyMoment(f, time) {
 
 // ---------------------------------------------------------------- coming up
 
+const SLOT_AT = { morning: '00:00', 'after-cutoff': '12:01', 'before-deploy': '16:00', evening: '23:00', 'after-deploy': '23:30' };
+/**
+ * Sort one day's actions in the order of Your day: morning items, timed items, the rest of the day,
+ * then the evening deploy and what follows it. Stable. `timeOf` reads the item's time.
+ */
+export function sortWithinDay(list, timeOf = (x) => x.time) {
+  const at = (x) => SLOT_AT[x.slot] || timeOf(x) || '12:30';
+  return list.sort((x, y) => (at(x) < at(y) ? -1 : at(x) > at(y) ? 1 : 0));
+}
+
 /** The next working days after the agenda day with role items and unit milestones (DESIGN.md §5). */
 export function comingUp(date, rules, role, holidays = [], days = 10) {
   const day = isWeekendDay(date) ? nextWorkingDay(date) : date;
@@ -827,8 +839,11 @@ export function comingUp(date, rules, role, holidays = [], days = 10) {
         label: s ? s.label : null,
         unit,
         ifNeeded: a.slot === 'after-cutoff',
+        slot: a.slot ?? null,
+        at: a.time ?? null,
       });
     }
+    sortWithinDay(list, (x) => x.at);
     const h = (holidays || []).filter((x) => x.date === d);
     const near = sprintsNear(context(d));
     out.push({
@@ -856,7 +871,7 @@ const BAND_SR = {
   urgent: (f) => (f.cut ? 'Cut-off day. ' : 'Demo update day. '),
   after: () => 'Cut-off passed. ',
   evening: () => 'Deploy tonight. ',
-  'heads-up': () => 'Heads-up. ',
+  'heads-up': (f) => (f.nwdIsTomorrow ? 'Heads-up for tomorrow. ' : 'Heads-up. '),
   weekend: () => '',
 };
 
