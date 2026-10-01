@@ -22,6 +22,7 @@
   --meeting-text: #784BAF; --meeting-soft: #F1EAF9;
   --preview-bg: #1A1A1A; --preview-fg: #FFFFFF;
   --bar-off: #D6D6D6; --bar-edge: #1A1A1A;
+  --radius-section: 8px; --section-edge: #D6D6D6; --section-body: #F5F5F5; --tag-on-tray: #3C3C3C; /* panels (READABILITY.md option B); the orange tag never sits on the tray in light (4.17:1) */
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -35,6 +36,7 @@
     --meeting-text: #B48CE6; --meeting-soft: #2A2140;
     --preview-bg: #FFFFFF; --preview-fg: #1A1A1A;
     --bar-off: #3C3C3C; --bar-edge: #FFFFFF;
+    --section-edge: #3C3C3C; --section-body: #1F1F1F; --tag-on-tray: #FF7D00;
     color-scheme: dark;
   }
 }
@@ -146,20 +148,55 @@ h1, h2, h3 { line-height: 1.2; }
 .na { color: var(--muted); font-style: italic; font-weight: 400; }
 
 /* ---------------------------------------------------------------- body */
-.body { display: grid; grid-template-columns: 7fr 5fr; gap: 28px 40px; padding-top: 22px; padding-bottom: 8px; }
+.body { display: grid; grid-template-columns: 7fr 5fr; gap: 16px 40px; padding-top: 22px; padding-bottom: 8px; align-items: start; }
+.body > * { min-width: 0; }
 .lower { display: block; min-width: 0; }
-.lower > section + section { margin-top: 22px; }
+.lower > section + section { margin-top: 16px; }
 .sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
 .sec-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
-.sec-head .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
-.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 44px; }
-.fold > summary::-webkit-details-marker { display: none; }
-.fold > summary .sec-head { flex: 1 1 auto; margin: 0; }
-.fold > summary .chev { flex: none; margin-right: 4px; }
-.fold > .fold-body { padding-top: 8px; }
-.fold + .fold { margin-top: 18px; }
+.sec-head .aside { font-size: 13px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- panels (READABILITY.md option B)
+   A white header strip carries the orange tag (the tag never sits on the tray: 4.17:1 there);
+   the body is a neutral tray with white items. */
+.fold { background: var(--surface); border: 1px solid var(--section-edge); border-radius: var(--radius-section); overflow: hidden; }
+.fold + .fold { margin-top: 16px; }
+.fold > summary { padding: 0 12px 0 16px; min-height: 40px; }
+.fold[open] > summary { border-bottom: 1px solid var(--section-edge); }
+.fold > .fold-body { padding: 0 16px 14px; background: var(--section-body); }
+.fold > .fold-body > :first-child { margin-top: 12px; }
+.fold > .fold-body > .slot:first-child { margin-top: 4px; }
+.fold > .fold-body > .cu:first-child > li:first-child { border-top: 0; padding-top: 0; }
+.fold .item:not(.key), .fold .rail > li { background: var(--surface); }
+.fold .rail > li:hover { background: var(--surface-2); }
+.fold .slot::after { background: var(--section-edge); }
+.fold .group, .fold .nextfor, .fold .cu > li { border-color: var(--section-edge); }
+.tl-foot { margin: 10px 0 0; font-size: 13px; }
+
+/* Fold headers: panels and the cycle explainer (READABILITY.md §3.2). The chevron sits inline after the
+   title (and the count when open). Folded: chevron, then "Folded ·" and a one-line summary. */
+:is(.fold, .cycle) > summary { list-style: none; cursor: pointer; display: flex; align-items: center; }
+:is(.fold, .cycle) > summary::-webkit-details-marker { display: none; }
+:is(.fold, .cycle) > summary .sec-head { flex: 1 1 auto; min-width: 0; margin: 0; align-items: center; row-gap: 0; padding: 6px 0; }
+:is(.fold, .cycle) > summary .sec-head h2 { flex: 0 1 auto; min-width: 0; }
+:is(.fold, .cycle) > summary .sec-head .ltag { flex: none; }
+:is(.fold, .cycle) > summary .chev { flex: none; margin: -4px 2px 0; justify-self: auto; }
+:is(.fold, .cycle)[open] > summary .chev { margin-top: 4px; width: 8px; height: 8px; border-color: var(--control); } /* touch and ≤767: small and quiet */
+:is(.fold, .cycle):not([open]) > summary .chev { border-color: var(--text-2); }
+:is(.fold, .cycle) > summary .sum { flex: 1 1 200px; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.fold, .cycle) > summary .sum b { color: var(--text-2); }
+:is(.fold, .cycle)[open] > summary .sum, :is(.fold, .cycle):not([open]) > summary .aside:not(.sum) { display: none; }
+:is(.fold, .cycle) > summary:focus-visible { outline: 2px solid transparent; border-radius: 0; box-shadow: inset 0 0 0 2px #1A1A1A, inset 0 0 0 4px #FFFFFF; }
+@media (prefers-color-scheme: dark) { :is(.fold, .cycle) > summary:focus-visible { box-shadow: inset 0 0 0 2px #FFFFFF, inset 0 0 0 4px #1A1A1A; } }
+@media (pointer: coarse) { .fold > summary { min-height: 44px; } }
+/* Mouse and trackpad: no chevron on an open section until hover or keyboard focus; the header tints on hover. */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  :is(.fold, .cycle)[open] > summary .chev { visibility: hidden; width: 9px; height: 9px; border-color: var(--muted); }
+  :is(.fold, .cycle)[open] > summary:hover .chev, :is(.fold, .cycle)[open] > summary:focus-visible .chev { visibility: visible; }
+  :is(.fold, .cycle) > summary:hover { background: var(--section-body); }
+}
 .sv-toggle { display: flex; justify-content: flex-end; margin-bottom: 4px; }
-.sv-duty .ltag { font-size: 13px; }
+.sv-duty .ltag { font-size: 13px; color: var(--tag-on-tray); }
 .slot { font-size: 13px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; display: flex; gap: 8px; align-items: center; }
 .slot::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .slot.hot { color: var(--text); }
@@ -204,6 +241,10 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .rows li span { font-size: 13px; color: var(--muted); }
 .nextfor { display: flex; gap: 10px; align-items: baseline; min-height: 44px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; margin-top: 12px; }
 .nextfor b.k { font-size: 13px; color: var(--muted); min-width: 150px; }
+.nf-list { display: inline; list-style: none; margin: 0; padding: 0; flex: 1 1 0; min-width: 0; }
+.nf-list li { display: inline; }
+.nf-list li + li::before { content: " · "; }
+.nf-list .nf-more { display: none; }
 .empty { padding: 12px 0; color: var(--text-2); }
 .picker { border: 2px solid var(--accent); border-radius: 4px; padding: 14px; background: var(--surface); margin-bottom: 16px; }
 .picker h2 { margin: 0 0 4px; font-size: 18px; }
@@ -253,7 +294,7 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .sv-head h1 { margin: 0 0 4px; font-size: 32px; }
 .sv-status { margin: 0; font-size: 17px; }
 .muted { color: var(--muted); }
-.sv-duty { display: grid; gap: 8px; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; font-size: 13px; }
+.sv-duty { display: grid; gap: 8px; background: var(--section-body); border: 1px solid var(--section-edge); border-radius: var(--radius-section); padding: 10px 12px; font-size: 13px; }
 .sv-duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); }
 .sv-note { background: var(--surface-2); border-radius: 4px; padding: 8px 10px; font-size: 14px; margin-top: 8px; }
 .tl { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
@@ -273,11 +314,10 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .seg2 button[aria-checked="true"] { background: var(--text); color: var(--bg); font-weight: 700; }
 
 /* ---------------------------------------------------------------- cycle, footer */
-.cycle { border-top: 1px solid var(--line); margin-top: 8px; }
-.cycle > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: baseline; padding: 12px 0; min-height: 44px; flex-wrap: wrap; }
-.cycle > summary::-webkit-details-marker { display: none; }
-.cycle > summary h2 { margin: 0; font-size: 18px; }
-.cycle > summary .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+.cycle { border-top: 2px solid var(--text); margin-top: 16px; } /* reference material: option C rule, no panel */
+.cycle > summary { min-height: 44px; padding: 0 12px 0 0; }
+.cycle > summary .sec-head h2 { font-size: 18px; }
+#cycle-body { padding-bottom: 8px; }
 .track-wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 4px; }
 .track { position: relative; height: 350px; min-width: 760px; background-image: linear-gradient(to right, transparent 71.43%, var(--surface-2) 71.43%, var(--surface-2) 100%); background-size: calc(100% / var(--weeks)) 100%; }
 .axis { position: absolute; left: 0; right: 0; top: 0; height: 28px; border-bottom: 1px solid var(--line); }
@@ -302,14 +342,28 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .gloss div { font-size: 15px; }
 .gloss dt { font-weight: 700; }
 .gloss dd { margin: 0; color: var(--text-2); }
-footer.foot { margin-top: 8px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
-footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap: 10px; }
-.foot-row { display: flex; gap: 6px 22px; flex-wrap: wrap; }
-.foot details > summary { cursor: pointer; color: var(--text-2); min-height: 32px; display: inline-flex; align-items: center; }
-.foot ul { margin: 6px 0; padding-left: 18px; }
-.howto-body { max-width: 70ch; display: grid; gap: 6px; padding-top: 6px; color: var(--text-2); font-size: 14px; }
+/* Footer: one bar in the panel language (READABILITY.md §6a) */
+footer.foot { margin-top: 16px; font-size: 13px; color: var(--muted); }
+footer.foot .wrap { padding-top: 0; padding-bottom: 24px; }
+.foot-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; min-height: 44px; padding: 0 12px 0 16px; background: var(--section-body); border: 1px solid var(--section-edge); border-radius: var(--radius-section); }
+.foot-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 0; flex: 1 1 auto; padding: 10px 0; }
+.foot-meta span:not(:last-child)::after { content: "·"; padding: 0 8px; }
+.foot-links { display: flex; gap: 4px 6px; flex-wrap: wrap; align-items: flex-start; }
+.fd > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 10px; border-radius: 4px; color: var(--text-2); font-weight: 700; }
+.fd > summary::-webkit-details-marker { display: none; }
+.fd > summary .n { font-weight: 400; color: var(--muted); }
+.fd > summary .chev { width: 7px; height: 7px; margin-top: -3px; border-color: var(--text-2); }
+.fd[open] > summary .chev { margin-top: 3px; }
+.fd[open] { flex-basis: 100%; }
+.fd[open] > summary { background: var(--surface); }
+.foot-links:has(.fd[open]) { flex-basis: 100%; }
+.fd-body { margin: 6px 0 12px; padding: 0 10px; color: var(--text-2); font-size: 13px; }
+.foot-bar a { color: var(--link-on-tint); } /* #C35500 on the tray is 4.17:1: links on the bar use the tint link colour */
+ul.src { list-style: none; columns: 2; column-gap: 24px; }
+ul.src li { padding: 2px 0; break-inside: avoid; }
+.howto-body { max-width: 70ch; display: grid; gap: 6px; }
 .howto-body p { margin: 0; }
-.howto-body code { font-family: Consolas, "Courier New", monospace; color: var(--text); overflow-wrap: anywhere; background: var(--surface-2); padding: 1px 4px; border-radius: 3px; }
+.howto-body code { font-family: Consolas, "Courier New", monospace; color: var(--text); overflow-wrap: anywhere; background: var(--surface); padding: 1px 4px; border-radius: 3px; }
 
 /* ---------------------------------------------------------------- laptop 768–1199 (DESIGN.md §4.2) */
 @media (max-width: 1199px) {
@@ -317,13 +371,21 @@ footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap:
   .band .wrap { grid-template-columns: 1fr 280px; padding-top: 18px; padding-bottom: 20px; }
   .band h1 { font-size: 30px; }
   .countdown .big { font-size: 38px; }
-  .body { grid-template-columns: 1fr; gap: 22px; padding-top: 18px; }
-  .body > .main { max-width: 760px; }
-  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-  .lower > section + section { margin-top: 0; }
+  .body { gap: 16px 24px; padding-top: 18px; }
   .sv-head .wrap { grid-template-columns: 1fr; }
   .gloss { grid-template-columns: repeat(2, 1fr); }
   .d-long-sub { display: none; }
+}
+/* Owner (2026-10-01): Sprints, then Coming up, stay in a right-hand column beside Today down to 1024 px.
+   Below that, one column: Today, Sprints, Coming up. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  /* The Today column is ~590 px here: the sprint tag moves into the expanded item (as on phones),
+     so titles stay on one line and the cut-off fold target holds (DESIGN.md §4.4). */
+  #yourday .item > summary .stag { display: none; }
+  #yourday .item > summary .chev { grid-column: 5; }
+}
+@media (max-width: 1023px) {
+  .body { grid-template-columns: 1fr; gap: 16px; }
 }
 
 /* ---------------------------------------------------------------- mobile ≤767 (DESIGN.md §4.3) */
@@ -342,8 +404,23 @@ footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap:
   .band--urgent .seq { display: none; }
   .seq li { min-width: 0; flex: 1 1 40%; padding: 6px 10px; }
   .duty .wrap { flex-direction: column; gap: 2px; font-size: 14px; }
-  .body { padding-top: 14px; }
-  .lower { grid-template-columns: 1fr; gap: 22px; }
+  .body { padding-top: 14px; gap: 12px; }
+  .lower > section + section, .fold + .fold { margin-top: 12px; }
+  /* Panels and the footer bar go full bleed: no width lost (READABILITY.md §3 B) */
+  .fold, .foot-bar { margin-left: -16px; margin-right: -16px; border-left: 0; border-right: 0; border-radius: 0; }
+  .fold > summary { min-height: 44px; padding: 0 16px; }
+  .foot-meta { padding-bottom: 4px; }
+  .foot-links { padding-bottom: 6px; }
+  .fd > summary { min-height: 44px; }
+  ul.src { columns: 1; }
+  /* Phone extras (READABILITY.md §6.1–6.4) */
+  #cu-sec .cu ul li .s:not(.ifn) { display: none; }
+  .nf-list { display: grid; gap: 2px; flex-basis: 100%; }
+  .nf-list li { display: block; }
+  .nf-list li + li::before { content: none; }
+  .nf-list .nf-x { display: none; }
+  .nf-list .nf-more { display: block; font-size: 13px; color: var(--muted); }
+  #body:not([data-band="urgent"]) .when.tw { visibility: hidden; }
   .sec-head h2 { font-size: 18px; }
   .item > summary { grid-template-columns: 58px 1fr 14px; gap: 3px 10px; }
   .item > summary .when { grid-row: 1 / span 3; align-self: start; padding-top: 2px; }
@@ -375,6 +452,9 @@ footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap:
 /* ---------------------------------------------------------------- forced colours (DESIGN.md §10.6) */
 @media (forced-colors: active) {
   .band, .chip, .item, .rail > li, .seq li, .bar, .previewbar, .nextbox { border: 1px solid CanvasText; }
+  .fold, .foot-bar, .sv-duty { border: 1px solid CanvasText; }
+  .fold > .fold-body, .foot-bar { background: Canvas; }
+  :is(.fold, .cycle) > summary:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
   .seg input:checked + span, .seg2 button[aria-checked="true"] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
   .steps li.now { border-top-color: Highlight; }
   :focus-visible { outline: 2px solid Highlight; }
@@ -437,24 +517,29 @@ footer.foot .wrap { padding-top: 12px; padding-bottom: 20px; display: grid; gap:
 
 <div class="wrap pad">
   <details class="cycle" id="cycle">
-    <summary><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><span class="aside">Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></summary>
+    <summary><div class="sec-head"><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><i class="chev" aria-hidden="true"></i><span class="aside sum"><b>Folded</b> · Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></div></summary>
     <div id="cycle-body"></div>
   </details>
 </div>
 
 <footer class="foot" id="footer">
   <div class="wrap pad">
-    <div class="foot-row" id="foot-row"></div>
-    <details id="sources"><summary>Sources</summary><ul id="sources-list"></ul></details>
-    <details class="howto" id="howto">
-      <summary>Make this your browser home page</summary>
-      <div class="howto-body">
+    <div class="foot-bar">
+      <p class="foot-meta" id="foot-row"></p>
+      <div class="foot-links">
+    <details class="fd" id="sources"><summary>Sources <span class="n" id="sources-n"></span><i class="chev" aria-hidden="true"></i></summary><ul class="fd-body src" id="sources-list"></ul></details>
+    <details class="fd howto" id="howto">
+      <summary>Home page setup<i class="chev" aria-hidden="true"></i></summary>
+      <div class="fd-body howto-body">
+        <p>Make this your browser home page.</p>
         <p>Page address: <code id="howto-url">https://insly-sprint-monitor.onrender.com</code> <button type="button" class="btn" id="howto-copy">Copy</button></p>
         <p><strong>Edge:</strong> Settings &gt; Start, home, and new tabs &gt; When Edge starts &gt; Open these pages &gt; Add a new page &gt; paste the address. For the Home button, set Home button to the same address.</p>
         <p><strong>Chrome:</strong> Settings &gt; On startup &gt; Open a specific page or set of pages &gt; Add a new page &gt; paste the address. For the Home button: Settings &gt; Appearance &gt; Show home button &gt; enter the address.</p>
         <p>Neither browser lets you choose a custom new tab page in settings. Your IT admin can set one for everyone.</p>
       </div>
     </details>
+      </div>
+    </div>
     <noscript><p>This page needs JavaScript to compute today's sprint.</p></noscript>
   </div>
 </footer>
@@ -493,11 +578,25 @@ function h(tag, attrs, ...kids) {
 }
 // Sections the viewer can fold. Open by default; a fold lasts for this page visit only (nothing stored).
 const folded = new Set();
+// Panel header (READABILITY.md §3.2): tag, h2, the open aside (count), the inline chevron, then the folded summary.
+// CSS shows the aside only when open and "Folded · summary" only when folded. No interactive children.
+function foldHead({ tag, title, id = null, tabindex = null, aside = null, sum = null }) {
+  return h('div', { class: 'sec-head' },
+    h('span', { class: 'ltag', 'aria-hidden': 'true' }, tag),
+    h('h2', { id, tabindex }, title),
+    aside ? h('span', { class: 'aside' }, aside) : null,
+    h('i', { class: 'chev', 'aria-hidden': 'true' }),
+    h('span', { class: 'aside sum' }, h('b', null, 'Folded'), sum ? ` · ${sum}` : null));
+}
 function foldable(key, head, ...body) {
   return h('details', { class: 'fold', open: folded.has(key) ? null : true, 'data-fold': key,
     ontoggle: (e) => { if (e.currentTarget.open) folded.delete(key); else folded.add(key); } },
-  h('summary', null, head, h('i', { class: 'chev', 'aria-hidden': 'true' })), h('div', { class: 'fold-body' }, body));
+  h('summary', null, foldHead(head)), h('div', { class: 'fold-body' }, body));
 }
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+const isClock = (t) => /^\d\d:\d\d$/.test(t || '');
+// Phone extras (READABILITY.md §6.1): Coming up shows 3 working days at ≤767 px, 7 above.
+const phoneMQ = matchMedia('(max-width: 767px)');
 const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
 const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//i.test(u) ? u : null);
 const ext = (href, text) => (safeUrl(href) ? h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, `${text} ↗`) : null);
@@ -702,14 +801,15 @@ function copyButton(text) {
 }
 
 const KIND_CLASS = { Due: 'due', Meeting: 'meet', Update: 'upd' };
-function itemNode(it, { everyoneView = false } = {}) {
+function itemNode(it, { everyoneView = false, todaySlot = false } = {}) {
   const chip = it.chip || { text: 'Check', cls: 'check' };
   const cls = ['item', it.other || chip.cls === 'passed' || chip.cls === 'outl' ? null : KIND_CLASS[chip.text], it.key ? 'key' : null].filter(Boolean).join(' ');
   const roles = everyoneView && Array.isArray(it.who) ? h('span', { class: 'roles' }, it.who.map((w) => h('span', null, w === 'All' ? 'Everyone' : roleLabel(w)))) : null;
   const tagText = it.tag ? (it.tag.text ? `${it.tag.label} · ${it.tag.text}` : it.tag.label) : null;
   return h('li', null, h('details', { class: cls, 'data-k': `item:${it.id}:${it.slot}` },
     h('summary', null,
-      h('span', { class: `when${/^\d\d:\d\d$|^Tonight$|^Now$/.test(it.when || '') ? '' : ' soft'}` }, it.when || 'Today'),
+      // Under a "Today" slot heading the default "Today" is redundant; phones hide it (READABILITY.md §6.4).
+      h('span', { class: `when${/^\d\d:\d\d$|^Tonight$|^Now$/.test(it.when || '') ? '' : ' soft'}${todaySlot && (!it.when || it.when === 'Today') ? ' tw' : ''}` }, it.when || 'Today'),
       h('span', { class: `chip ${chip.cls}` }, chip.text),
       h('span', { class: 'ttl' }, it.title, it.sub ? h('small', null, it.sub) : null),
       roles || (tagText ? h('span', { class: 'stag' }, tagText) : h('span')),
@@ -718,6 +818,15 @@ function itemNode(it, { everyoneView = false } = {}) {
       it.facts.map((f) => h('div', { class: 'fact' }, h('span', null, f.text, TALLINN_NOTE()), copyButton(f.copy))),
       h('p', null, it.detail),
       h('div', { class: 'links' }, itemLinks(it)))));
+}
+
+// Folded summaries (READABILITY.md §3.1), from data the renderer already has.
+function todaySummary(a, n) {
+  if (!a) return 'The action list could not load';
+  const items = a.groups.flatMap((g) => g.items);
+  if (!items.length) return a.weekend ? `Nothing due on ${a.heading}` : 'Nothing due today';
+  const next = items.find((it) => isClock(it.when) && (a.weekend || it.when >= n.time)) || items[0];
+  return `${plural(a.count || items.length, 'item')} · next ${isClock(next.when) ? `${next.when} ` : ''}${next.title}`;
 }
 
 function renderYourDay(n, m) {
@@ -732,12 +841,11 @@ function renderYourDay(n, m) {
       h('a', { class: 'new', href: '#cycle', onclick: (e) => { e.preventDefault(); $('cycle').open = true; const s = $('cycle').querySelector('summary'); s.scrollIntoView({ block: 'start' }); s.focus(); } }, 'New here? See how the 2-week cycle works ↓')));
   }
   const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
-  const pre = kids.splice(0);
-  const head = (h('div', { class: 'sec-head' },
-    h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<today>'),
-    h('h2', { id: 'yourday-h', tabindex: '-1' }, heading),
-    a && a.weekend ? h('span', { class: 'aside' }, 'Next working day') : a && a.count ? h('span', { class: 'aside' }, `${a.count} item${a.count === 1 ? '' : 's'}`) : null));
-  const out = () => fill($('yourday'), pre, foldable('today', head, kids));
+  // The picker sits at the top of the Today panel's body, as a card (READABILITY.md §5).
+  const head = { tag: '<today>', title: heading, id: 'yourday-h', tabindex: '-1',
+    aside: a && a.weekend ? 'Next working day' : a && a.count ? plural(a.count, 'item') : null,
+    sum: todaySummary(a, n) };
+  const out = () => fill($('yourday'), foldable('today', head, kids));
   if (m.holidayWarnings && m.holidayWarnings.length) kids.push(h('ul', { class: 'notices' }, m.holidayWarnings.map((w) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), w.text))));
 
   if (!a) {
@@ -750,7 +858,8 @@ function renderYourDay(n, m) {
   const loneToday = a.groups.length === 1 && a.groups[0].heading === 'Today';
   a.groups.forEach((g, i) => {
     if (!loneToday) kids.push(h('div', { class: `slot${i === 0 && ['urgent', 'after', 'evening'].includes(m.band) ? ' hot' : ''}` }, g.heading));
-    kids.push(h('ul', { class: 'agenda' }, g.items.map((it) => itemNode(it, { everyoneView }))));
+    const todaySlot = !loneToday && g.heading === 'Today';
+    kids.push(h('ul', { class: 'agenda' }, g.items.map((it) => itemNode(it, { everyoneView, todaySlot }))));
   });
   // Gates for planning follow the day's items directly (mockup H; DESIGN §4.4 fold target for Lead).
   if (a.gates && a.gates.items.length) {
@@ -776,8 +885,10 @@ function renderYourDay(n, m) {
   if (a.nextFor && a.groups.length) {
     const nf = a.nextFor;
     const k = nf.date === addDays(a.day, 1) ? `Tomorrow, ${fmtDay(nf.date)}` : `Next for you · ${fmtDay(nf.date)}`;
+    // A dot-separated run on >=768 px; on phones a short list of up to 3, then "+N more" (READABILITY.md §6.3).
     kids.push(h('div', { class: 'nextfor' }, h('b', { class: 'k' }, k),
-      h('span', null, nf.items.flatMap((x, i) => [i ? ' · ' : null, x.time ? `${x.time} ` : null, x.title]))));
+      h('ul', { class: 'nf-list' }, nf.items.map((x, i) => h('li', { class: i >= 3 ? 'nf-x' : null }, x.time ? `${x.time} ` : null, x.title)),
+        nf.items.length > 3 ? h('li', { class: 'nf-more' }, `+${nf.items.length - 3} more`) : null)));
   }
   if (a.also.length) {
     kids.push(h('details', { class: 'group', open: a.alsoOpen, 'data-k': 'also' },
@@ -794,8 +905,9 @@ function stepsBar(phase) {
     h('li', { class: p === phase ? 'now' : null, 'aria-current': p === phase ? 'step' : null }, p)));
 }
 function renderRail(m) {
+  const hot = m.rail.find((r) => r.hot) || m.rail[1] || m.rail[0];
   fill($('rail-sec'),
-    foldable('sprints', h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<sprints>'), h('h2', { id: 'rail-h' }, 'Three sprints in play')),
+    foldable('sprints', { tag: '<sprints>', title: 'Three sprints in play', id: 'rail-h', sum: hot ? `${hot.label} · ${hot.phaseLabel}` : null },
     h('ul', { class: 'rail' }, m.rail.map((r) => h('li', { class: r.hot ? 'hot' : null },
       h('div', { class: 'r1' },
         h('a', { class: 'lab', href: linkTo(r.href), 'data-sprint': r.label }, r.label),
@@ -806,21 +918,26 @@ function renderRail(m) {
     m.notices.length ? h('ul', { class: 'notices' }, m.notices.map((t) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), t))) : null));
 }
 
-let cuExpanded = false;
+let cuLimit = null; // working days shown; null = the default for the width (3 on phones, 7 above)
 function renderComingUp(m) {
   const days = m.comingUp;
-  const visible = cuExpanded ? days : days.filter((d) => d.index < 7);
-  const hiddenDays = days.filter((d) => d.index >= 7);
+  const limit = cuLimit ?? (phoneMQ.matches ? 3 : 7);
+  const visible = days.filter((d) => d.index < limit);
+  let nextLimit = limit < 7 ? 7 : 10;
+  let hiddenDays = days.filter((d) => d.index >= limit && d.index < nextLimit);
+  if (!hiddenDays.length && nextLimit === 7) { nextLimit = 10; hiddenDays = days.filter((d) => d.index >= limit); }
+  const first = days[0];
+  const sum = first ? `${first.label} · ${first.items.length} for ${role === 'Everyone' ? 'everyone' : 'you'}` : 'Nothing in the next working days';
   fill($('cu-sec'), foldable('coming',
-    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<coming up>'), h('h2', { id: 'cu-h' }, `Next ${cuExpanded ? 10 : 7} working days`), h('span', { class: 'aside' }, roleLabel(role))),
+    { tag: '<coming up>', title: `Next ${limit} working days`, id: 'cu-h', aside: roleLabel(role), sum },
     visible.length ? h('ul', { class: 'cu' }, visible.map((d) => h('li', null,
       h('div', { class: 'd' }, h('b', null, d.label), d.cutoff ? 'cut-off' : null, d.holiday ? h('span', null, ` · ${d.holiday}`) : null),
       h('ul', null, d.items.map((x) => h('li', { class: x.unit ? 'unit' : null },
         x.unit ? h('span', { class: 'sr' }, 'Unit milestone: ') : null,
         x.time ? h('span', { class: 't' }, x.time) : null,
         x.title,
-        h('span', { class: 's' }, x.ifNeeded ? 'if needed' : x.label || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
-    hiddenDays.length && !cuExpanded ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuExpanded = true; renderComingUp(lastModel); } }, `+${hiddenDays.length} more day${hiddenDays.length === 1 ? '' : 's'} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
+        h('span', { class: x.ifNeeded ? 's ifn' : 's' }, x.ifNeeded ? 'if needed' : x.label || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
+    hiddenDays.length && limit < 10 ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuLimit = nextLimit; renderComingUp(lastModel); } }, `+${plural(hiddenDays.length, 'more day', 'more days')} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
 }
 
 // ---------------------------------------------------------------- preview bar
@@ -950,8 +1067,10 @@ function renderSprintView(n) {
         a.dates && a.dates.to ? `${a.title}, ${untilText(a, T)}` : a.title,
         h('span', { class: 's' }, a.slot === 'after-cutoff' ? 'if needed' : a.slot === 'after-deploy' ? 'after the update' : '')))))));
   };
+  const count = (st) => det.actions.filter((a) => a.status === st).length;
+  const actionsSum = RULES ? groups.map(([st]) => [count(st), st]).filter(([c]) => c).map(([c, st]) => `${c} ${st}`).join(' · ') || 'No actions' : 'Actions unavailable';
   const actions = foldable('sv-actions',
-    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<actions>'), h('h2', null, `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`)),
+    { tag: '<actions>', title: `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`, sum: actionsSum },
     h('div', { class: 'sv-toggle' }, toggle),
     RULES ? groups.map(([st, label, open]) => {
       const list = det.actions.filter((a) => a.status === st);
@@ -961,19 +1080,26 @@ function renderSprintView(n) {
         byDate(list));
     }) : h('p', { class: 'empty' }, 'Actions unavailable.'));
 
-  const hols = foldable('sv-holidays',
-    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<holidays>'), h('h2', null, 'Holidays')),
-    det.holidays.length
-      ? h('ul', { class: 'rows' }, det.holidays.map((x) => h('li', null, h('b', null, fmtDay(x.date)), h('span', null, `${x.name} · ${x.country}`))))
-      : h('p', { class: 'muted', style: 'margin:0' }, 'No public holidays (EE, PL) between planning and Live.'),
+  // Holidays is its own panel only when a holiday exists; otherwise one line at the foot of Timeline (READABILITY.md §5).
+  const hols = !det.holidays.length ? null : foldable('sv-holidays',
+    { tag: '<holidays>', title: 'Holidays', sum: plural(det.holidays.length, 'public holiday') },
+    h('ul', { class: 'rows' }, det.holidays.map((x) => h('li', null, h('b', null, fmtDay(x.date)), h('span', null, `${x.name} · ${x.country}`)))),
     det.holidaysAffecting.length ? h('p', { class: 'note' }, 'Key dates affected: ', [...new Set(det.holidaysAffecting.map((x) => x.date))].map((d) => {
       const k = Object.entries(MILESTONE_NAME).find(([key]) => s[key] === d);
       const c = [...new Set(det.holidaysAffecting.filter((x) => x.date === d).map((x) => x.country))].join(', ');
       return `${k ? `${k[1]} ` : ''}${fmtDay(d)} (${c} holiday)`;
     }).join(' · ')) : null);
 
+  const nextMs = det.milestones.find((ms) => ms.status !== 'passed');
+  const tlSum = [
+    det.relation === 'current' && ctx.dayOfSprint ? `Today · day ${ctx.dayOfSprint} of ${workingDaysIn(s)}` : null,
+    nextMs ? `next ${MILESTONE_NAME[nextMs.key]} ${nextMs.status === 'today' ? 'today' : fmtDay(nextMs.date)}` : 'all key dates passed',
+  ].filter(Boolean).join(' · ');
+  const timeline = foldable('sv-timeline', { tag: '<timeline>', title: 'Timeline', aside: 'Tallinn time', sum: tlSum },
+    h('ol', { class: 'tl' }, items),
+    hols ? null : h('p', { class: 'muted tl-foot' }, 'No public holidays (EE, PL) between planning and Live.'));
   fill(view, nav, head, h('div', { class: 'wrap pad body' },
-    h('div', null, foldable('sv-timeline', h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<timeline>'), h('h2', null, 'Timeline'), h('span', { class: 'aside' }, 'Tallinn time')), h('ol', { class: 'tl' }, items)), hols),
+    h('div', null, timeline, hols),
     actions));
 }
 
@@ -1045,6 +1171,7 @@ function renderFooter() {
   const list = $('sources-list');
   if (!list.childElementCount) {
     for (const s of Object.values(SOURCES)) if (s && safeUrl(s.url)) list.append(h('li', null, ext(s.url, s.title)));
+    $('sources-n').textContent = list.childElementCount ? String(list.childElementCount) : '';
   }
 }
 
@@ -1165,7 +1292,8 @@ render();
 setInterval(tick, 20_000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
 // hashchange and popstate both fire on Back; render once per route.
-window.addEventListener('hashchange', () => { if (location.href !== lastHref) { cuExpanded = false; render(); } });
+window.addEventListener('hashchange', () => { if (location.href !== lastHref) { cuLimit = null; render(); } });
+phoneMQ.addEventListener('change', () => { if (lastModel && !$('today-view').hidden) renderComingUp(lastModel); });
 window.addEventListener('popstate', () => { if (location.href !== lastHref) render(); });
 </script>
 </body>
