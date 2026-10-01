@@ -1,5 +1,13 @@
 # Progress log
 
+## 2026-10-01 — live
+
+- LIVE: https://insly-sprint-monitor.onrender.com (Render static site, created manually from the public repo; render.yaml headers not applied, Render default cache is max-age=0, s-maxage=300).
+- Repo made public by Kaspar (Render GitHub app has no access to Insly org repos; Kaspar is org member, not owner). Colleague names removed from SPEC (still in old commit history).
+- CI: .github/workflows/deploy.yml runs tests on push and POSTs secret RENDER_DEPLOY_HOOK on main. Pending: Kaspar adds the secret; until then use Manual Deploy in Render.
+- Render build currently runs `npm install` (auto-detected) and reports audit warnings from vitest devDeps; harmless (not served). Set Build Command to `echo ok` to skip.
+- Verified live: title, "2026-21 Day 4 of 10" on Thu 1 Oct, help box shows live URL, no console errors.
+
 ## 2026-09-29 — morning session
 
 Done
