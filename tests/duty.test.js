@@ -1,5 +1,5 @@
 // duty.js (the real rota) against DESIGN.md §9: names are first name + last initial only,
-// rota dates equal engine dates, support weeks are keyed by Monday.
+// rota dates equal engine dates. Support duty is not part of the rota (differs per team).
 import { describe, it, expect } from 'vitest';
 import * as DUTY from '../public/duty.js';
 import { sprintDates, sprintForDate, weekdayOf, parseDate } from '../public/schedule.js';
@@ -11,7 +11,6 @@ process.env.TZ ||= 'Europe/Tallinn';
 const NAME = /^\p{L}[\p{L}'-]* \p{Lu}\.$/u;
 const names = [
   ...DUTY.RELEASES.flatMap((r) => [r.demoBy, r.liveLead, r.liveBackup]),
-  ...DUTY.SUPPORT_WEEKS.map((w) => w.dev),
 ].filter((x) => x != null);
 
 /** The sprint whose Demo update is on this date. */
@@ -39,12 +38,6 @@ describe('duty.js data', () => {
     expect(weekdayOf(r.live)).toBe('Mon');
   });
 
-  it('support weeks are keyed by Monday and unique', () => {
-    for (const w of DUTY.SUPPORT_WEEKS) expect(weekdayOf(w.week), w.week).toBe('Mon');
-    const weeks = DUTY.SUPPORT_WEEKS.map((w) => w.week);
-    expect(new Set(weeks).size).toBe(weeks.length);
-  });
-
   it('the 2027-1 release is Demo Tue 5 Jan, Live Mon 11 Jan 2027', () => {
     expect(DUTY.RELEASES.find((r) => r.demo === '2027-01-05')?.live).toBe('2027-01-11');
     expect(sprintWithDemo('2027-01-05').label).toBe('2027-1');
@@ -58,7 +51,10 @@ describe('duty line from the real rota', () => {
     expect(dutyTexts(line)[0]).toMatch(/^Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: \S+ \S\. \(lead\), \S+ \S\. \(backup\)$/);
   });
 
-  it('a week beyond the rota reads "not assigned yet"', () => {
-    expect(dutyTexts(dutyLine('2026-12-02', DUTY, RULES))[0]).toBe('Support this week: not assigned yet');
+  it('has no support-duty data or text (owner, 2026-10-01: it differs per team)', () => {
+    expect(DUTY.SUPPORT_WEEKS).toBeUndefined();
+    for (const d of ['2026-09-29', '2026-10-01', '2026-12-02']) {
+      expect(dutyTexts(dutyLine(d, DUTY, RULES)).join(' ')).not.toMatch(/support/i);
+    }
   });
 });

@@ -1,7 +1,13 @@
 # Progress log
 
+## 2026-10-01 — owner feedback on the live redesign
+- Support duty removed from the page and data (differs per team). Duty line now shows only the Demo/Live deployers, same font size as labels.
+- Whole sprint block in the rail opens the sprint view. "Your day" tag renamed `<today>`.
+- Cycle picture laid out in % of the page width: no sideways or vertical scroll at 100% (min width 760px, scrolls on phones only).
+- Full Refinement once (Thu 10 Dec) in the long 2027-1 is enough (owner).
+
 ## TODO (future)
-- Dev duty rota (public/duty.js) is a one-time paste from "Duty dev.xlsx" valid to end of 2026. Replace with a live source (SharePoint) when the sheet is available there; extend by hand for 2027 until then. Names: first name + last initial only (page and repo are public).
+- Dev deploy rota (public/duty.js) is a one-time paste from "Duty dev.xlsx" valid to end of 2026. Replace with a live source (SharePoint) when the sheet is available there; extend by hand for 2027 until then. Names: first name + last initial only (page and repo are public).
 
 ## 2026-10-01 — v2.1 build (developer; not pushed, QA next)
 - Rules v2 (DESIGN §14): 39 rules. New cutoff-last-chase, tell-client-revert, uat-findings-to-planning. code-freeze ends at demoStart, ready-for-live at cutoff, revert-missed-fixes is Dev only. Optional slot / carryOver / links fields; demo-update 17:00, live-update 20:00. SPEC table and CONTRACT schema updated.

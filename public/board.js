@@ -505,16 +505,13 @@ export function weekMonday(date) {
 }
 
 /**
- * STATES.md §7. duty = the duty.js module ({ RELEASES, SUPPORT_WEEKS, ROTA_UPDATED }) or null.
+ * STATES.md §7. duty = the duty.js module ({ RELEASES, ROTA_UPDATED }) or null.
  * Returns null when there is no rota (state `no-data`: the line is not rendered).
  */
 export function dutyLine(date, duty, rules = []) {
   if (!duty || !Array.isArray(duty.RELEASES)) return null;
   const times = keyTimes(rules);
   const d = date;
-  const weeks = Array.isArray(duty.SUPPORT_WEEKS) ? duty.SUPPORT_WEEKS : [];
-  const week = weeks.find((w) => w.week === weekMonday(d));
-  const support = { name: week?.dev ?? null };
   const deploys = deploysNear(d, times);
   const mk = (dep) => ({
     kind: dep.kind,
@@ -525,12 +522,12 @@ export function dutyLine(date, duty, rules = []) {
     people: deployPeople(duty, dep.kind, dep.date),
   });
   const tonight = !isWeekendDay(d) && deploys.find((x) => x.date === d);
-  if (tonight) return { state: 'tonight', deploy: mk(tonight), support };
+  if (tonight) return { state: 'tonight', deploy: mk(tonight) };
   const prev = previousWorkingDay(d);
   const last = !isWeekendDay(d) && deploys.find((x) => x.date === prev);
-  if (last) return { state: 'last-night', deploy: mk(last), support };
+  if (last) return { state: 'last-night', deploy: mk(last) };
   const next = deploys.find((x) => x.date > d);
-  return { state: 'next', deploy: next ? mk(next) : null, support };
+  return { state: 'next', deploy: next ? mk(next) : null };
 }
 
 export const NOT_ASSIGNED = 'not assigned yet';
@@ -544,13 +541,13 @@ export function peopleText(people) {
 /** The duty line as plain text parts in display order (STATES.md §7 patterns). */
 export function dutyTexts(line) {
   if (!line) return [];
-  const supportText = `Support this week: ${line.support.name ?? NOT_ASSIGNED}`;
+  // Support duty is not shown: it differs per team (owner, 2026-10-01).
   const dep = line.deploy;
-  if (!dep) return [supportText];
+  if (!dep) return [];
   const who = peopleText(dep.people);
-  if (line.state === 'tonight') return [`Tonight · ${dep.kind} update ${dep.label} · ${dep.zones}: ${who}`, supportText];
-  if (line.state === 'last-night') return [`Last night · ${dep.kind} update ${dep.label}: ${who}`, supportText];
-  return [supportText, `Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (${dep.label}): ${who}`];
+  if (line.state === 'tonight') return [`Tonight · ${dep.kind} update ${dep.label} · ${dep.zones}: ${who}`];
+  if (line.state === 'last-night') return [`Last night · ${dep.kind} update ${dep.label}: ${who}`];
+  return [`Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (${dep.label}): ${who}`];
 }
 
 // ---------------------------------------------------------------- agenda ("Your day")

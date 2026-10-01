@@ -36,7 +36,6 @@ export function officeTimes(dateKey, hhmm) {
 export const TIMES = ['09:00', '11:59', '12:00', '16:59', '17:00', '19:59', '20:00'];
 const DUTY_NAMES = new Set([
   ...DUTY.RELEASES.flatMap((r) => [r.demoBy, r.liveLead, r.liveBackup]),
-  ...DUTY.SUPPORT_WEEKS.map((w) => w.dev),
 ].filter(Boolean));
 const ALLOWED_CLOCK = new Set(['12:00', '14:00', '17:00', '20:00']);
 
@@ -93,7 +92,7 @@ export function sweepDay(date) {
       if (tabDay) expect(Number(tabDay[1]), `${at} tab=${m.tab}`).toBeLessThanOrEqual(total);
 
       // Duty names come from duty.js.
-      const people = [m.duty?.support?.name, ...(m.duty?.deploy?.people ?? []).map((p) => p.name)].filter(Boolean);
+      const people = [...(m.duty?.deploy?.people ?? []).map((p) => p.name)].filter(Boolean);
       for (const p of people) expect(DUTY_NAMES.has(p), `${at} ${p}`).toBe(true);
 
       // Deploy times: Demo 17:00, Live 20:00 Tallinn, Warsaw and London converted correctly.

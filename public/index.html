@@ -140,7 +140,7 @@ h1, h2, h3 { line-height: 1.2; }
 
 /* ---------------------------------------------------------------- duty line */
 .duty { border-bottom: 1px solid var(--line); background: var(--surface); }
-.duty .wrap { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; padding-top: 10px; padding-bottom: 10px; min-height: 44px; font-size: 15px; }
+.duty .wrap { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; padding-top: 10px; padding-bottom: 10px; min-height: 44px; font-size: 13px; }
 .duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 2px; }
 .duty .tonight { font-weight: 700; }
 .na { color: var(--muted); font-style: italic; font-weight: 400; }
@@ -206,7 +206,10 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 
 /* ---------------------------------------------------------------- rail */
 .rail { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.rail > li { background: var(--surface-2); border-radius: 4px; padding: 10px 12px; box-shadow: inset 4px 0 0 transparent; }
+.rail > li { position: relative; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; box-shadow: inset 4px 0 0 transparent; }
+.rail > li:hover { background: var(--line); }
+.rail a.lab::after { content: ''; position: absolute; inset: 0; border-radius: 4px; } /* whole block opens the sprint view */
+.rail .note { position: relative; }
 .rail > li.hot { box-shadow: inset 4px 0 0 var(--accent); }
 .rail .r1 { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .rail a.lab { font-weight: 700; font-size: 16px; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
@@ -267,8 +270,8 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .cycle > summary::-webkit-details-marker { display: none; }
 .cycle > summary h2 { margin: 0; font-size: 18px; }
 .cycle > summary .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
-.track-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
-.track { position: relative; height: 328px; background-image: linear-gradient(to right, transparent 80px, var(--surface-2) 80px, var(--surface-2) 112px, transparent 112px); background-size: 112px 100%; }
+.track-wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 4px; }
+.track { position: relative; height: 350px; min-width: 760px; background-image: linear-gradient(to right, transparent 71.43%, var(--surface-2) 71.43%, var(--surface-2) 100%); background-size: calc(100% / var(--weeks)) 100%; }
 .axis { position: absolute; left: 0; right: 0; top: 0; height: 28px; border-bottom: 1px solid var(--line); }
 .axis span { position: absolute; top: 7px; font-size: 13px; color: var(--muted); padding-left: 4px; border-left: 1px solid var(--line); height: 21px; white-space: nowrap; }
 .lane { position: absolute; left: 0; right: 0; height: 100px; border-bottom: 1px solid var(--line); }
@@ -640,7 +643,6 @@ function renderDuty(m) {
   $('duty').hidden = !line;
   if (!line) return;
   // A text space after each key keeps screen readers from running "London" and the name together.
-  const support = h('span', null, h('span', { class: 'dk' }, 'Support this week'), ' ', line.support.name || h('span', { class: 'na' }, NOT_ASSIGNED));
   const d = line.deploy;
   let dep = null;
   if (d) {
@@ -649,7 +651,8 @@ function renderDuty(m) {
     else if (line.state === 'last-night') dep = h('span', null, h('span', { class: 'dk' }, `Last night · ${d.kind} update `, h('a', { href }, d.label)), ' ', personNodes(d.people));
     else dep = h('span', null, h('span', { class: 'dk' }, `Next · ${d.kind} update ${fmtDay(d.date)} · ${d.zones} (`, h('a', { href }, d.label), ')'), ' ', personNodes(d.people));
   }
-  fill($('duty-inner'), line.state === 'next' ? [support, dep] : [dep, support]);
+  $('duty').hidden = !dep;
+  fill($('duty-inner'), dep);
 }
 
 // ---------------------------------------------------------------- your day
@@ -715,7 +718,7 @@ function renderYourDay(n, m) {
   }
   const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
   kids.push(h('div', { class: 'sec-head' },
-    h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<your day>'),
+    h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<today>'),
     h('h2', { id: 'yourday-h', tabindex: '-1' }, heading),
     a && a.weekend ? h('span', { class: 'aside' }, 'Next working day') : a && a.count ? h('span', { class: 'aside' }, `${a.count} item${a.count === 1 ? '' : 's'}`) : null));
 
@@ -958,39 +961,42 @@ function renderSprintView(n) {
 function renderCycle(n) {
   const c = context(isWeekendDay(n.date) ? addDays(n.date, 2) : n.date);
   const sprints = [c.previous, c.current, c.next];
-  const PX = 16;
   const start = (() => { let d = sprints[0].planning; while (new Date(`${d}T12:00:00Z`).getUTCDay() !== 1) d = addDays(d, -1); return d; })();
-  const dx = (d) => Math.round((Date.parse(`${d}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000) * PX;
   const endKey = addDays(sprints[2].live, 7);
-  const width = dx(endKey);
+  const days = (d) => Math.round((Date.parse(`${d}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000);
+  const total = days(endKey);
+  // Positions in % of the track so the whole cycle fits the page width (no sideways scroll at 100% zoom).
+  const pc = (d) => (days(d) / total) * 100;
+  const dx = (d, px = 0) => `calc(${pc(d).toFixed(3)}% + ${px}px)`;
+  const span = (a, b, px = 0) => `calc(${(pc(b) - pc(a)).toFixed(3)}% + ${px}px)`;
   const axis = [];
-  for (let d = start; d <= endKey; d = addDays(d, 7)) axis.push(h('span', { style: `left:${dx(d)}px` }, fmtDM(d)));
+  for (let d = start; d < endKey; d = addDays(d, 7)) axis.push(h('span', { style: `left:${dx(d)}` }, fmtDM(d)));
   const lanes = sprints.map((s, i) => {
     const kids = [
-      h('span', { class: 'ln', style: `left:${Math.max(4, dx(s.planning) - 40)}px` }, h('b', null, s.label), i === 0 ? 'release' : i === 1 ? 'building' : 'being refined'),
-      h('span', { class: 'bar build', style: `left:${dx(s.start)}px;width:${dx(addDays(s.end, 1)) - dx(s.start) - 2}px` }),
-      h('span', { class: 'blab', style: `left:${dx(s.start) + 30}px` }, 'Build on Beta'),
-      h('span', { class: 'bar freeze', style: `left:${dx(s.freezeStart)}px;width:${dx(addDays(s.demoStart, 1)) - dx(s.freezeStart) - 2}px` }),
-      h('span', { class: 'blab', style: `left:${dx(s.freezeStart) + 2}px` }, 'Freeze'),
-      h('span', { class: 'bar uat', style: `left:${dx(s.uatStart)}px;width:${dx(addDays(s.cutoff, 1)) - dx(s.uatStart) - 2}px` }),
-      h('span', { class: 'blab', style: `left:${dx(s.uatStart) + 6}px` }, 'UAT'),
-      h('span', { class: 'stn plan', style: `left:${dx(s.planning) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.planning) + 8}px` }, `Plan ${fmtDM(s.planning)}`),
-      h('span', { class: 'stn', style: `left:${dx(s.demoStart) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.demoStart) + 8}px;top:84px` }, `Demo ${fmtDM(s.demoStart)}`),
-      h('span', { class: 'stn live', style: `left:${dx(s.live) + 8}px` }), h('span', { class: 'stl', style: `left:${dx(s.live) + 30}px` }, `Live ${fmtDM(s.live)}`),
+      h('span', { class: 'ln', style: `left:max(4px, ${dx(s.planning, -40)})` }, h('b', null, s.label), i === 0 ? 'release' : i === 1 ? 'building' : 'being refined'),
+      h('span', { class: 'bar build', style: `left:${dx(s.start)};width:${span(s.start, addDays(s.end, 1), -2)}` }),
+      h('span', { class: 'blab', style: `left:${dx(s.start, 30)}` }, 'Build on Beta'),
+      h('span', { class: 'bar freeze', style: `left:${dx(s.freezeStart)};width:${span(s.freezeStart, addDays(s.demoStart, 1), -2)}` }),
+      h('span', { class: 'blab', style: `left:${dx(s.freezeStart, 2)}` }, 'Freeze'),
+      h('span', { class: 'bar uat', style: `left:${dx(s.uatStart)};width:${span(s.uatStart, addDays(s.cutoff, 1), -2)}` }),
+      h('span', { class: 'blab', style: `left:${dx(s.uatStart, 6)}` }, 'UAT'),
+      h('span', { class: 'stn plan', style: `left:${dx(s.planning, 8)}` }), h('span', { class: 'stl', style: `left:${dx(s.planning, 8)}` }, `Plan ${fmtDM(s.planning)}`),
+      h('span', { class: 'stn', style: `left:${dx(s.demoStart, 8)}` }), h('span', { class: 'stl', style: `left:${dx(s.demoStart, 8)};top:84px` }, `Demo ${fmtDM(s.demoStart)}`),
+      h('span', { class: 'stn live', style: `left:${dx(s.live, 8)}` }), h('span', { class: 'stl', style: `left:${dx(s.live, 30)}` }, `Live ${fmtDM(s.live)}`),
     ];
     if (RULES) {
       // Refinement sessions that feed this sprint's planning.
       for (let d = sprintDates(s.n - 1).start; d < s.planning; d = addDays(d, 1)) {
-        if (actionsFor(d, RULES).some((a) => (a.id === 'pre-refinement' || a.id === 'full-refinement') && a.sprintNumber === s.n)) kids.push(h('span', { class: 'ref', style: `left:${dx(d) + 8}px` }));
+        if (actionsFor(d, RULES).some((a) => (a.id === 'pre-refinement' || a.id === 'full-refinement') && a.sprintNumber === s.n)) kids.push(h('span', { class: 'ref', style: `left:${dx(d, 8)}` }));
       }
     }
     return h('div', { class: 'lane', style: `top:${28 + i * 100}px` }, kids);
   });
-  const today = h('div', { class: 'todayline', style: `left:${dx(n.date) + 8}px` }, h('span', null, fmtDay(n.date)));
+  const today = h('div', { class: 'todayline', style: `left:${dx(n.date, 8)}` }, h('span', null, fmtDay(n.date)));
   const alt = sprints.map((s) => `${s.label}: planning ${fmtDay(s.planning)}, built on Beta ${fmtDM(s.start)} to ${fmtDM(s.end)}, code freeze from ${fmtDay(s.freezeStart)} until the Demo update ${fmtDay(s.demoStart)} evening, UAT on Demo from ${fmtDay(s.uatStart)}, fix cut-off and Live update ${fmtDay(s.live)}.`).join(' ');
   fill($('cycle-body'),
-    h('div', { class: 'track-wrap', tabindex: '0', role: 'region', 'aria-label': 'Cycle timeline, scrolls sideways' },
-      h('div', { class: 'track', role: 'img', 'aria-label': alt, style: `width:${width}px` }, h('div', { class: 'axis' }, axis), lanes, today)),
+    h('div', { class: 'track-wrap', tabindex: '0', role: 'region', 'aria-label': 'Cycle timeline' },
+      h('div', { class: 'track', role: 'img', 'aria-label': alt, style: `--weeks:${total / 7}` }, h('div', { class: 'axis' }, axis), lanes, today)),
     h('p', { class: 'muted', style: 'font-size:13px;margin:8px 0 0' }, 'Bars: outlined grey = build on Beta (10 working days) · blue "Freeze" = code freeze until the Demo update (Tue evening) · light orange "UAT" = clients test on Demo until the fix cut-off · ◆ = refinement sessions, which feed the next sprint\'s planning · weekends shaded.'),
     h('dl', { class: 'gloss' }, [
       ['Beta → Demo → Live', 'The three environments. A sprint is built on Beta, moves to Demo on Tuesday evening, and to Live on Monday evening.'],

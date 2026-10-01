@@ -16,11 +16,3 @@ export const RELEASES = [
   // The sheet also lists 22 Dec / 28 Dec; superseded by the 2027-1 plan (7 Dec to Live 11 Jan).
   { demo: '2027-01-05', demoBy: null,           live: '2027-01-11', liveLead: null,            liveBackup: null },
 ];
-
-/** Weekly support duty dev, Monday to Sunday (week = the Monday). */
-export const SUPPORT_WEEKS = [
-  { week: '2026-09-21', dev: 'Andrei B.' },
-  { week: '2026-09-28', dev: 'Andrei I.' },
-  { week: '2026-10-05', dev: 'Evgeny M.' },
-  { week: '2026-10-12', dev: 'Alexander M.' },
-];

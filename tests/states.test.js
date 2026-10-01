@@ -178,28 +178,23 @@ const ROTA = {
     { demo: '2026-09-29', demoBy: 'Dev A.', live: '2026-10-05', liveLead: 'Dev B.', liveBackup: 'Dev C.' },
     { demo: '2026-10-13', demoBy: 'Dev C.', live: '2026-10-19', liveLead: null, liveBackup: null },
   ],
-  SUPPORT_WEEKS: [
-    { week: '2026-09-28', dev: 'Dev D.' },
-    { week: '2026-10-05', dev: 'Dev E.' },
-    { week: '2026-10-12', dev: null },
-  ],
 };
 
 const DUTY = [
-  ['2026-09-28', 'next', ['Support this week: Dev D.', 'Next · Demo update Tue 29 Sep 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-20): Dev A.']],
-  ['2026-09-29', 'tonight', ['Tonight · Demo update 2026-20 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Dev A.', 'Support this week: Dev D.']],
-  ['2026-09-30', 'last-night', ['Last night · Demo update 2026-20: Dev A.', 'Support this week: Dev D.']],
-  ['2026-10-01', 'next', ['Support this week: Dev D.', 'Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
-  ['2026-10-02', 'next', ['Support this week: Dev D.', 'Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
-  ['2026-10-03', 'next', ['Support this week: Dev D.', 'Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
-  ['2026-10-05', 'tonight', ['Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Dev B. (lead), Dev C. (backup)', 'Support this week: Dev E.']],
-  ['2026-10-06', 'last-night', ['Last night · Live update 2026-20: Dev B. (lead), Dev C. (backup)', 'Support this week: Dev E.']],
-  ['2026-10-07', 'next', ['Support this week: Dev E.', 'Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
-  ['2026-10-08', 'next', ['Support this week: Dev E.', 'Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
-  ['2026-10-09', 'next', ['Support this week: Dev E.', 'Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
-  ['2026-10-12', 'next', ['Support this week: not assigned yet', 'Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
-  ['2026-10-13', 'tonight', ['Tonight · Demo update 2026-21 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Dev C.', 'Support this week: not assigned yet']],
-  ['2026-10-15', 'next', ['Support this week: not assigned yet', 'Next · Live update Mon 19 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-21): not assigned yet']],
+  ['2026-09-28', 'next', ['Next · Demo update Tue 29 Sep 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-20): Dev A.']],
+  ['2026-09-29', 'tonight', ['Tonight · Demo update 2026-20 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Dev A.']],
+  ['2026-09-30', 'last-night', ['Last night · Demo update 2026-20: Dev A.']],
+  ['2026-10-01', 'next', ['Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
+  ['2026-10-02', 'next', ['Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
+  ['2026-10-03', 'next', ['Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20): Dev B. (lead), Dev C. (backup)']],
+  ['2026-10-05', 'tonight', ['Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Dev B. (lead), Dev C. (backup)']],
+  ['2026-10-06', 'last-night', ['Last night · Live update 2026-20: Dev B. (lead), Dev C. (backup)']],
+  ['2026-10-07', 'next', ['Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
+  ['2026-10-08', 'next', ['Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
+  ['2026-10-09', 'next', ['Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
+  ['2026-10-12', 'next', ['Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.']],
+  ['2026-10-13', 'tonight', ['Tonight · Demo update 2026-21 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Dev C.']],
+  ['2026-10-15', 'next', ['Next · Live update Mon 19 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-21): not assigned yet']],
 ];
 
 describe('STATES.md §7 duty line (placeholder rota)', () => {
@@ -215,14 +210,14 @@ describe('STATES.md §7 duty line (placeholder rota)', () => {
     const na = dutyLine('2026-10-19', ROTA, RULES);
     expect(na.deploy.people.map((p) => p.name)).toEqual([null, null]);
     expect(dutyTexts(na)[0]).toBe('Tonight · Live update 2026-21 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: not assigned yet');
-    expect(dutyTexts(na)[1]).toBe('Support this week: not assigned yet'); // week of 19 Oct is not in the rota
+    expect(dutyTexts(na)).toHaveLength(1); // support duty is not shown (owner, 2026-10-01)
     expect(dutyLine('2026-10-05', null, RULES)).toBeNull();
     expect(dutyLine('2026-10-05', {}, RULES)).toBeNull();
     expect(dutyTexts(null)).toEqual([]);
   });
 
   it('a partly assigned Live update names the gap', () => {
-    const rota = { RELEASES: [{ demo: '2026-10-13', demoBy: null, live: '2026-10-19', liveLead: 'Dev B.', liveBackup: null }], SUPPORT_WEEKS: [] };
+    const rota = { RELEASES: [{ demo: '2026-10-13', demoBy: null, live: '2026-10-19', liveLead: 'Dev B.', liveBackup: null }] };
     expect(dutyTexts(dutyLine('2026-10-19', rota, RULES))[0]).toMatch(/: Dev B\. \(lead\), not assigned yet \(backup\)$/);
   });
 

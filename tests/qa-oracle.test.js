@@ -11,7 +11,7 @@
 //   Code freeze from the sprint-end Friday until the Tuesday-evening Demo update; Beta reopens Wednesday.
 //   Pre-Refinement every Wed 14:00; Full Refinement Thu 14:00 in week 1; refinement belongs to the NEXT sprint.
 //   Sprint planning on the Thursday before the start.
-//   Rota: S20 Demo 29 Sep Rafael F.; Live 5 Oct Konstantin M. (lead), Evgeny M. (backup); support week of 28 Sep Andrei I.
+//   Rota: S20 Demo 29 Sep Rafael F.; Live 5 Oct Konstantin M. (lead), Evgeny M. (backup); support duty is not shown (differs per team)
 //   Names are always "First L."; no full surname anywhere in public/ or docs/.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -150,12 +150,10 @@ describe('refinement and planning (owner)', () => {
     }
   });
 
-  it('2027-1 (4 weeks): Full Refinement fires Thu 10 Dec only (weeks 2-4 count as week 2). OWNER TO DECIDE', () => {
+  it('2027-1 (4 weeks): one Full Refinement, Thu 10 Dec, is enough (owner, 2026-10-01)', () => {
     const inYearEnd = fired('full-refinement').map(([d]) => d).filter((d) => d >= '2026-12-07' && d <= '2027-01-01');
-    // Observed behaviour, recorded for the owner. Not a certified truth: see the it.todo below.
     expect(inYearEnd).toEqual(['2026-12-10']);
   });
-  it.todo('2027-1: should Full Refinement also run Thu 17 Dec / 24 Dec / 31 Dec? (owner decision pending)');
 
   it('sprint planning on the Thursday before each start, for the next sprint; 2027-2 on Thu 31 Dec', () => {
     const hits = fired('sprint-planning');
@@ -176,16 +174,9 @@ describe('duty rota (owner)', () => {
     expect(sprintDates(20).live).toBe('2026-10-05');
   });
 
-  it('support duty for the week of Mon 28 Sep is Andrei I.', () => {
-    expect(DUTY.SUPPORT_WEEKS.find((w) => w.week === '2026-09-28')?.dev).toBe('Andrei I.');
-    // Sat 3 Oct belongs to the week starting Mon 28 Sep.
-    expect(dutyTexts(dutyLine('2026-10-03', DUTY, RULES))[0]).toBe('Support this week: Andrei I.');
-  });
-
   it('the page shows them on the day (duty line, real rota)', () => {
     expect(dutyTexts(dutyLine('2026-09-29', DUTY, RULES))).toEqual([
       'Tonight · Demo update 2026-20 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Rafael F.',
-      'Support this week: Andrei I.',
     ]);
     expect(dutyTexts(dutyLine('2026-10-05', DUTY, RULES))[0])
       .toBe('Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Konstantin M. (lead), Evgeny M. (backup)');
@@ -234,7 +225,6 @@ function walk(dir) {
 describe('no full surnames in public/ or docs/', () => {
   const people = [
     ...DUTY.RELEASES.flatMap((r) => [r.demoBy, r.liveLead, r.liveBackup]),
-    ...DUTY.SUPPORT_WEEKS.map((w) => w.dev),
   ].filter(Boolean);
   const firsts = [...new Set(people.map((n) => n.split(' ')[0]))];
   const files = [...walk(join(ROOT, 'public')), ...walk(join(ROOT, 'docs'))].filter((p) => /\.(js|html|md|json|css|txt)$/.test(p));
