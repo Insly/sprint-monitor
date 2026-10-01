@@ -152,6 +152,14 @@ h1, h2, h3 { line-height: 1.2; }
 .sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
 .sec-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
 .sec-head .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary .sec-head { flex: 1 1 auto; margin: 0; }
+.fold > summary .chev { flex: none; margin-right: 4px; }
+.fold > .fold-body { padding-top: 8px; }
+.fold + .fold { margin-top: 18px; }
+.sv-toggle { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+.sv-duty .ltag { font-size: 13px; }
 .slot { font-size: 13px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; display: flex; gap: 8px; align-items: center; }
 .slot::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .slot.hot { color: var(--text); }
@@ -245,7 +253,7 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .sv-head h1 { margin: 0 0 4px; font-size: 32px; }
 .sv-status { margin: 0; font-size: 17px; }
 .muted { color: var(--muted); }
-.sv-duty { display: grid; gap: 8px; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; font-size: 15px; }
+.sv-duty { display: grid; gap: 8px; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; font-size: 13px; }
 .sv-duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); }
 .sv-note { background: var(--surface-2); border-radius: 4px; padding: 8px 10px; font-size: 14px; margin-top: 8px; }
 .tl { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
@@ -483,6 +491,13 @@ function h(tag, attrs, ...kids) {
   }
   return el;
 }
+// Sections the viewer can fold. Open by default; a fold lasts for this page visit only (nothing stored).
+const folded = new Set();
+function foldable(key, head, ...body) {
+  return h('details', { class: 'fold', open: folded.has(key) ? null : true, 'data-fold': key,
+    ontoggle: (e) => { if (e.currentTarget.open) folded.delete(key); else folded.add(key); } },
+  h('summary', null, head, h('i', { class: 'chev', 'aria-hidden': 'true' })), h('div', { class: 'fold-body' }, body));
+}
 const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
 const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//i.test(u) ? u : null);
 const ext = (href, text) => (safeUrl(href) ? h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, `${text} ↗`) : null);
@@ -717,14 +732,16 @@ function renderYourDay(n, m) {
       h('a', { class: 'new', href: '#cycle', onclick: (e) => { e.preventDefault(); $('cycle').open = true; const s = $('cycle').querySelector('summary'); s.scrollIntoView({ block: 'start' }); s.focus(); } }, 'New here? See how the 2-week cycle works ↓')));
   }
   const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
-  kids.push(h('div', { class: 'sec-head' },
+  const pre = kids.splice(0);
+  const head = (h('div', { class: 'sec-head' },
     h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<today>'),
     h('h2', { id: 'yourday-h', tabindex: '-1' }, heading),
     a && a.weekend ? h('span', { class: 'aside' }, 'Next working day') : a && a.count ? h('span', { class: 'aside' }, `${a.count} item${a.count === 1 ? '' : 's'}`) : null));
+  const out = () => fill($('yourday'), pre, foldable('today', head, kids));
 
   if (!a) {
     kids.push(h('p', { class: 'empty' }, 'The action list could not load. Sprint dates below are still correct.'));
-    fill($('yourday'), kids);
+    out();
     return;
   }
   const everyoneView = role === 'Everyone';
@@ -766,7 +783,7 @@ function renderYourDay(n, m) {
       h('summary', null, h('b', null, 'Also today'), h('span', { class: 'cnt' }, `${a.also.length} for other roles`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
       h('ul', { class: 'rows' }, a.also.map((it) => h('li', null, h('span', { class: 'chip other' }, it.chip?.text || 'Check'), h('b', null, it.title), h('span', null, it.who.map((w) => (w === 'All' ? 'Everyone' : roleLabel(w))).join(', ')))))));
   }
-  fill($('yourday'), kids);
+  out();
   $('body').dataset.band = m.band;
 }
 
@@ -777,7 +794,7 @@ function stepsBar(phase) {
 }
 function renderRail(m) {
   fill($('rail-sec'),
-    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<sprints>'), h('h2', { id: 'rail-h' }, 'Three sprints in play')),
+    foldable('sprints', h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<sprints>'), h('h2', { id: 'rail-h' }, 'Three sprints in play')),
     h('ul', { class: 'rail' }, m.rail.map((r) => h('li', { class: r.hot ? 'hot' : null },
       h('div', { class: 'r1' },
         h('a', { class: 'lab', href: linkTo(r.href), 'data-sprint': r.label }, r.label),
@@ -785,7 +802,7 @@ function renderRail(m) {
         r.unconfirmed ? h('span', { class: 'chip outl' }, 'plain projection') : r.projected ? h('span', { class: 'chip outl' }, 'projected') : null),
       stepsBar(r.phase),
       r.holidayNotice ? h('p', { class: 'note' }, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), r.holidayNotice) : null))),
-    m.notices.length ? h('ul', { class: 'notices' }, m.notices.map((t) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), t))) : null);
+    m.notices.length ? h('ul', { class: 'notices' }, m.notices.map((t) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), t))) : null));
 }
 
 let cuExpanded = false;
@@ -793,7 +810,7 @@ function renderComingUp(m) {
   const days = m.comingUp;
   const visible = cuExpanded ? days : days.filter((d) => d.index < 7);
   const hiddenDays = days.filter((d) => d.index >= 7);
-  fill($('cu-sec'),
+  fill($('cu-sec'), foldable('coming',
     h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<coming up>'), h('h2', { id: 'cu-h' }, `Next ${cuExpanded ? 10 : 7} working days`), h('span', { class: 'aside' }, roleLabel(role))),
     visible.length ? h('ul', { class: 'cu' }, visible.map((d) => h('li', null,
       h('div', { class: 'd' }, h('b', null, d.label), d.cutoff ? 'cut-off' : null, d.holiday ? h('span', null, ` · ${d.holiday}`) : null),
@@ -802,7 +819,7 @@ function renderComingUp(m) {
         x.time ? h('span', { class: 't' }, x.time) : null,
         x.title,
         h('span', { class: 's' }, x.ifNeeded ? 'if needed' : x.label || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
-    hiddenDays.length && !cuExpanded ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuExpanded = true; renderComingUp(lastModel); } }, `+${hiddenDays.length} more day${hiddenDays.length === 1 ? '' : 's'} to ${hiddenDays[hiddenDays.length - 1].label}`) : null);
+    hiddenDays.length && !cuExpanded ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuExpanded = true; renderComingUp(lastModel); } }, `+${hiddenDays.length} more day${hiddenDays.length === 1 ? '' : 's'} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
 }
 
 // ---------------------------------------------------------------- preview bar
@@ -884,6 +901,7 @@ function renderSprintView(n) {
       notes.map((t) => h('p', { class: 'muted', style: 'margin:6px 0 0;font-size:13px' }, t))),
     h('div', null,
       DUTY ? h('div', { class: 'sv-duty' },
+        h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<deploys>'),
         h('div', null, h('span', { class: 'dk' }, `Demo update · ${fmtDay(s.demoStart)} · ${formatAcrossZones(s.demoStart, T.demo)}`), h('br'), personNodes(demoPeople)),
         h('div', null, h('span', { class: 'dk' }, `Live update · ${fmtDay(s.live)} · ${formatAcrossZones(s.live, T.live)}`), h('br'),
           'Lead ', livePeople[0].name || h('span', { class: 'na' }, NOT_ASSIGNED), ' · Backup ', livePeople[1].name || h('span', { class: 'na' }, NOT_ASSIGNED))) : null,
@@ -931,8 +949,9 @@ function renderSprintView(n) {
         a.dates && a.dates.to ? `${a.title}, ${untilText(a, T)}` : a.title,
         h('span', { class: 's' }, a.slot === 'after-cutoff' ? 'if needed' : a.slot === 'after-deploy' ? 'after the update' : '')))))));
   };
-  const actions = h('div', null,
-    h('div', { class: 'sec-head' }, h('h2', null, `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`), toggle),
+  const actions = foldable('sv-actions',
+    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<actions>'), h('h2', null, `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`)),
+    h('div', { class: 'sv-toggle' }, toggle),
     RULES ? groups.map(([st, label, open]) => {
       const list = det.actions.filter((a) => a.status === st);
       if (!list.length) return null;
@@ -941,8 +960,8 @@ function renderSprintView(n) {
         byDate(list));
     }) : h('p', { class: 'empty' }, 'Actions unavailable.'));
 
-  const hols = h('div', null,
-    h('div', { class: 'sec-head', style: 'margin-top:18px' }, h('h2', null, 'Holidays')),
+  const hols = foldable('sv-holidays',
+    h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<holidays>'), h('h2', null, 'Holidays')),
     det.holidays.length
       ? h('ul', { class: 'rows' }, det.holidays.map((x) => h('li', null, h('b', null, fmtDay(x.date)), h('span', null, `${x.name} · ${x.country}`))))
       : h('p', { class: 'muted', style: 'margin:0' }, 'No public holidays (EE, PL) between planning and Live.'),
@@ -953,7 +972,7 @@ function renderSprintView(n) {
     }).join(' · ')) : null);
 
   fill(view, nav, head, h('div', { class: 'wrap pad body' },
-    h('div', null, h('div', { class: 'sec-head' }, h('h2', null, 'Timeline'), h('span', { class: 'aside' }, 'Tallinn time')), h('ol', { class: 'tl' }, items), hols),
+    h('div', null, foldable('sv-timeline', h('div', { class: 'sec-head' }, h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<timeline>'), h('h2', null, 'Timeline'), h('span', { class: 'aside' }, 'Tallinn time')), h('ol', { class: 'tl' }, items)), hols),
     actions));
 }
 
