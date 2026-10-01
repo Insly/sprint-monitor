@@ -8,7 +8,7 @@ People in the MGA delivery unit keep having to look up where we are in the sprin
 
 Sprint Monitor is a browser home page. It shows the active sprint, today's working day within it, and the actions due today for the previous, current and next sprint, by role.
 
-**Success measure:** within one sprint of launch, the team leads (Kaspar / Martti / Sander) report no missed Demo/Live matrix update, missed client UAT notice or missed cut-off caused by "didn't know it was today". Secondary measure: at least 5 people in the unit use it as their home page (self-reported).
+**Success measure:** within one sprint of launch, the delivery team leads report no missed Demo/Live matrix update, missed client UAT notice or missed cut-off caused by "didn't know it was today". Secondary measure: at least 5 people in the unit use it as their home page (self-reported).
 
 ## Non-goals (v1)
 
@@ -98,4 +98,4 @@ Note: the engine checks dated rules against all three sprints. So `code-freeze` 
 11. **Bug retro owner.** Recent pages are authored by a dev lead and prepared on the Friday. No page states who owns the preparation. `bug-retro-prep` is assigned to Lead. The S20 retro also notes the next query "should start from Friday 12:00".
 12. **Release page ownership.** "Release 2026-NN" and "Golive Release 2026-NN" pages are created by developers per the examples. This is not stated in any process page.
 13. **Demo/Live matrix title vs scope.** The matrix governs configuration only; code always deploys to all tenants. This is stated on both pages but easy to miss, so it is repeated in the rule detail.
-14. **Refinement page names "Kaspar / Martti / Sander" as rankers in one place and "Kaspar / Martti" in two others.** `rank-refinement-queue` uses the generic role Lead.
+14. **Refinement page lists three delivery leads as rankers in one place and two in others.** `rank-refinement-queue` uses the generic role Lead.

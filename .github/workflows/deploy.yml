@@ -1,0 +1,32 @@
+# Tests on every push; on main, triggers the Render deploy hook.
+# Render has no GitHub app access to this repo, so the hook triggers deploys.
+# Setup: Render > insly-sprint-monitor > Settings > Deploy Hook > copy URL >
+#        GitHub repo > Settings > Secrets and variables > Actions > new secret RENDER_DEPLOY_HOOK.
+name: test-and-deploy
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK not set; skipping deploy."; exit 0; fi
+          curl -fsS -X POST "$HOOK" > /dev/null && echo "Render deploy triggered."
