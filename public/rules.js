@@ -246,7 +246,7 @@ export const RULES = [
   {
     id: 'code-freeze',
     title: 'Code freeze',
-    detail: 'Beta stays locked until the freeze ends, the day after the Demo update. QA-reported bug fixes still go in; new features and config changes without QA permission do not. Only hotfixes bypass it.',
+    detail: 'Beta stays locked until the Demo update on Tuesday evening. Because that update can run into the night, Beta reopens on Wednesday. QA-reported bug fixes still go in; new features and config changes without QA permission do not. Only hotfixes bypass it.',
     who: ['Dev', 'QA', 'IM/AM'],
     sprint: 'previous',
     when: { from: 'freezeStart', to: 'freezeEnd' },

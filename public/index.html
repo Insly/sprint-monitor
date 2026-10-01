@@ -497,7 +497,7 @@ function renderToday(today, c, actDate, ctx) {
       : null,
     phaseLine,
     [ctx.previous, ctx.current, ctx.next, s].some((x) => x.yearEndUnconfirmed)
-      ? h('p', { class: 'notice', role: 'note' }, 'Year-end sprint dates and numbering are not confirmed yet.')
+      ? h('p', { class: 'notice', role: 'note' }, 'Dates from 2027-2 onward are not confirmed yet (the start after the year-end break is not published).')
       : null,
   );
   document.title = c.isWeekend ? `${s.label} weekend · MGA Sprint Board` : `${s.label} day ${c.dayOfSprint} · MGA Sprint Board`;

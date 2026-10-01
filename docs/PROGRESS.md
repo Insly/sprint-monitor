@@ -1,5 +1,11 @@
 # Progress log
 
+## 2026-10-01 — Kaspar's answers applied
+
+- Refinement rules now under the Next sprint column.
+- 2027-1 = internal sprint 26: start 7 Dec 2026, Live 11 Jan 2027 (Demo Tue 5 Jan assumed). Labels reset per year via YEAR_STARTS.
+- Open: 2027-2 start after the break (UNCONFIRMED_FROM = 27 shows a notice); confirm Demo 5 Jan; times for planning/retro/Demo/Live; QA Refinement day; team retro/client demo; owner confirmations (bug retro prep = Lead, release pages = Dev).
+
 ## 2026-10-01 — live
 
 - LIVE: https://insly-sprint-monitor.onrender.com (Render static site, created manually from the public repo; render.yaml headers not applied, Render default cache is max-age=0, s-maxage=300).

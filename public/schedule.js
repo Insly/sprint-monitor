@@ -78,10 +78,30 @@ export function nextWorkingDay(input) {
  * If an override sets `start` and/or `end`, the other keys are re-derived from them first,
  * then any further override keys are applied on top. Keep empty until a plan is published.
  */
-export const OVERRIDES = {};
+export const OVERRIDES = {
+  // 2027-1 (Kaspar, 2026-10-01): starts Mon 7 Dec 2026 on the normal cadence, Live Mon 11 Jan 2027.
+  // Demo Tue 5 Jan / freeze end Wed 6 Jan assumed from the standard Live - 6 pattern.
+  26: {
+    demoStart: '2027-01-05', demoEnd: '2027-01-06', freezeEnd: '2027-01-06', uatStart: '2027-01-06',
+    cutoff: '2027-01-11', live: '2027-01-11',
+  },
+};
 
-/** Sprints starting after this date may have year-end changes that are not confirmed yet. */
-export const YEAR_END_UNCONFIRMED_AFTER = '2026-11-30';
+/**
+ * Release-year numbering: the first internal sprint number of each year's series.
+ * Labels are `${year}-${n - first + 1}`, e.g. internal 26 = 2027-1 (numbering resets per year).
+ */
+export const YEAR_STARTS = { 2026: 1, 2027: 26 };
+
+/** Internal sprint numbers from here on have unconfirmed year-end dates (2027-2 start not published). */
+export const UNCONFIRMED_FROM = 27;
+
+function labelOf(n) {
+  let year = null;
+  for (const [y, first] of Object.entries(YEAR_STARTS)) if (n >= first && (year === null || first >= YEAR_STARTS[year])) year = y;
+  return year === null ? `${n}` : `${year}-${n - YEAR_STARTS[year] + 1}`;
+}
+
 
 function formulaStart(n) {
   // A `start` override re-bases the 14-day cadence for every later sprint, so that
@@ -122,9 +142,9 @@ export function sprintDates(n) {
   const merged = { ...base, ...o, n };
   return {
     ...merged,
-    label: `${merged.start.slice(0, 4)}-${n}`,
+    label: labelOf(n),
     projected: n > LAST_CONFIRMED,
-    yearEndUnconfirmed: merged.start > YEAR_END_UNCONFIRMED_AFTER,
+    yearEndUnconfirmed: n >= UNCONFIRMED_FROM,
     overridden: Object.keys(o).length > 0,
   };
 }

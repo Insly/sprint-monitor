@@ -63,22 +63,34 @@ describe('calendar model', () => {
     expect(sprintDates(22).live).toBe('2026-11-02');
   });
 
-  it('flags sprints starting after 2026-11-30 as year-end unconfirmed', () => {
-    expect(sprintDates(25).start).toBe('2026-11-23');
-    expect(sprintDates(25).yearEndUnconfirmed).toBe(false);
-    expect(sprintDates(26).start).toBe('2026-12-07');
-    expect(sprintDates(26).yearEndUnconfirmed).toBe(true);
+  it('2027-1 starts Mon 7 Dec 2026 and goes Live Mon 11 Jan 2027 (Kaspar, 2026-10-01)', () => {
+    const s = sprintDates(26);
+    expect(s.label).toBe('2027-1');
+    expect(s.start).toBe('2026-12-07');
+    expect(s.end).toBe('2026-12-18');
+    expect(s.freezeStart).toBe('2026-12-18');
+    expect(s.demoStart).toBe('2027-01-05'); // Tue evening, Live - 6 like every other sprint
+    expect(s.freezeEnd).toBe('2027-01-06');
+    expect(s.cutoff).toBe('2027-01-11');
+    expect(s.live).toBe('2027-01-11');
+    expect(s.yearEndUnconfirmed).toBe(false);
   });
 
-  it('labels sprints with the year of their start date', () => {
+  it('flags sprints after 2027-1 as unconfirmed until the post-break start is published', () => {
+    expect(sprintDates(25).yearEndUnconfirmed).toBe(false);
+    expect(sprintDates(26).yearEndUnconfirmed).toBe(false);
+    expect(sprintDates(27).yearEndUnconfirmed).toBe(true);
+  });
+
+  it('numbering resets per release year (2026-25 is followed by 2027-1)', () => {
     expect(sprintDates(21).label).toBe('2026-21');
-    expect(sprintDates(27).label).toBe('2026-27');
-    expect(sprintDates(28).start).toBe('2027-01-04');
-    expect(sprintDates(28).label).toBe('2027-28');
+    expect(sprintDates(25).label).toBe('2026-25');
+    expect(sprintDates(26).label).toBe('2027-1');
+    expect(sprintDates(27).label).toBe('2027-2');
   });
 
   it('applies OVERRIDES over the formula', () => {
-    expect(OVERRIDES).toEqual({});
+    expect(Object.keys(OVERRIDES)).toEqual(['26']); // only the published 2027-1 plan
     try {
       OVERRIDES[27] = { live: '2027-01-07', cutoff: '2027-01-07' };
       const s = sprintDates(27);

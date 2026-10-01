@@ -85,6 +85,8 @@ Note: the engine checks dated rules against all three sprints. So `code-freeze` 
 
 ## Open discrepancies
 
+**Resolved by Kaspar (2026-10-01):** #1 Wed Pre-Refinement / Thu Full Refinement is correct (lifecycle page's Tue+Wed is wrong). #2 Beta to Demo update is Tuesday evening. #3 Freeze lasts until the Demo update; since it runs into the night, Wednesday is the effective end (as modelled). #4 2027-1 starts Mon 7 Dec 2026, Live Mon 11 Jan 2027 (OVERRIDES[26], YEAR_STARTS). Still open: 2027-2 start date after the break; Demo date for 2027-1 assumed Tue 5 Jan. Refinement rules moved to the next sprint (estimates feed next planning).
+
 1. **Refinement days.** The lifecycle page says backlog refinement runs "every Tuesday and Wednesday". The Backlog Refinement page says Pre-Refinement is **Wed 14:00 weekly** and Full Refinement is **Thu 14:00 bi-weekly**, skipped in planning weeks. It mentions Tuesday only as a possible extra session. `rules.js` follows the refinement page as the more specific source. The lifecycle page should be corrected. The refinement page also calls its schedule "a starting point, not a fixed rule".
 2. **Demo update day.** The lifecycle page says "every second Tuesday evening". The calendar lists Demo as "Tue–Wed" (e.g. 29–30 Sep). The 2023 page said Tuesday afternoon, 14:00–15:00 EET. `rules.js` puts the deploy on Tuesday (`demoStart`) with no time, and client notification and UAT start on Wednesday. Needs confirmation: is Wednesday a spill-over day, or part of the planned Demo work?
 3. **Code freeze end.** The lifecycle page says the freeze lasts "until the Demo update" (Tuesday evening). The calendar says "freeze ends Wed". `code-freeze` follows the calendar (to `freezeEnd`). `regression-run` ends at `demoStart`.
