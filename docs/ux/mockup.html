@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprint Board v2 mockup</title>
+<meta name="description" content="Static v2 mockup of the reworked MGA Sprint Board: key days of one cycle, desktop, laptop and mobile, light and dark.">
+<style>
+/* ======================================================================
+   Mockup canvas (presentation only, not part of the design)
+   ====================================================================== */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body.canvas { margin: 0; padding: 32px 24px 64px; background: #D6D6D6; color: #1A1A1A; font: 15px/1.45 Arial, "Helvetica Neue", Helvetica, sans-serif; }
+.canvas-head { max-width: 1240px; margin: 0 auto 20px; }
+.canvas-head h1 { font-size: 26px; margin: 0 0 6px; }
+.canvas-head p { margin: 4px 0; max-width: 100ch; color: #3C3C3C; }
+.canvas-head code, .legend-note code { font-size: 13px; background: #EDEDED; padding: 1px 4px; border-radius: 3px; }
+.frame-label { max-width: 1240px; margin: 40px auto 10px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.frame-label b { font-size: 17px; }
+.frame-label span { font-size: 13px; color: #3C3C3C; }
+.frame-label .lt { font-weight: 700; color: #C35500; background: #FFFFFF; padding: 0 6px; border-radius: 3px; }
+.scroller { max-width: 1240px; margin: 0 auto; overflow-x: auto; padding-bottom: 6px; }
+.mobile-row { max-width: 1700px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.mobile-col { flex: 0 0 auto; width: 390px; }
+.mobile-col .frame-label { margin: 0 0 10px; }
+.legend-note { max-width: 1240px; margin: 10px auto 0; font-size: 13px; color: #3C3C3C; }
+.fold { position: relative; }
+.fold::after { content: attr(data-fold); position: absolute; left: 0; right: 0; top: var(--fold); border-top: 2px dashed #C35500; font-size: 11px; color: #C35500; text-align: right; padding-right: 6px; pointer-events: none; z-index: 5; }
+
+/* ======================================================================
+   Design tokens (DESIGN.md §10.2 / §10.3), scoped per frame
+   ====================================================================== */
+.t-light {
+  --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #EDEDED; --line: #EBEBEB; --control: #8A8A8A;
+  --text: #1A1A1A; --text-2: #3C3C3C; --muted: #575757;
+  --accent: #FF7D00; --on-accent: #1A1A1A; --accent-text: #C35500; --link-on-tint: #1A1A1A;
+  --accent-soft: #FFF1E5; --accent-light: #FFBE91;
+  --after-bg: #1A1A1A; --after-fg: #FFFFFF; --after-muted: #BDBDBD; --after-outline: transparent;
+  --evening-bar: #00D7A5; --evening-tag: #007A5E;
+  --update-fill: #00D7A5; --freeze-fill: #00C8FF; --freeze-text: #006E8F;
+  --meeting-text: #784BAF; --meeting-soft: #F1EAF9;
+  --preview-bg: #1A1A1A; --preview-fg: #FFFFFF;
+  --bar-off: #D6D6D6;
+  --chrome: #EBEBEB; --chrome-tab: #FFFFFF;
+}
+.t-dark {
+  --bg: #1A1A1A; --surface: #242424; --surface-2: #2E2E2E; --line: #3C3C3C; --control: #9B9B9B;
+  --text: #FFFFFF; --text-2: #EBEBEB; --muted: #9B9B9B;
+  --accent: #FF7D00; --on-accent: #1A1A1A; --accent-text: #FF7D00; --link-on-tint: #FFFFFF;
+  --accent-soft: #3A2410; --accent-light: #FFBE91;
+  --after-bg: #0F0F0F; --after-fg: #FFFFFF; --after-muted: #9B9B9B; --after-outline: #FF7D00;
+  --evening-bar: #00D7A5; --evening-tag: #00D7A5;
+  --update-fill: #00D7A5; --freeze-fill: #00C8FF; --freeze-text: #00C8FF;
+  --meeting-text: #B48CE6; --meeting-soft: #2A2140;
+  --preview-bg: #FFFFFF; --preview-fg: #1A1A1A;
+  --bar-off: #3C3C3C;
+  --chrome: #2E2E2E; --chrome-tab: #1A1A1A;
+}
+
+/* ======================================================================
+   Components
+   ====================================================================== */
+.frame { background: var(--bg); color: var(--text); font: 15px/1.45 Arial, "Helvetica Neue", Helvetica, sans-serif; font-variant-numeric: tabular-nums; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.18), 0 8px 24px rgba(0,0,0,.12); }
+.frame.d { width: 1240px; } .frame.l { width: 1093px; } .frame.m { width: 390px; }
+.frame a { color: var(--accent-text); text-underline-offset: 2px; }
+.frame :focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #1A1A1A; border-radius: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* browser chrome: tab title + favicon */
+.chrome { background: var(--chrome); padding: 8px 12px 0; display: flex; gap: 8px; align-items: flex-end; }
+.tab { display: inline-flex; align-items: center; gap: 8px; max-width: 420px; background: var(--chrome-tab); color: var(--text); padding: 7px 14px 8px; border-radius: 8px 8px 0 0; font-size: 13px; white-space: nowrap; overflow: hidden; }
+.tab.ghost { background: transparent; color: var(--muted); }
+.fav { width: 16px; height: 16px; border-radius: 3px; background: #FF7D00; flex: none; }
+.fav.key { background: #1A1A1A; box-shadow: inset 0 0 0 2px #1A1A1A, inset 0 0 0 4px #FF7D00; }
+
+/* preview bar */
+.previewbar { background: var(--preview-bg); color: var(--preview-fg); padding: 10px 32px; display: flex; gap: 10px 18px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+.previewbar b { font-weight: 700; }
+.previewbar .pb { min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 4px; font-size: 13px; }
+.previewbar .back { margin-left: auto; text-decoration: underline; }
+
+/* top bar */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; padding: 12px 32px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.l .topbar { padding: 10px 24px; }
+.m .topbar { padding: 8px 16px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.mark { width: 12px; height: 12px; background: #FF7D00; border-radius: 2px; align-self: center; }
+.brand .date { font-weight: 700; }
+.brand .sub { font-size: 13px; color: var(--muted); }
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seg-label { font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--control); border-radius: 4px; overflow: hidden; }
+.seg span { padding: 0 12px; min-height: 34px; display: inline-flex; align-items: center; font-size: 13px; border-left: 1px solid var(--line); }
+.seg span:first-child { border-left: 0; }
+.seg span[aria-checked="true"] { background: var(--text); color: var(--bg); font-weight: 700; }
+.btn { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border: 1px solid var(--control); border-radius: 4px; background: var(--surface); color: var(--text); font-size: 13px; }
+.m .btn { min-height: 44px; min-width: 44px; font-size: 15px; }
+
+/* brand tag */
+.ltag { font-weight: 700; font-size: 13px; color: var(--accent-text); }
+
+/* headline band */
+.band { padding: 20px 32px 22px; display: grid; grid-template-columns: 1fr 330px; gap: 14px 36px; align-items: start; border-bottom: 1px solid var(--line); position: relative; }
+.l .band { padding: 18px 24px 20px; grid-template-columns: 1fr 280px; }
+.m .band { padding: 16px 16px 18px; grid-template-columns: 1fr; gap: 10px; }
+.band h1 { margin: 6px 0 6px; font-size: 34px; line-height: 1.12; font-weight: 700; }
+.l .band h1 { font-size: 30px; }
+.m .band h1 { font-size: 26px; }
+.band .sub { margin: 0; font-size: 17px; color: var(--text-2); max-width: 62ch; }
+.m .band .sub { font-size: 15px; }
+.band .meta { font-size: 13px; color: var(--muted); }
+.band .blinks { margin-top: 8px; font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; }
+/* state treatments */
+.band--urgent { background: #FF7D00; color: #1A1A1A; border-bottom: 0; }
+.band--urgent .sub, .band--urgent .meta, .band--urgent .ltag, .band--urgent a { color: #1A1A1A; }
+.band--after { background: var(--after-bg); color: var(--after-fg); border-bottom: 0; box-shadow: inset 0 0 0 2px var(--after-outline); }
+.band--after .sub { color: var(--after-fg); } .band--after .meta { color: var(--after-muted); } .band--after .ltag { color: #FF7D00; } .band--after a { color: #FFFFFF; }
+.band--evening { background: var(--surface); border-left: 8px solid var(--evening-bar); }
+.band--evening .ltag { color: var(--evening-tag); }
+.band--headsup { background: var(--accent-soft); border-left: 4px solid var(--accent); }
+.band--headsup .ltag, .band--headsup a { color: var(--link-on-tint); }
+.band--weekend { background: var(--surface-2); }
+.band--weekend .ltag { color: var(--text-2); }
+
+/* countdown / next box */
+.next { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--surface); }
+.next .k { font-size: 13px; color: var(--muted); }
+.next .big { font-size: 24px; font-weight: 700; line-height: 1.15; margin: 4px 0 2px; }
+.next .what { font-size: 15px; }
+.band--headsup .next { background: var(--bg); }
+.countdown .big { font-size: 44px; font-weight: 700; line-height: 1; }
+.countdown .lbl { font-size: 15px; margin-top: 4px; }
+.countdown .tz { font-size: 13px; margin-top: 4px; }
+.l .countdown .big { font-size: 38px; }
+.m .countdown .big { font-size: 32px; }
+
+/* order strip */
+.seq { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; list-style: none; padding: 0; }
+.seq li { display: flex; flex-direction: column; padding: 7px 12px; border-radius: 4px; min-width: 150px; font-size: 13px; border: 1px solid transparent; }
+.seq li b { font-size: 15px; }
+.m .seq li { min-width: 0; flex: 1 1 40%; padding: 6px 10px; }
+.band--urgent .seq li { background: #FFBE91; color: #1A1A1A; }
+.band--urgent .seq li[aria-current] { background: #1A1A1A; color: #FFFFFF; }
+.band--after .seq li { border-color: #575757; color: var(--after-fg); }
+.band--after .seq li.earlier { color: var(--after-muted); border-style: dashed; }
+.band--after .seq li[aria-current] { background: #FF7D00; border-color: #FF7D00; color: #1A1A1A; }
+.band--evening .seq li { border-color: var(--line); background: var(--bg); }
+.band--evening .seq li.earlier { color: var(--muted); border-style: dashed; }
+.band--evening .seq li[aria-current] { background: var(--text); color: var(--bg); }
+
+/* duty line */
+.duty { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; padding: 10px 32px; min-height: 44px; border-bottom: 1px solid var(--line); background: var(--surface); font-size: 15px; }
+.l .duty { padding: 10px 24px; }
+.m .duty { padding: 10px 16px; font-size: 14px; flex-direction: column; gap: 2px; }
+.duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 6px; }
+.duty .tonight { font-weight: 700; }
+.duty .na { color: var(--muted); font-style: italic; }
+
+/* body layouts */
+.body { display: grid; grid-template-columns: 7fr 5fr; gap: 28px 40px; padding: 22px 32px 8px; }
+.l .body { grid-template-columns: 1fr; padding: 18px 24px 8px; gap: 22px; }
+.l .body .main { max-width: 760px; }
+.l .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.m .body { grid-template-columns: 1fr; padding: 14px 16px; gap: 22px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+.sec-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.m .sec-head h2 { font-size: 18px; }
+.sec-head .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+
+/* slots + items */
+.slot { font-size: 13px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; display: flex; gap: 8px; align-items: center; }
+.slot::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.slot.hot { color: var(--text); }
+.agenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.item { border: 1px solid var(--line); border-left: 4px solid var(--surface-2); border-radius: 4px; background: var(--surface); }
+.item.due { border-left-color: var(--accent); }
+.item.meet { border-left-color: var(--meeting-text); }
+.item.upd { border-left-color: var(--update-fill); }
+.item.key { background: var(--accent-soft); border-left-width: 6px; }
+.item.key a { color: var(--link-on-tint); }
+.item > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 74px auto 1fr auto 16px; gap: 10px; align-items: center; padding: 9px 12px; min-height: 44px; }
+.item > summary::-webkit-details-marker { display: none; }
+.m .item > summary { grid-template-columns: 58px 1fr 14px; gap: 3px 10px; }
+.m .item > summary .when { grid-row: 1 / span 3; align-self: start; padding-top: 2px; }
+.m .item > summary .ttl { grid-column: 2; grid-row: 1; }
+.m .item > summary .chip { grid-column: 2; grid-row: 2; justify-self: start; }
+.m .item > summary .stag { grid-column: 2; grid-row: 3; justify-self: start; }
+.m .item > summary .chev { grid-column: 3; grid-row: 1; }
+.when { font-weight: 700; font-size: 15px; }
+.when.soft { font-weight: 400; font-size: 13px; color: var(--muted); }
+.ttl { font-size: 16px; font-weight: 700; }
+.ttl small { display: block; font-size: 13px; font-weight: 400; color: var(--text-2); }
+.chev { width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; justify-self: center; }
+details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
+.chip { display: inline-block; font-size: 13px; line-height: 20px; padding: 0 7px; border-radius: 3px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.chip.due { background: var(--accent-soft); color: var(--text); border-color: var(--accent); }
+.item.key .chip.due { background: var(--accent); color: #1A1A1A; }
+.chip.meet { background: var(--meeting-soft); color: var(--meeting-text); }
+.chip.upd { background: var(--update-fill); color: #1A1A1A; }
+.chip.check, .chip.other, .chip.passed { background: var(--surface-2); color: var(--text-2); }
+.chip.outl { background: transparent; color: var(--text); border-color: var(--text); font-weight: 400; }
+.stag { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.item .more { padding: 0 12px 12px 96px; font-size: 15px; color: var(--text-2); }
+.m .item .more { padding: 0 12px 12px 80px; }
+.item .more p { margin: 0 0 8px; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.fact { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-2); border-radius: 4px; padding: 6px 10px; font-size: 15px; margin-bottom: 8px; color: var(--text); }
+.fact .btn { min-height: 32px; }
+.roles { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.roles span { font-size: 13px; border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; color: var(--text-2); }
+
+/* grouped compact rows */
+.group { margin-top: 12px; border-top: 1px solid var(--line); }
+.group > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary b { font-size: 13px; color: var(--muted); min-width: 150px; }
+.m .group > summary b { min-width: 0; }
+.group > summary .cnt { color: var(--muted); font-size: 13px; }
+.group > summary .chev { margin-left: auto; }
+.rows { list-style: none; margin: 0 0 8px; padding: 0; }
+.rows li { display: flex; gap: 10px; align-items: baseline; min-height: 40px; padding: 8px 0 8px 12px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
+.rows li b { font-size: 15px; }
+.rows li span { font-size: 13px; color: var(--muted); }
+.nextfor { display: flex; gap: 10px; align-items: baseline; min-height: 44px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.nextfor b.k { font-size: 13px; color: var(--muted); min-width: 150px; }
+.m .nextfor b.k { min-width: 0; width: 100%; }
+
+/* first-visit picker */
+.picker { border: 2px solid var(--accent); border-radius: 4px; padding: 14px; background: var(--surface); margin-bottom: 16px; }
+.picker h2 { margin: 0 0 4px; font-size: 18px; }
+.picker p { margin: 0 0 10px; color: var(--text-2); }
+.picker .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.picker .grid span { min-height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--control); border-radius: 4px; font-weight: 700; }
+.picker .new { display: inline-block; margin-top: 10px; }
+
+/* rail */
+.rail { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rail li { background: var(--surface-2); border-radius: 4px; padding: 10px 12px; border-left: 4px solid transparent; }
+.rail li.hot { border-left-color: var(--accent); }
+.rail .r1 { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.rail .lab { font-weight: 700; font-size: 16px; }
+.rail .st { font-size: 15px; }
+.steps { display: flex; gap: 3px; margin-top: 8px; }
+.steps span { flex: 1; font-size: 13px; color: var(--muted); border-top: 4px solid var(--bar-off); padding-top: 3px; text-align: center; }
+.steps span.now { border-top-color: var(--accent); color: var(--text); font-weight: 700; }
+
+/* coming up */
+.cu { list-style: none; margin: 0; padding: 0; }
+.cu > li { display: grid; grid-template-columns: 82px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.cu .d { font-size: 13px; color: var(--muted); }
+.cu .d b { display: block; color: var(--text); font-size: 15px; }
+.cu ul { list-style: none; margin: 0; padding: 0 0 0 16px; display: grid; gap: 3px; }
+.cu ul li { font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.cu ul li .t { font-size: 13px; font-weight: 700; min-width: 40px; color: var(--text-2); }
+.cu ul li .s { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; padding-left: 6px; }
+.cu ul li.unit { font-weight: 700; }
+.cu ul li.unit::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; align-self: center; margin-left: -16px; }
+.cu-more { font-size: 13px; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--line); }
+
+/* cycle + footer */
+.cycle { margin: 8px 32px 0; border-top: 1px solid var(--line); }
+.l .cycle { margin: 8px 24px 0; } .m .cycle { margin: 0 16px; }
+.cycle > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: baseline; padding: 12px 0; min-height: 44px; flex-wrap: wrap; }
+.cycle > summary::-webkit-details-marker { display: none; }
+.cycle > summary h2 { margin: 0; font-size: 18px; }
+.cycle > summary .aside { margin-left: auto; font-size: 13px; color: var(--muted); }
+.foot { margin-top: 8px; padding: 12px 32px 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; gap: 6px 22px; flex-wrap: wrap; }
+.l .foot { padding: 12px 24px 16px; } .m .foot { padding: 12px 16px 16px; }
+
+/* cycle track */
+.track-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+.track { position: relative; width: 1008px; height: 330px; background-image: linear-gradient(to right, transparent 80px, var(--surface-2) 80px, var(--surface-2) 112px, transparent 112px); background-size: 112px 100%; }
+.axis { position: absolute; left: 0; right: 0; top: 0; height: 28px; border-bottom: 1px solid var(--line); }
+.axis span { position: absolute; top: 7px; font-size: 13px; color: var(--muted); padding-left: 4px; border-left: 1px solid var(--line); height: 21px; }
+.lane { position: absolute; left: 0; right: 0; height: 100px; border-bottom: 1px solid var(--line); }
+.lane .ln { position: absolute; top: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.lane .ln b { color: var(--text); font-size: 15px; margin-right: 6px; }
+.bar { position: absolute; top: 44px; height: 14px; border-radius: 3px; border: 1px solid #1A1A1A; }
+.t-dark .bar { border-color: #FFFFFF; }
+.bar.build { background: var(--surface-2); }
+.bar.freeze { background: var(--freeze-fill); }
+.bar.uat { background: var(--accent-light); }
+.blab { position: absolute; top: 28px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.stn { position: absolute; top: 42px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--surface); border: 3px solid var(--text-2); }
+.stn.plan { border-color: var(--meeting-text); }
+.stn.live { border-color: var(--text); background: var(--update-fill); }
+.ref { position: absolute; top: 46px; width: 10px; height: 10px; margin-left: -5px; background: var(--meeting-text); transform: rotate(45deg); }
+.stl { position: absolute; top: 66px; transform: translateX(-50%); font-size: 13px; white-space: nowrap; color: var(--text-2); }
+.env { position: absolute; top: 82px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.todayline { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); }
+.todayline span { position: absolute; top: 6px; left: 6px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--surface); padding: 0 3px; }
+.gloss { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 28px; margin: 14px 0 6px; }
+.gloss div { font-size: 15px; }
+.gloss dt { font-weight: 700; }
+.gloss dd { margin: 0; color: var(--text-2); }
+
+/* state sampler */
+.sampler { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px; }
+.sampler .band { grid-template-columns: 1fr; padding: 12px 14px; border-radius: 4px; border-bottom: 0; min-height: 96px; }
+.sampler .band h1 { font-size: 18px; margin: 4px 0 2px; }
+.sampler .band .meta { font-size: 13px; }
+.sampler .pv { background: var(--preview-bg); color: var(--preview-fg); border-radius: 4px; padding: 12px 14px; }
+.sampler .pv b { display: block; font-size: 18px; margin-top: 4px; }
+
+
+/* v2.1 sprint view */
+.rail a.lab { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.sv-nav { display: flex; gap: 10px 22px; align-items: center; flex-wrap: wrap; padding: 10px 32px; border-bottom: 1px solid var(--line); font-size: 15px; min-height: 44px; }
+.m .sv-nav { padding: 8px 16px; }
+.sv-nav a { color: var(--text); font-weight: 700; }
+.sv-arrows { display: inline-flex; gap: 16px; }
+.sv-nav .btn { margin-left: auto; }
+.sv-head { display: grid; grid-template-columns: 1fr 460px; gap: 12px 32px; padding: 18px 32px; border-bottom: 1px solid var(--line); align-items: start; }
+.m .sv-head { grid-template-columns: 1fr; padding: 14px 16px; }
+.sv-head h1 { margin: 0 0 4px; font-size: 32px; }
+.m .sv-head h1 { font-size: 26px; }
+.sv-status { margin: 0; font-size: 17px; }
+.muted { color: var(--muted); }
+.sv-duty { display: grid; gap: 8px; background: var(--surface-2); border-radius: 4px; padding: 10px 12px; font-size: 15px; }
+.sv-duty .dk { font-size: 13px; font-weight: 700; color: var(--muted); }
+.sv-duty .na { color: var(--muted); font-style: italic; }
+.sv-note { background: var(--surface-2); border-radius: 4px; padding: 8px 10px; font-size: 14px; }
+.tl { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.tl li { display: grid; grid-template-columns: 220px 1fr auto; gap: 4px 12px; padding: 8px 0 8px 14px; position: relative; align-items: baseline; }
+.m .tl li { grid-template-columns: 1fr; }
+.tl li::before { content: ""; position: absolute; left: -7px; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 2px solid var(--text-2); }
+.tl li.past { color: var(--muted); }
+.tl li.past::before { border-color: var(--line); }
+.tl li.now { background: var(--accent-soft); border-radius: 0 4px 4px 0; }
+.tl li.now::before { background: var(--accent); border-color: var(--accent); }
+.tl li.key b { font-weight: 700; }
+.tl li.brk { color: var(--muted); font-style: italic; }
+.tl .tld { font-size: 15px; }
+.tl small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; font-style: normal; }
+.tl b { font-size: 16px; }
+.tl .tls { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.m .tl .tls { white-space: normal; }
+
+@media (forced-colors: active) {
+  .band, .chip, .item, .rail li, .seq li, .bar, .previewbar { border: 1px solid CanvasText; }
+  .seg span[aria-checked="true"] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
+}
+</style>
+</head>
+<body class="canvas">
+
+<div class="canvas-head">
+  <h1>MGA Sprint Board v2: mockup</h1>
+  <p>Static mockup for <code>DESIGN.md</code> v2. The states follow <code>STATES.md</code>. Dates, titles and sprint labels come from <code>schedule.js</code> plus <code>rules.js</code>, with the v2 rule changes from DESIGN §14 applied. The engine was re-run for every frame. All times are Tallinn time. The duty names (Dev A.–Dev E.) are placeholders for <code>duty.js</code>.</p>
+  <p>Frames: <b>A</b> Thu 1 Oct, IM / AM, desktop · <b>B</b> Mon 5 Oct 09:10, IM / AM, laptop 1093 · <b>C</b> Mon 5 Oct 09:10, Dev, mobile (device in London) · <b>D</b> Mon 5 Oct 13:20, Dev, mobile, dark · <b>E</b> Mon 5 Oct 20:00, Dev, mobile · <b>F</b> Tue 29 Sep (Demo update), Dev, desktop, dark · <b>G</b> Wed 30 Sep (UAT opens), IM / AM, mobile · <b>H</b> Thu 8 Oct (planning), Lead, laptop 1093 · <b>I</b> Fri 9 Oct (code freeze), QA, mobile, dark · <b>J</b> preview of Mon 12 Oct on a first visit, desktop · <b>L</b> v2.1 sprint view <code>#sprint-2026-21</code>, desktop · <b>M</b> v2.1 sprint view <code>#sprint-2027-1</code>, mobile (year end, holidays) · <b>K</b> band states side by side. v2.1: deploy times are 17:00 (Demo) and 20:00 (Live) Tallinn, shown for three offices on the duty line and in the sprint view; rail sprint labels are links to the sprint view. Dashed orange lines on B, C, D, E, G and H mark the fold at 1093×614 / 390×844, measured from the top bar.</p>
+</div>
+
+<!-- ================================================================== A -->
+<div class="frame-label"><span class="lt">A</span><b>Desktop ≥1200 · Thu 1 Oct 2026, 08:50 · IM / AM · light</b><span>event · full refinement (week 1)</span></div>
+<div class="scroller">
+<div class="frame d t-light">
+  <div class="chrome"><span class="tab"><i class="fav"></i>Refinement 14:00 · 2026-21 day 4 · Sprint Board</span><span class="tab ghost">Outlook</span><span class="tab ghost">Jira</span></div>
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Thursday 1 October 2026</span><span class="sub">MGA Sprint Board</span></div>
+    <div class="controls"><span class="seg-label" id="va-a">Viewing as</span>
+      <span class="seg" role="radiogroup" aria-labelledby="va-a"><span aria-checked="false">Everyone</span><span aria-checked="true">IM / AM</span><span aria-checked="false">Dev</span><span aria-checked="false">QA</span><span aria-checked="false">Lead</span><span aria-checked="false">Analyst</span></span>
+      <span class="btn">View date</span></div>
+  </header>
+  <section class="band">
+    <div><span class="meta">2026-21 · day 4 of 10</span>
+      <h1>Full Refinement at 14:00</h1>
+      <p class="sub">2026-20 is in UAT on Demo. Fix cut-off Mon 5 Oct 12:00.</p></div>
+    <div class="next"><div class="k">Next key moment · 2026-20</div><div class="big">Mon 5 Oct, 12:00</div><div class="what">Fix cut-off · in 2 working days<br>Live update that evening</div></div>
+  </section>
+  <div class="duty"><span><span class="dk">Support this week</span>Dev D.</span><span><span class="dk">Next · Live update Mon 5 Oct · 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20)</span>Dev B. (lead), Dev C. (backup)</span></div>
+  <div class="body">
+    <main class="main">
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for IM / AM</h2></div>
+      <div class="slot">14:00</div>
+      <ul class="agenda">
+        <li><details class="item meet"><summary><span class="when">14:00</span><span class="chip meet">Meeting</span><span class="ttl">Full Refinement</span><span class="stag">2026-22 · Refinement</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <details class="group" open><summary><b>Running</b><span class="cnt">2</span><i class="chev"></i></summary>
+        <ul class="rows"><li><b>UAT window</b><span>2026-20 · until Mon 5 Oct 12:00</span></li><li><b>Set tasks Ready for Live</b><span>2026-20 · by Mon 5 Oct 12:00</span></li></ul></details>
+      <details class="group"><summary><b>Every day this sprint</b><span class="cnt">2 · Flag overruns at 80% · Log time today</span><i class="chev"></i></summary></details>
+      <div class="nextfor"><b class="k">Tomorrow, Fri 2 Oct</b><span><span class="chip due">Due</span> Update Demo/Live matrix for Live · <span class="chip check">Check</span> Chase UAT results before the cut-off</span></div>
+      <details class="group"><summary><b>Also today</b><span class="cnt">5 every-day items for Dev, QA, Analyst</span><i class="chev"></i></summary></details>
+    </main>
+    <div>
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints in play</h2></div>
+      <ul class="rail">
+        <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">UAT on Demo · fix cut-off Mon 5 Oct 12:00</span></div><div class="steps"><span>Plan</span><span>Build</span><span>Freeze</span><span class="now">UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Sprint day 4 of 10 · code freeze Fri 9 Oct</span></div><div class="steps"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Refinement · planning Thu 8 Oct</span></div><div class="steps"><span class="now">Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+      </ul>
+      <div class="sec-head" style="margin-top:22px"><span class="ltag" aria-hidden="true">&lt;coming up&gt;</span><h2>Next 7 working days</h2><span class="aside">IM / AM</span></div>
+      <ul class="cu">
+        <li><div class="d"><b>Fri 2 Oct</b></div><ul><li>Update Demo/Live matrix for Live<span class="s">2026-20</span></li><li>Chase UAT results before the cut-off<span class="s">2026-20</span></li></ul></li>
+        <li><div class="d"><b>Mon 5 Oct</b>cut-off</div><ul><li>Last chase of UAT results before 12:00<span class="s">2026-20</span></li><li><span class="t">12:00</span>Fix cut-off<span class="s">2026-20</span></li><li>Agree reverts and tell affected clients<span class="s">if needed</span></li><li class="unit"><span class="t">Tonight</span>Live update<span class="s">2026-20</span></li><li>Confirm Live update to clients<span class="s">2026-20</span></li></ul></li>
+        <li><div class="d"><b>Wed 7 Oct</b></div><ul><li>Check Definition of Ready<span class="s">2026-22</span></li><li>Hold priority calls before planning<span class="s">2026-22</span></li><li>QA estimates on sprint candidates<span class="s">2026-22</span></li><li>Bring UAT findings to planning as first priority<span class="s">2026-22</span></li></ul></li>
+        <li><div class="d"><b>Thu 8 Oct</b></div><ul><li class="unit">Sprint planning<span class="s">2026-22</span></li></ul></li>
+        <li><div class="d"><b>Fri 9 Oct</b></div><ul><li class="unit">Code freeze starts, until the Demo update Tue 13 Oct (evening)<span class="s">2026-21</span></li></ul></li>
+        <li><div class="d"><b>Mon 12 Oct</b></div><ul><li>Update Demo/Live matrix for Demo<span class="s">2026-21</span></li><li>Bug retro<span class="s">2026-21</span></li><li>Sprint starts<span class="s">2026-22</span></li></ul></li>
+      </ul>
+      <div class="cu-more">+3 more days to Thu 15 Oct</div>
+    </div>
+  </div>
+  <details class="cycle"><summary><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><span class="aside">Timeline, environments, glossary</span></summary></details>
+  <footer class="foot"><span>Times are Tallinn time</span><span>Sources: 11 Confluence pages</span><span>Confluence confirms dates up to 2026-22</span><span>Rota updated 1 Oct</span><span>Make this your home page</span></footer>
+</div>
+</div>
+
+<!-- ================================================================== B -->
+<div class="frame-label"><span class="lt">B</span><b>Laptop 768–1199 (1093 px) · Mon 5 Oct, 09:10 · IM / AM · light</b><span>urgent · cut-off morning · single-column layout · fold at 614</span></div>
+<div class="scroller">
+<div class="frame l t-light">
+  <div class="chrome"><span class="tab"><i class="fav key"></i>Cut-off 12:00 · Live tonight · Sprint Board</span><span class="tab ghost">Outlook</span></div>
+  <div class="fold" data-fold="fold 614 px" id="fold-b" style="--fold:614px">
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Monday 5 October 2026</span></div>
+    <div class="controls"><span class="seg-label" id="va-b">Viewing as</span><span class="seg" role="radiogroup" aria-labelledby="va-b"><span aria-checked="false">Everyone</span><span aria-checked="true">IM / AM</span><span aria-checked="false">Dev</span><span aria-checked="false">QA</span><span aria-checked="false">Lead</span><span aria-checked="false">Analyst</span></span><span class="btn">View date</span></div>
+  </header>
+  <section class="band band--urgent" data-m="band">
+    <div><span class="ltag">&lt;cut-off day&gt;</span> <span class="meta">2026-20 · 2026-21 day 6 of 10</span>
+      <h1><span class="sr">Cut-off day. </span>Fix cut-off at 12:00</h1>
+      <p class="sub">Raise blocking UAT bugs with the developers now. Anything not fixed by 12:00 is reverted.</p>
+      <div class="blinks"><a href="#">Demo/Live matrix ↗</a></div></div>
+    <div class="countdown"><div class="big">2 h 50 min</div><div class="lbl">left until 12:00</div></div>
+    <ol class="seq" aria-label="Today in order">
+      <li aria-current="step"><span>Now, by 12:00</span><b>Last chase, fixes in</b></li>
+      <li><span>After 12:00</span><b>Reverts, if needed</b></li>
+      <li><span>20:00</span><b>Live update</b></li>
+      <li><span>After the update</span><b>Confirm to clients</b></li>
+    </ol>
+  </section>
+  <div class="duty"><span class="tonight"><span class="dk">Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London</span>Dev B. (lead), Dev C. (backup)</span><span><span class="dk">Support this week</span>Dev E.</span></div>
+  <div class="body">
+    <main class="main">
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for IM / AM</h2><span class="aside">5 items</span></div>
+      <div class="slot hot">By 12:00</div>
+      <ul class="agenda">
+        <li data-m="item"><details class="item due"><summary><span class="when soft">Morning</span><span class="chip due">Due</span><span class="ttl">Last chase of UAT results before 12:00</span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+        <li data-m="item"><details class="item due key"><summary><span class="when">12:00</span><span class="chip due">Due</span><span class="ttl">Fix cut-off<small>UAT window closes at the same time</small></span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+        <li data-m="item"><details class="item"><summary><span class="when soft">by 12:00</span><span class="chip outl">Last day</span><span class="ttl">Set tasks Ready for Live</span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <div class="slot">After 12:00</div>
+      <ul class="agenda">
+        <li data-m="item"><details class="item"><summary><span class="when soft">Afternoon</span><span class="chip outl">If needed</span><span class="ttl">Agree reverts and tell affected clients</span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <div class="slot">After the Live update (tonight or tomorrow morning)</div>
+      <ul class="agenda">
+        <li data-m="item"><details class="item due"><summary><span class="when soft">After</span><span class="chip due">Due</span><span class="ttl">Confirm Live update to clients</span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <details class="group"><summary><b>Every day this sprint</b><span class="cnt">2</span><i class="chev"></i></summary></details>
+      <details class="group"><summary><b>Also today</b><span class="cnt">Dev: Live update, Golive page, reverts if needed</span><i class="chev"></i></summary></details>
+    </main>
+    <div class="lower">
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints</h2></div>
+        <ul class="rail">
+          <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">Fix cut-off 12:00 today · Live update tonight</span></div><div class="steps"><span>Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span class="now">Live</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Sprint day 6 of 10 · code freeze Fri 9 Oct</span></div><div class="steps"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Refinement · planning Thu 8 Oct</span></div><div class="steps"><span class="now">Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+        </ul>
+      </div>
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;coming up&gt;</span><h2>Next 7 working days</h2></div>
+        <ul class="cu">
+          <li><div class="d"><b>Wed 7 Oct</b></div><ul><li>Check Definition of Ready</li><li>Hold priority calls before planning</li><li>QA estimates on sprint candidates</li><li>Bring UAT findings to planning</li></ul></li>
+          <li><div class="d"><b>Thu 8 Oct</b></div><ul><li class="unit">Sprint planning<span class="s">2026-22</span></li></ul></li>
+          <li><div class="d"><b>Fri 9 Oct</b></div><ul><li class="unit">Code freeze starts<span class="s">2026-21</span></li></ul></li>
+          <li><div class="d"><b>Mon 12 Oct</b></div><ul><li>Update Demo/Live matrix for Demo</li><li>Bug retro · Sprint starts</li></ul></li>
+          <li><div class="d"><b>Tue 13 Oct</b></div><ul><li class="unit"><span class="t">Tonight</span>Demo update<span class="s">2026-21</span></li></ul></li>
+        </ul>
+        <div class="cu-more">+2 more days to Wed 14 Oct</div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><span>Times are Tallinn time</span><span>Sources</span><span>Rota updated 1 Oct</span></footer>
+  </div>
+</div>
+</div>
+
+<!-- ================================================================== mobile row 1: C D E -->
+<div class="frame-label" style="margin-top:44px"><b>Mobile ≤767 (390 px frames) · cut-off Monday through the day</b><span>urgent → after → evening · fold at 844</span></div>
+<div class="mobile-row">
+
+  <div class="mobile-col">
+    <div class="frame-label"><span class="lt">C</span><b>Mon 5 Oct 09:10 · Dev · light</b><span>urgent; device zone London, so "(Tallinn time)" is shown; no order strip on mobile</span></div>
+    <div class="frame m t-light"><div class="fold" data-fold="fold 844" style="--fold:844px">
+      <header class="topbar"><div class="brand"><span class="date">Mon 5 Oct</span><span class="sub">2026-21 · day 6</span></div><span class="btn" aria-label="Viewing as: Dev">Dev ▾</span></header>
+      <section class="band band--urgent" data-m="band">
+        <div><span class="ltag">&lt;cut-off day&gt;</span>
+          <h1><span class="sr">Cut-off day. </span>Fix cut-off at 12:00</h1>
+          <p class="sub">Blocking UAT fixes in by 12:00. Live update tonight.</p></div>
+        <div class="countdown"><div class="big">2 h 50 min</div><div class="lbl">left until 12:00</div><div class="tz">12:00 Tallinn time = 10:00 your time</div></div>
+      </section>
+      <div class="duty"><span class="tonight"><span class="dk">Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London</span>Dev B. (lead), Dev C. (backup)</span><span><span class="dk">Support this week</span>Dev E.</span></div>
+      <div class="body"><main>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Dev</h2></div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item due key"><summary><span class="when">12:00</span><span class="ttl">Fix cut-off<small>UAT window closes at the same time</small></span><span class="chip due">Due</span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item"><summary><span class="when soft">After 12:00</span><span class="ttl">Revert items that missed the cut-off</span><span class="chip outl">If needed</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item upd"><summary><span class="when">Tonight</span><span class="ttl">Live update</span><span class="chip upd">Update</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item due"><summary><span class="when soft">After</span><span class="ttl">Create the Golive release page</span><span class="chip due">Due</span><i class="chev"></i></summary></details></li>
+        </ul>
+        <details class="group"><summary><b>Every day this sprint</b><span class="cnt">4</span><i class="chev"></i></summary></details>
+      </main>
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints</h2></div>
+        <ul class="rail">
+          <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">Fix cut-off 12:00 today · Live update tonight</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Sprint day 6 of 10 · code freeze Fri 9 Oct</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Refinement · planning Thu 8 Oct</span></div></li>
+        </ul>
+      </div></div>
+    </div></div>
+  </div>
+
+  <div class="mobile-col">
+    <div class="frame-label"><span class="lt">D</span><b>Mon 5 Oct 13:20 · Dev · dark</b><span>after (cut-off passed) · neutral "Passed", no ✓</span></div>
+    <div class="frame m t-dark"><div class="fold" data-fold="fold 844" style="--fold:844px">
+      <header class="topbar"><div class="brand"><span class="date">Mon 5 Oct</span><span class="sub">2026-21 · day 6</span></div><span class="btn" aria-label="Viewing as: Dev">Dev ▾</span></header>
+      <section class="band band--after" data-m="band">
+        <div><span class="ltag">&lt;cut-off passed&gt;</span>
+          <h1>Cut-off passed. Live update tonight.</h1>
+          <p class="sub">If anything missed the cut-off, revert it before Live. The IM/AM decide which.</p></div>
+        <ol class="seq" aria-label="Today in order">
+          <li class="earlier"><span>Earlier today</span><b>Fix cut-off 12:00</b></li>
+          <li aria-current="step"><span>Now</span><b>Reverts, if needed</b></li>
+          <li><span>20:00</span><b>Live update</b></li>
+          <li><span>After</span><b>Golive page</b></li>
+        </ol>
+      </section>
+      <div class="duty"><span class="tonight"><span class="dk">Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London</span>Dev B. (lead), Dev C. (backup)</span><span><span class="dk">Support this week</span>Dev E.</span></div>
+      <div class="body"><main>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Dev</h2></div>
+        <div class="slot hot">Now, before the Live update</div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item" open><summary><span class="when">Now</span><span class="ttl">Revert items that missed the cut-off</span><span class="chip outl">If needed</span><span class="stag">2026-20</span><i class="chev"></i></summary>
+            <div class="more"><p>If anything missed the cut-off: remove the ticket's commits from the release branch so it is gone from Demo before Live starts. Re-point the feature branch at the next release. The IM/AM decide which items.</p><div class="links"><a href="#">Revert procedure ↗</a></div></div></details></li>
+        </ul>
+        <div class="slot">Tonight</div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item upd"><summary><span class="when">Tonight</span><span class="ttl">Live update</span><span class="chip upd">Update</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item due"><summary><span class="when soft">After</span><span class="ttl">Create the Golive release page</span><span class="chip due">Due</span><i class="chev"></i></summary></details></li>
+        </ul>
+        <div class="slot">Earlier today</div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item"><summary><span class="when soft">12:00</span><span class="ttl">Fix cut-off</span><span class="chip passed">Passed</span><i class="chev"></i></summary></details></li>
+        </ul>
+      </main></div>
+    </div></div>
+  </div>
+
+  <div class="mobile-col">
+    <div class="frame-label"><span class="lt">E</span><b>Mon 5 Oct 20:00 · Dev · light</b><span>evening (green bar) · deploy is described as scheduled</span></div>
+    <div class="frame m t-light"><div class="fold" data-fold="fold 844" style="--fold:844px">
+      <header class="topbar"><div class="brand"><span class="date">Mon 5 Oct</span><span class="sub">2026-21 · day 6</span></div><span class="btn" aria-label="Viewing as: Dev">Dev ▾</span></header>
+      <section class="band band--evening" data-m="band">
+        <div><span class="ltag">&lt;tonight&gt;</span>
+          <h1>Live update tonight</h1>
+          <p class="sub">After the update: create the Golive Release 2026-20 page.</p></div>
+        <ol class="seq" aria-label="Today in order">
+          <li class="earlier"><span>Earlier today</span><b>Fix cut-off 12:00</b></li>
+          <li class="earlier"><span>Earlier today</span><b>Reverts, if needed</b></li>
+          <li aria-current="step"><span>Tonight, 20:00</span><b>Live update</b></li>
+          <li><span>After</span><b>Golive page</b></li>
+        </ol>
+      </section>
+      <div class="duty"><span class="tonight"><span class="dk">Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London</span>Dev B. (lead), Dev C. (backup)</span><span><span class="dk">Support this week</span>Dev E.</span></div>
+      <div class="body"><main>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Dev</h2></div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item upd" open><summary><span class="when">Tonight</span><span class="ttl">Live update</span><span class="chip upd">Update</span><span class="stag">2026-20</span><i class="chev"></i></summary>
+            <div class="more"><p>Monday evening: Demo moves to Live per the Demo/Live matrix. Confirm when done.</p><div class="links"><a href="#">Demo/Live matrix ↗</a><a href="#">Release 2026-20 pages ↗</a><a href="#">Source ↗</a></div></div></details></li>
+          <li data-m="item"><details class="item due"><summary><span class="when soft">After</span><span class="ttl">Create the Golive release page<small>Tonight or tomorrow morning</small></span><span class="chip due">Due</span><i class="chev"></i></summary></details></li>
+        </ul>
+        <div class="nextfor"><b class="k">Next for you</b><span><b>Wed 7 Oct</b> · 14:00 Pre-Refinement</span></div>
+      </main></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ================================================================== F -->
+<div class="frame-label"><span class="lt">F</span><b>Desktop · Tue 29 Sep 2026, 09:10 · Dev · dark</b><span>urgent (Demo update day; orange for Dev and QA only, same orange in both themes)</span></div>
+<div class="scroller">
+<div class="frame d t-dark">
+  <div class="chrome"><span class="tab"><i class="fav key"></i>Demo update tonight · Sprint Board</span><span class="tab ghost">GitHub</span></div>
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Tuesday 29 September 2026</span><span class="sub">MGA Sprint Board</span></div>
+    <div class="controls"><span class="seg-label" id="va-f">Viewing as</span><span class="seg" role="radiogroup" aria-labelledby="va-f"><span aria-checked="false">Everyone</span><span aria-checked="false">IM / AM</span><span aria-checked="true">Dev</span><span aria-checked="false">QA</span><span aria-checked="false">Lead</span><span aria-checked="false">Analyst</span></span><span class="btn">View date</span></div>
+  </header>
+  <section class="band band--urgent">
+    <div><span class="ltag">&lt;demo day&gt;</span> <span class="meta">2026-20 · 2026-21 day 2 of 10</span>
+      <h1><span class="sr">Demo update day. </span>Demo update tonight</h1>
+      <p class="sub">Code freeze holds until the update. Afterwards: Release 2026-20 page.</p>
+      <div class="blinks"><a href="#">Demo/Live matrix ↗</a></div></div>
+    <div class="next" style="background:#FFBE91;border-color:#FFBE91;color:#1A1A1A"><div class="k" style="color:#1A1A1A">Tonight</div><div class="big">Beta → Demo</div><div class="what">Everything on Beta moves to Demo unless excluded in the matrix</div></div>
+    <ol class="seq" aria-label="Today in order">
+      <li aria-current="step"><span>Today</span><b>Freeze holds · QA: Ready for Demo</b></li>
+      <li><span>17:00</span><b>Demo update</b></li>
+      <li><span>After the update</span><b>Release 2026-20 page</b></li>
+      <li><span>Wed 30 Sep</span><b>Beta reopens · UAT opens</b></li>
+    </ol>
+  </section>
+  <div class="duty"><span class="tonight"><span class="dk">Tonight · Demo update 2026-20 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London</span>Dev A.</span><span><span class="dk">Support this week</span>Dev D.</span></div>
+  <div class="body">
+    <main class="main">
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Dev</h2></div>
+      <div class="slot hot">Today</div>
+      <ul class="agenda">
+        <li><details class="item"><summary><span class="when soft">Today</span><span class="chip outl">Last day</span><span class="ttl">Code freeze<small>until the Demo update tonight</small></span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <div class="slot">Tonight</div>
+      <ul class="agenda">
+        <li><details class="item upd" open><summary><span class="when">Tonight</span><span class="chip upd">Update</span><span class="ttl">Demo update</span><span class="stag">2026-20</span><i class="chev"></i></summary>
+          <div class="more"><p>Tuesday evening: everything on Beta moves to Demo unless excluded in the Demo/Live matrix. Confirm when done.</p><div class="links"><a href="#">Demo/Live matrix ↗</a><a href="#">Release 2026-19 (example) ↗</a><a href="#">Source ↗</a></div></div></details></li>
+        <li><details class="item due"><summary><span class="when soft">After</span><span class="chip due">Due</span><span class="ttl">Create the release page<small>Tonight or tomorrow morning</small></span><span class="stag">2026-20</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <details class="group"><summary><b>Every day this sprint</b><span class="cnt">4 · code reviews within 24h · verify on Beta · overruns · log time</span><i class="chev"></i></summary></details>
+      <div class="nextfor"><b class="k">Tomorrow, Wed 30 Sep</b><span>14:00 Pre-Refinement · UAT window opens</span></div>
+      <details class="group"><summary><b>Also today</b><span class="cnt">QA: All tasks tested and Ready for Demo · Run regression (last day)</span><i class="chev"></i></summary></details>
+    </main>
+    <div>
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints in play</h2></div>
+      <ul class="rail">
+        <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">Code freeze · Demo update 17:00</span></div><div class="steps"><span>Plan</span><span>Build</span><span class="now">Freeze</span><span>UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Sprint day 2 of 10 · code freeze Fri 9 Oct</span></div><div class="steps"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Refinement · planning Thu 8 Oct</span></div><div class="steps"><span class="now">Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+      </ul>
+      <div class="sec-head" style="margin-top:22px"><span class="ltag" aria-hidden="true">&lt;coming up&gt;</span><h2>Next 7 working days</h2><span class="aside">Dev</span></div>
+      <ul class="cu">
+        <li><div class="d"><b>Wed 30 Sep</b></div><ul><li><span class="t">14:00</span>Pre-Refinement<span class="s">2026-22</span></li><li>UAT window opens, until Mon 5 Oct 12:00<span class="s">2026-20</span></li></ul></li>
+        <li><div class="d"><b>Thu 1 Oct</b></div><ul><li><span class="t">14:00</span>Full Refinement<span class="s">2026-22</span></li></ul></li>
+        <li><div class="d"><b>Mon 5 Oct</b>cut-off</div><ul><li><span class="t">12:00</span>Fix cut-off<span class="s">2026-20</span></li><li>Revert items that missed the cut-off<span class="s">if needed</span></li><li class="unit"><span class="t">Tonight</span>Live update<span class="s">2026-20</span></li><li>Create the Golive release page<span class="s">2026-20</span></li></ul></li>
+        <li><div class="d"><b>Wed 7 Oct</b></div><ul><li><span class="t">14:00</span>Pre-Refinement<span class="s">2026-22</span></li></ul></li>
+        <li><div class="d"><b>Thu 8 Oct</b></div><ul><li class="unit">Sprint planning<span class="s">2026-22</span></li></ul></li>
+      </ul>
+      <div class="cu-more">+3 more days to Mon 12 Oct</div>
+    </div>
+  </div>
+  <footer class="foot"><span>Times are Tallinn time</span><span>Sources</span><span>Rota updated 1 Oct</span></footer>
+</div>
+</div>
+
+<!-- ================================================================== mobile row 2: G I -->
+<div class="frame-label" style="margin-top:44px"><b>Mobile · other key days</b></div>
+<div class="mobile-row">
+  <div class="mobile-col">
+    <div class="frame-label"><span class="lt">G</span><b>Wed 30 Sep 08:50 · IM / AM · light</b><span>event · UAT opens · deadline with Copy · duty "last night"</span></div>
+    <div class="frame m t-light"><div class="fold" data-fold="fold 844" style="--fold:844px">
+      <header class="topbar"><div class="brand"><span class="date">Wed 30 Sep</span><span class="sub">2026-21 · day 3</span></div><span class="btn" aria-label="Viewing as: IM / AM">IM / AM ▾</span></header>
+      <section class="band" data-m="band">
+        <div><span class="meta">2026-20 · UAT on Demo</span>
+          <h1>UAT opens: deadline Mon 5 Oct 12:00</h1>
+          <p class="sub">Once the developers confirm the Demo update, tell clients what is on Demo.</p></div>
+      </section>
+      <div class="duty"><span><span class="dk">Last night · Demo update 2026-20</span>Dev A.</span><span><span class="dk">Support this week</span>Dev D.</span></div>
+      <div class="body"><main>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for IM / AM</h2></div>
+        <div class="slot hot">Morning</div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item"><summary><span class="when soft">First</span><span class="ttl">Check your changes on Demo</span><span class="chip check">Check</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item due" open><summary><span class="when soft">Today</span><span class="ttl">Tell clients their items are on Demo</span><span class="chip due">Due</span><span class="stag">2026-20</span><i class="chev"></i></summary>
+            <div class="more"><div class="fact"><span>UAT deadline: <b>Mon 5 Oct, 12:00</b> (Tallinn time)</span><span class="btn">Copy</span></div><p>Once developers confirm the Demo update, tell each client what is on Demo and give them the UAT deadline.</p><div class="links"><a href="#">Release 2026-20 page ↗</a><a href="#">Source ↗</a></div></div></details></li>
+        </ul>
+        <div class="slot">Today</div>
+        <ul class="agenda">
+          <li data-m="item"><details class="item due"><summary><span class="when soft">Before Thu</span><span class="ttl">Answer parked refinement questions</span><span class="chip due">Due</span><span class="stag">2026-22</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item"><summary><span class="when soft">Today</span><span class="ttl">UAT window<small>until Mon 5 Oct 12:00</small></span><span class="chip outl">Opens today</span><i class="chev"></i></summary></details></li>
+          <li data-m="item"><details class="item"><summary><span class="when soft">Today</span><span class="ttl">Set tasks Ready for Live<small>by Mon 5 Oct 12:00</small></span><span class="chip outl">Opens today</span><i class="chev"></i></summary></details></li>
+        </ul>
+        <div class="nextfor"><b class="k">Tomorrow, Thu 1 Oct</b><span>14:00 Full Refinement</span></div>
+      </main></div>
+    </div></div>
+  </div>
+
+  <div class="mobile-col">
+    <div class="frame-label"><span class="lt">I</span><b>Fri 9 Oct 08:50 · QA · dark</b><span>event · code freeze starts · first-day promotion</span></div>
+    <div class="frame m t-dark">
+      <header class="topbar"><div class="brand"><span class="date">Fri 9 Oct</span><span class="sub">2026-21 · day 10</span></div><span class="btn" aria-label="Viewing as: QA">QA ▾</span></header>
+      <section class="band">
+        <div><span class="meta">2026-21</span>
+          <h1>Code freeze starts today</h1>
+          <p class="sub">Run regression opens today, until the Demo update Tue 13 Oct (evening).</p></div>
+      </section>
+      <div class="duty"><span><span class="dk">Support this week</span>Dev E.</span><span><span class="dk">Next · Demo update Tue 13 Oct · 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21)</span>Dev C.</span></div>
+      <div class="body"><main>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for QA</h2></div>
+        <ul class="agenda">
+          <li><details class="item" open><summary><span class="when soft">Today</span><span class="ttl">Run regression<small>until the Demo update Tue 13 Oct (evening)</small></span><span class="chip outl">Opens today</span><span class="stag">2026-21</span><i class="chev"></i></summary>
+            <div class="more"><p>Execute manual and automated regression on Beta during the freeze. QA controls what may still be deployed. It ends with the Demo update, by when every task should be Ready for Demo.</p><div class="links"><a href="#">Source ↗</a></div></div></details></li>
+          <li><details class="item"><summary><span class="when soft">Today</span><span class="ttl">Code freeze<small>until the Demo update Tue 13 Oct (evening). Beta reopens Wed 14 Oct.</small></span><span class="chip outl">Opens today</span><i class="chev"></i></summary></details></li>
+        </ul>
+        <details class="group"><summary><b>Every day this sprint</b><span class="cnt">3 · last day</span><i class="chev"></i></summary></details>
+        <div class="nextfor"><b class="k">Next for you</b><span><b>Mon 12 Oct</b> · Bug retro · Sprint starts</span></div>
+      </main>
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints</h2></div>
+        <ul class="rail">
+          <li><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">Live update was Mon 5 Oct</span></div></li>
+          <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Code freeze starts today · Demo update Tue 13 Oct evening</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Planned · starts Mon 12 Oct</span></div></li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== H -->
+<div class="frame-label"><span class="lt">H</span><b>Laptop 1093 · Thu 8 Oct 2026, 08:50 · Lead · light</b><span>event: "Sprint planning today. Code freeze starts tomorrow." (B-2) · Also today expanded for Lead · fold at 614</span></div>
+<div class="scroller">
+<div class="frame l t-light">
+  <div class="chrome"><span class="tab"><i class="fav"></i>Planning today · 2026-21 day 9 · Sprint Board</span></div>
+  <div class="fold" data-fold="fold 614 px" style="--fold:614px">
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Thursday 8 October 2026</span></div>
+    <div class="controls"><span class="seg-label" id="va-h">Viewing as</span><span class="seg" role="radiogroup" aria-labelledby="va-h"><span aria-checked="false">Everyone</span><span aria-checked="false">IM / AM</span><span aria-checked="false">Dev</span><span aria-checked="false">QA</span><span aria-checked="true">Lead</span><span aria-checked="false">Analyst</span></span><span class="btn">View date</span></div>
+  </header>
+  <section class="band" data-m="band">
+    <div><span class="meta">2026-21 · day 9 of 10</span>
+      <h1>Sprint planning today. Code freeze starts tomorrow.</h1>
+      <p class="sub">Plan 2/3 of capacity, keep 1/3 as buffer. Bug retro page due tomorrow.</p></div>
+    <div class="next"><div class="k">Next key moment · 2026-21</div><div class="big">Tue 13 Oct, evening</div><div class="what">Demo update · in 3 working days</div></div>
+  </section>
+  <div class="duty"><span><span class="dk">Support this week</span>Dev E.</span><span><span class="dk">Next · Demo update Tue 13 Oct · 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21)</span>Dev C.</span></div>
+  <div class="body">
+    <main class="main">
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Lead</h2></div>
+      <ul class="agenda">
+        <li data-m="item"><details class="item meet"><summary><span class="when soft">Today</span><span class="chip meet">Meeting</span><span class="ttl">Sprint planning</span><span class="stag">2026-22 · starts Mon 12 Oct</span><i class="chev"></i></summary></details></li>
+      </ul>
+      <details class="group" open><summary><b>Gates for planning</b><span class="cnt">were due Wed 7 Oct · check in Jira</span><i class="chev"></i></summary>
+        <ul class="rows">
+          <li><b>Check Definition of Ready</b><span>IM / AM</span></li>
+          <li><b>Hold priority calls before planning</b><span>IM / AM</span></li>
+          <li><b>QA estimates on sprint candidates</b><span>IM / AM, QA</span></li>
+          <li><b>Bring UAT findings to planning as first priority</b><span>IM / AM, Lead · 2026-20 non-blocking findings</span></li>
+        </ul></details>
+      <details class="group" open><summary><b>Also today</b><span class="cnt">other roles</span><i class="chev"></i></summary>
+        <ul class="rows"><li><span class="chip other">Due</span><b>Regression plans ready in TestRail</b><span>QA · freeze tomorrow</span></li></ul></details>
+      <div class="nextfor"><b class="k">Tomorrow, Fri 9 Oct</b><span><span class="chip due">Due</span> Prepare the bug retro page</span></div>
+      <details class="group"><summary><b>Every day this sprint</b><span class="cnt">1 · Log time today</span><i class="chev"></i></summary></details>
+    </main>
+    <div class="lower">
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints</h2></div>
+        <ul class="rail">
+          <li><div class="r1"><a class="lab" href="#sprint-2026-20">2026-20</a><span class="st">Live update was Mon 5 Oct</span></div><div class="steps"><span>Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span class="now">Live</span></div></li>
+          <li><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Sprint day 9 of 10 · code freeze Fri 9 Oct</span></div><div class="steps"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+          <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Sprint planning today · starts Mon 12 Oct</span></div><div class="steps"><span class="now">Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+        </ul>
+      </div>
+      <div>
+        <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;coming up&gt;</span><h2>Next 7 working days</h2><span class="aside">Lead</span></div>
+        <ul class="cu">
+          <li><div class="d"><b>Fri 9 Oct</b></div><ul><li>Prepare the bug retro page<span class="s">2026-21</span></li><li class="unit">Code freeze starts<span class="s">2026-21</span></li></ul></li>
+          <li><div class="d"><b>Mon 12 Oct</b></div><ul><li>Bug retro<span class="s">2026-21</span></li><li>Sprint starts<span class="s">2026-22</span></li></ul></li>
+          <li><div class="d"><b>Tue 13 Oct</b></div><ul><li class="unit"><span class="t">Tonight</span>Demo update<span class="s">2026-21</span></li></ul></li>
+          <li><div class="d"><b>Wed 14 Oct</b></div><ul><li>Rank the refinement queue<span class="s">2026-23</span></li></ul></li>
+          <li><div class="d"><b>Mon 19 Oct</b></div><ul><li class="unit"><span class="t">12:00</span>Fix cut-off · Live update tonight<span class="s">2026-21</span></li></ul></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><span>Times are Tallinn time</span><span>Sources</span><span>Rota updated 1 Oct</span></footer>
+  </div>
+</div>
+</div>
+
+<!-- ================================================================== J -->
+<div class="frame-label"><span class="lt">J</span><b>Desktop · Preview of Mon 12 Oct 2026 · first visit (no role stored) · light</b><span>preview bar · heads-up band (Demo tomorrow) · role picker · duty "not assigned yet" · cycle explainer open on first visit</span></div>
+<div class="scroller">
+<div class="frame d t-light">
+  <div class="chrome"><span class="tab"><i class="fav"></i>Preview Mon 12 Oct · Demo tomorrow · 2026-22 day 1 · Sprint Board</span></div>
+  <div class="previewbar" role="region" aria-label="Preview"><span>Preview · <b>Monday 12 October 2026</b></span><span class="pb" aria-label="Previous day">‹</span><span class="pb" aria-label="Next day">›</span><span class="pb">Pick a date</span><a class="back" href="#" style="color:inherit">Back to today</a></div>
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Monday 12 October 2026</span><span class="sub">MGA Sprint Board</span></div>
+    <div class="controls"><span class="seg-label" id="va-j">Viewing as</span><span class="seg" role="radiogroup" aria-labelledby="va-j"><span aria-checked="true">Everyone</span><span aria-checked="false">IM / AM</span><span aria-checked="false">Dev</span><span aria-checked="false">QA</span><span aria-checked="false">Lead</span><span aria-checked="false">Analyst</span></span><span class="btn">View date</span></div>
+  </header>
+  <section class="band band--headsup">
+    <div><span class="ltag">&lt;tomorrow&gt;</span> <span class="meta">2026-22 · day 1 of 10</span>
+      <h1><span class="sr">Heads-up for tomorrow. </span>2026-22 starts today. Demo update tomorrow.</h1>
+      <p class="sub">Bug retro for 2026-21 today. IM/AM: Demo/Live matrix due.</p>
+      <div class="blinks"><a href="#">Demo/Live matrix ↗</a></div></div>
+    <div class="next"><div class="k">Tomorrow evening · 2026-21</div><div class="big">Tue 13 Oct</div><div class="what">Demo update · UAT opens Wed 14 Oct</div></div>
+  </section>
+  <div class="duty"><span><span class="dk">Support this week</span><span class="na">not assigned yet</span></span><span><span class="dk">Next · Demo update Tue 13 Oct · 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21)</span>Dev C.</span></div>
+  <div class="body">
+    <main class="main">
+      <div class="picker"><h2>Show only what is yours</h2><p>Which of these are you? You can change it any time under "Viewing as".</p>
+        <div class="grid"><span>IM / AM</span><span>Dev</span><span>QA</span><span>Lead</span><span>Analyst</span><span>Everyone</span></div>
+        <a class="new" href="#cycle-j">New here? See how the 2-week cycle works ↓</a></div>
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;your day&gt;</span><h2>Today for Everyone</h2></div>
+      <ul class="agenda">
+        <li><details class="item due"><summary><span class="when soft">Today</span><span class="chip due">Due</span><span class="ttl">Update Demo/Live matrix for Demo</span><span class="roles"><span>IM / AM</span></span><i class="chev"></i></summary></details></li>
+        <li><details class="item meet"><summary><span class="when soft">Today</span><span class="chip meet">Meeting</span><span class="ttl">Bug retro</span><span class="roles"><span>Everyone</span></span><i class="chev"></i></summary></details></li>
+        <li><details class="item"><summary><span class="when soft">Today</span><span class="chip check">Check</span><span class="ttl">Sprint starts</span><span class="roles"><span>Everyone</span></span><i class="chev"></i></summary></details></li>
+      </ul>
+      <details class="group" open><summary><b>Running</b><span class="cnt">2</span><i class="chev"></i></summary>
+        <ul class="rows"><li><b>Code freeze</b><span>2026-21 · until the Demo update Tue 13 Oct (evening) · Dev, QA, IM / AM</span></li><li><b>Run regression</b><span>2026-21 · until the Demo update · QA</span></li></ul></details>
+    </main>
+    <div>
+      <div class="sec-head"><span class="ltag" aria-hidden="true">&lt;sprints&gt;</span><h2>Three sprints in play</h2></div>
+      <ul class="rail">
+        <li class="hot"><div class="r1"><a class="lab" href="#sprint-2026-21">2026-21</a><span class="st">Code freeze · Demo update Tue 13 Oct evening</span></div><div class="steps"><span>Plan</span><span>Build</span><span class="now">Freeze</span><span>UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-22">2026-22</a><span class="st">Sprint day 1 of 10 · code freeze Fri 23 Oct</span></div><div class="steps"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+        <li><div class="r1"><a class="lab" href="#sprint-2026-23">2026-23</a><span class="st">Refinement · planning Thu 22 Oct</span></div><div class="steps"><span class="now">Plan</span><span>Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div></li>
+      </ul>
+      <p class="band" style="display:block;border:0;padding:12px 0 0;font-size:13px;color:var(--muted)">ⓘ Dates after 2026-22 are projected from the 2-week cadence.</p>
+    </div>
+  </div>
+
+  <details class="cycle" id="cycle-j" open>
+    <summary><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><span class="aside">Open on a first visit. Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></summary>
+    <div class="track-wrap" tabindex="0" role="region" aria-label="Cycle timeline, scrolls sideways">
+      <div class="track" role="img" aria-label="2026-21: planning Thu 24 Sep, built on Beta 28 Sep to 9 Oct, code freeze from Fri 9 Oct until the Demo update Tue 13 Oct evening, UAT on Demo from Wed 14 Oct, fix cut-off and Live update Mon 19 Oct. 2026-22: planning Thu 8 Oct, built 12 to 23 Oct, code freeze until the Demo update Tue 27 Oct, Live update Mon 2 Nov. 2026-23: refined at Pre-Refinement Wed 14 Oct and Wed 21 Oct and Full Refinement Thu 15 Oct, planning Thu 22 Oct, Demo update Tue 10 Nov, Live update Mon 16 Nov.">
+        <div class="axis"><span style="left:0">21 Sep</span><span style="left:112px">28 Sep</span><span style="left:224px">5 Oct</span><span style="left:336px">12 Oct</span><span style="left:448px">19 Oct</span><span style="left:560px">26 Oct</span><span style="left:672px">2 Nov</span><span style="left:784px">9 Nov</span><span style="left:896px">16 Nov</span></div>
+        <div class="lane" style="top:28px">
+          <span class="ln" style="left:4px"><b>2026-21</b>code freeze</span>
+          <span class="bar build" style="left:113px;width:174px"></span><span class="blab" style="left:150px">Build on Beta</span>
+          <span class="bar freeze" style="left:289px;width:78px"></span><span class="blab" style="left:292px">Freeze</span>
+          <span class="bar uat" style="left:369px;width:78px"></span><span class="blab" style="left:380px">UAT</span>
+          <span class="stn plan" style="left:56px"></span><span class="stl" style="left:56px">Plan 24 Sep</span>
+          <span class="stn" style="left:360px"></span><span class="stl" style="left:340px">Demo 13 Oct</span>
+          <span class="stn live" style="left:456px"></span><span class="stl" style="left:476px">Cut-off · Live 19 Oct</span>
+          <span class="env" style="left:150px">Beta</span><span class="env" style="left:380px">Demo</span><span class="env" style="left:470px">→ Live</span>
+        </div>
+        <div class="lane" style="top:128px">
+          <span class="ln" style="left:228px"><b>2026-22</b>building</span>
+          <span class="bar build" style="left:337px;width:174px"></span><span class="blab" style="left:380px">Build on Beta</span>
+          <span class="bar freeze" style="left:513px;width:78px"></span><span class="blab" style="left:516px">Freeze</span>
+          <span class="bar uat" style="left:593px;width:78px"></span><span class="blab" style="left:604px">UAT</span>
+          <span class="stn plan" style="left:280px"></span><span class="stl" style="left:270px">Plan 8 Oct</span>
+          <span class="stn" style="left:584px"></span><span class="stl" style="left:570px">Demo 27 Oct</span>
+          <span class="stn live" style="left:680px"></span><span class="stl" style="left:700px">Live 2 Nov</span>
+        </div>
+        <div class="lane" style="top:228px">
+          <span class="ln" style="left:376px"><b>2026-23</b>being refined</span>
+          <span class="ref" style="left:376px"></span><span class="ref" style="left:392px"></span><span class="ref" style="left:488px"></span>
+          <span class="stl" style="left:420px">Pre-Ref Wed · Full Ref Thu · Pre-Ref Wed →</span>
+          <span class="stn plan" style="left:504px"></span><span class="stl" style="left:530px;top:84px">Plan 22 Oct</span>
+          <span class="bar build" style="left:561px;width:174px"></span>
+          <span class="bar freeze" style="left:737px;width:78px"></span>
+          <span class="bar uat" style="left:817px;width:78px"></span>
+          <span class="stn live" style="left:904px"></span><span class="stl" style="left:930px">Live 16 Nov</span>
+        </div>
+        <div class="todayline" style="left:343px"><span>Mon 12 Oct</span></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Bars: outlined grey = build on Beta (10 working days) · blue "Freeze" = code freeze until the Demo update (Tue evening) · light orange "UAT" = clients test on Demo until the fix cut-off · ◆ = refinement sessions, which feed the next sprint's planning · weekends shaded.</p>
+    <dl class="gloss">
+      <div><dt>Beta → Demo → Live</dt><dd>The three environments. A sprint is built on Beta, moves to Demo on Tuesday evening, and to Live on Monday evening.</dd></div>
+      <div><dt>Code freeze</dt><dd>From the sprint's last Friday until the Demo update on Tuesday evening. Beta reopens Wednesday.</dd></div>
+      <div><dt>Demo update / Live update</dt><dd>The 2-weekly deploys. Client project go-lives are not on this board.</dd></div>
+      <div><dt>Demo/Live matrix</dt><dd>Per-tenant configuration switches. Code always deploys to all tenants.</dd></div>
+      <div><dt>UAT</dt><dd>Clients test on Demo from Wednesday until the fix cut-off.</dd></div>
+      <div><dt>Fix cut-off</dt><dd>Monday 12:00 Tallinn time. After it: reverts, not fixes.</dd></div>
+      <div><dt>Ready for Demo / Ready for Live</dt><dd>Task states set by QA before the Demo update, and by IM / AM after the client signs off.</dd></div>
+      <div><dt>Release / Golive Release page</dt><dd>Confluence pages "Release 2026-NN" and "Golive Release 2026-NN", written by developers after each update.</dd></div>
+      <div><dt>Pre-Refinement / Full Refinement</dt><dd>Wednesday 14:00 every week / Thursday 14:00 in week 1. Both estimate work for the next sprint.</dd></div>
+      <div><dt>Definition of Ready, priority call</dt><dd>What a ticket needs before planning; the call where each client fixes its priorities.</dd></div>
+      <div><dt>Bug retro</dt><dd>Monday after a sprint ends: review its bugs and escaped defects.</dd></div>
+      <div><dt>Hotfix</dt><dd>The only change that bypasses the freeze. Event-driven, not on this calendar.</dd></div>
+    </dl>
+  </details>
+  <footer class="foot"><span>Times are Tallinn time</span><span>Sources: 11 Confluence pages</span><span>Confluence confirms dates up to 2026-22</span><span>Rota updated 1 Oct</span></footer>
+</div>
+</div>
+
+<!-- ================================================================== L (v2.1) -->
+<div class="frame-label"><span class="lt">L</span><b>v2.1 · Sprint view · desktop · <code>#sprint-2026-21</code> viewed Thu 1 Oct 2026, 09:00 · IM / AM · light</b><span>a full view that replaces main · shareable · focus goes to the h1 · ← Today and ‹ › are links</span></div>
+<div class="scroller">
+<div class="frame d t-light">
+  <div class="chrome"><span class="tab"><i class="fav"></i>Sprint 2026-21 · Sprint Board</span><span class="tab ghost">Teams</span></div>
+  <header class="topbar">
+    <div class="brand"><i class="mark"></i><span class="date">Thursday 1 October 2026</span><span class="sub">MGA Sprint Board</span></div>
+    <div class="controls"><span class="seg-label" id="va-l">Viewing as</span><span class="seg" role="radiogroup" aria-labelledby="va-l"><span aria-checked="false">Everyone</span><span aria-checked="true">IM / AM</span><span aria-checked="false">Dev</span><span aria-checked="false">QA</span><span aria-checked="false">Lead</span><span aria-checked="false">Analyst</span></span><span class="btn">View date</span></div>
+  </header>
+  <nav class="sv-nav" aria-label="Sprint navigation"><a href="#">← Today</a><span class="sv-arrows"><a href="#sprint-2026-20" aria-label="Previous sprint 2026-20">‹ 2026-20</a><a href="#sprint-2026-22" aria-label="Next sprint 2026-22">2026-22 ›</a></span><span class="btn">Copy link</span></nav>
+  <section class="sv-head">
+    <div>
+      <h1 tabindex="-1">Sprint 2026-21</h1>
+      <p class="sv-status">Sprint day 4 of 10 · code freeze Fri 9 Oct · <span class="muted">Mon 28 Sep – Fri 9 Oct · release Mon 19 Oct</span></p>
+      <div class="steps" style="max-width:520px"><span>Plan</span><span class="now">Build</span><span>Freeze</span><span>UAT</span><span>Live</span></div>
+    </div>
+    <div class="sv-duty">
+      <div><span class="dk">Demo update · Tue 13 Oct · 17:00 Tallinn · 16:00 Warsaw · 15:00 London</span><br>Dev C.</div>
+      <div><span class="dk">Live update · Mon 19 Oct · 20:00 Tallinn · 19:00 Warsaw · 18:00 London</span><br>Lead <span class="na">not assigned yet</span> · Backup <span class="na">not assigned yet</span></div>
+    </div>
+  </section>
+  <div class="body">
+    <div>
+      <div class="sec-head"><h2>Timeline</h2><span class="aside">Tallinn time</span></div>
+      <ol class="tl">
+        <li class="past"><span class="tld">Thu 24 Sep</span><b>Sprint planning</b><span class="tls">Passed</span></li>
+        <li class="past"><span class="tld">Mon 28 Sep</span><b>Sprint starts</b><span class="tls">Passed</span></li>
+        <li class="now" aria-current="step"><span class="tld">Thu 1 Oct</span><b>Today · sprint day 4 of 10</b><span class="tls">Today</span></li>
+        <li><span class="tld">Fri 9 Oct</span><b>Code freeze starts<small>until the Demo update Tue 13 Oct (evening)</small></b><span class="tls">Coming · in 6 working days</span></li>
+        <li><span class="tld">Mon 12 Oct</span><b>Bug retro</b><span class="tls">Coming</span></li>
+        <li class="key"><span class="tld">Tue 13 Oct<small>17:00 Tallinn · 16:00 Warsaw · 15:00 London</small></span><b>Demo update<small>Deployer: Dev C.</small></b><span class="tls">Coming</span></li>
+        <li><span class="tld">Wed 14 Oct</span><b>UAT opens · Beta reopens<small>UAT deadline Mon 19 Oct 12:00</small></b><span class="tls">Coming</span></li>
+        <li class="key"><span class="tld">Mon 19 Oct<small>12:00 Tallinn · 11:00 Warsaw · 10:00 London</small></span><b>Fix cut-off</b><span class="tls">Coming</span></li>
+        <li class="key"><span class="tld">Mon 19 Oct<small>20:00 Tallinn · 19:00 Warsaw · 18:00 London</small></span><b>Live update<small>Lead and backup: not assigned yet</small></b><span class="tls">Coming</span></li>
+      </ol>
+      <div class="sec-head" style="margin-top:18px"><h2>Holidays</h2></div>
+      <p class="muted" style="margin:0">No public holidays (EE, PL) between planning and Live.</p>
+    </div>
+    <div>
+      <div class="sec-head"><h2>Actions for IM / AM</h2><span class="seg" role="radiogroup" aria-label="Show actions for" style="margin-left:auto"><span aria-checked="true">IM / AM</span><span aria-checked="false">Everyone</span></span></div>
+      <details class="group"><summary><b>Passed</b><span class="cnt">8 · refinement, planning gates, sprint planning, sprint start</span><i class="chev"></i></summary></details>
+      <details class="group"><summary><b>Running</b><span class="cnt">2 · Flag overruns at 80% · Log time today</span><i class="chev"></i></summary></details>
+      <details class="group" open><summary><b>Coming</b><span class="cnt">13</span><i class="chev"></i></summary>
+        <ul class="cu" style="margin-top:4px">
+          <li><div class="d"><b>Fri 9 Oct</b></div><ul><li>Code freeze, until the Demo update Tue 13 Oct (evening)</li></ul></li>
+          <li><div class="d"><b>Mon 12 Oct</b></div><ul><li>Update Demo/Live matrix for Demo</li><li>Bug retro</li></ul></li>
+          <li><div class="d"><b>Wed 14 Oct</b></div><ul><li>Check your changes on Demo</li><li>Tell clients their items are on Demo</li><li>UAT window opens · Set tasks Ready for Live opens</li></ul></li>
+          <li><div class="d"><b>Fri 16 Oct</b></div><ul><li>Update Demo/Live matrix for Live</li><li>Chase UAT results before the cut-off</li></ul></li>
+          <li><div class="d"><b>Mon 19 Oct</b></div><ul><li>Last chase of UAT results before 12:00</li><li><span class="t">12:00</span>Fix cut-off</li><li>Agree reverts and tell affected clients<span class="s">if needed</span></li><li>Confirm Live update to clients<span class="s">after the update</span></li></ul></li>
+        </ul></details>
+    </div>
+  </div>
+  <footer class="foot"><span>Link: insly-sprint-monitor.onrender.com/#sprint-2026-21</span><span>Times are Tallinn time unless three offices are shown</span><span>Rota updated 1 Oct</span></footer>
+</div>
+</div>
+
+<!-- ================================================================== M (v2.1) -->
+<div class="frame-label"><span class="lt">M</span><b>v2.1 · Sprint view · mobile · <code>#sprint-2027-1</code> viewed Thu 1 Oct 2026 · IM / AM · dark</b><span>year end · holiday notice on a key date · "not assigned yet" in the rota</span></div>
+<div class="mobile-row">
+  <div class="mobile-col">
+    <div class="frame m t-dark">
+      <header class="topbar"><div class="brand"><span class="date">Thu 1 Oct</span><span class="sub">2026-21 · day 4</span></div><span class="btn" aria-label="Viewing as: IM / AM">IM / AM ▾</span></header>
+      <nav class="sv-nav" aria-label="Sprint navigation"><a href="#">← Today</a><span class="sv-arrows"><a href="#sprint-2026-25" aria-label="Previous sprint 2026-25">‹ 2026-25</a><a href="#sprint-2027-2" aria-label="Next sprint 2027-2">2027-2 ›</a></span></nav>
+      <section class="sv-head">
+        <div>
+          <h1 tabindex="-1">Sprint 2027-1</h1>
+          <p class="sv-status">Upcoming · planning Thu 3 Dec <span class="chip outl">projected</span></p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px">Demo Tue 5 Jan and Live Mon 11 Jan were set by the owner. There is no release on 28 Dec.</p>
+        </div>
+        <div class="sv-note">ⓘ Holidays during release: 24–25 Dec (EE, PL), 1 Jan (EE, PL), 6 Jan (PL, the day UAT opens)</div>
+      </section>
+      <div class="body">
+        <div>
+          <div class="sec-head"><h2>Timeline</h2></div>
+          <ol class="tl">
+            <li><span class="tld">Thu 3 Dec</span><b>Sprint planning</b><span class="tls">Coming</span></li>
+            <li><span class="tld">Mon 7 Dec</span><b>Sprint starts</b><span class="tls">Coming</span></li>
+            <li><span class="tld">Fri 18 Dec</span><b>Code freeze starts<small>until the Demo update Tue 5 Jan (evening)</small></b><span class="tls">Coming</span></li>
+            <li><span class="tld">Mon 21 Dec</span><b>Bug retro<small>falls in the year-end break; owner to confirm</small></b><span class="tls">Coming</span></li>
+            <li class="brk"><span class="tld">21 – 31 Dec</span><b>Year-end break<small>24–25 Dec, 1 Jan: EE, PL holidays</small></b><span class="tls"></span></li>
+            <li class="key"><span class="tld">Tue 5 Jan<small>17:00 Tallinn · 16:00 Warsaw · 15:00 London</small></span><b>Demo update<small>Deployer: not assigned yet</small></b><span class="tls">Coming</span></li>
+            <li><span class="tld">Wed 6 Jan</span><b>UAT opens · Beta reopens<small>ⓘ PL holiday (Epiphany)</small></b><span class="tls">Coming</span></li>
+            <li class="key"><span class="tld">Mon 11 Jan<small>12:00 Tallinn · 11:00 Warsaw · 10:00 London</small></span><b>Fix cut-off</b><span class="tls">Coming</span></li>
+            <li class="key"><span class="tld">Mon 11 Jan<small>20:00 Tallinn · 19:00 Warsaw · 18:00 London</small></span><b>Live update<small>Lead and backup: not assigned yet</small></b><span class="tls">Coming</span></li>
+          </ol>
+        </div>
+        <div>
+          <div class="sec-head"><h2>Actions for IM / AM</h2></div>
+          <details class="group"><summary><b>Coming</b><span class="cnt">23, from Wed 25 Nov</span><i class="chev"></i></summary></details>
+          <span class="seg" role="radiogroup" aria-label="Show actions for" style="margin-top:8px"><span aria-checked="true">IM / AM</span><span aria-checked="false">Everyone (41)</span></span>
+        </div>
+        <div>
+          <div class="sec-head"><h2>Holidays</h2></div>
+          <ul class="rows">
+            <li><b>Thu 24 Dec</b><span>Christmas Eve · EE, PL</span></li>
+            <li><b>Fri 25 Dec</b><span>Christmas Day · EE, PL</span></li>
+            <li><b>Fri 1 Jan</b><span>New Year · EE, PL</span></li>
+            <li><b>Wed 6 Jan</b><span>Epiphany · PL · UAT opens</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== K -->
+<div class="frame-label"><span class="lt">K</span><b>Band states side by side · light, then dark</b><span>The four non-calm states differ in fill, bar and tag. Only cut-off morning and Demo day (Dev/QA) are orange.</span></div>
+<div class="scroller">
+<div class="frame d t-light"><div class="sampler">
+  <section class="band band--urgent"><div><span class="ltag">&lt;cut-off day&gt;</span><h1>Fix cut-off at 12:00</h1><span class="meta">urgent · Mon &lt; 12:00 all · Demo Tue Dev/QA</span></div></section>
+  <section class="band band--after"><div><span class="ltag">&lt;cut-off passed&gt;</span><h1>Cut-off passed. Live update tonight.</h1><span class="meta">after · Mon 12:00–16:59</span></div></section>
+  <section class="band band--evening"><div><span class="ltag">&lt;tonight&gt;</span><h1>Live update tonight</h1><span class="meta">evening · deploy day ≥ 17:00</span></div></section>
+  <section class="band band--headsup"><div><span class="ltag">&lt;monday&gt;</span><h1>Cut-off Monday 12:00</h1><span class="meta">heads-up · eve, actors only</span></div></section>
+  <section class="band" style="border:1px solid var(--line)"><div><h1>Full Refinement at 14:00</h1><span class="meta">event</span></div></section>
+  <section class="band" style="border:1px solid var(--line)"><div><h1>No deadlines today</h1><span class="meta">quiet · next: Rank the refinement queue, Wed 7 Oct</span></div></section>
+  <section class="band band--weekend"><div><span class="ltag">&lt;weekend&gt;</span><h1>Weekend. Monday is cut-off and Live day.</h1></div></section>
+  <div class="pv"><span style="font-size:13px">Preview · ‹ › · Back to today</span><b>Monday 12 October 2026</b></div>
+</div></div>
+<div class="frame d t-dark" style="margin-top:10px"><div class="sampler">
+  <section class="band band--urgent"><div><span class="ltag">&lt;cut-off day&gt;</span><h1>Fix cut-off at 12:00</h1><span class="meta">urgent (identical in both themes)</span></div></section>
+  <section class="band band--after"><div><span class="ltag">&lt;cut-off passed&gt;</span><h1>Cut-off passed. Live update tonight.</h1><span class="meta">after · #0F0F0F + orange outline</span></div></section>
+  <section class="band band--evening"><div><span class="ltag">&lt;tonight&gt;</span><h1>Live update tonight</h1><span class="meta">evening · green bar</span></div></section>
+  <section class="band band--headsup"><div><span class="ltag">&lt;monday&gt;</span><h1>Cut-off Monday 12:00</h1><span class="meta">heads-up · #3A2410 wash</span></div></section>
+  <section class="band" style="border:1px solid var(--line)"><div><h1>Full Refinement at 14:00</h1><span class="meta">event</span></div></section>
+  <section class="band" style="border:1px solid var(--line)"><div><h1>No deadlines today</h1><span class="meta">quiet</span></div></section>
+  <section class="band band--weekend"><div><span class="ltag">&lt;weekend&gt;</span><h1>Weekend. Monday is cut-off and Live day.</h1></div></section>
+  <div class="pv"><span style="font-size:13px">Preview · ‹ › · Back to today</span><b>Monday 12 October 2026</b></div>
+</div></div>
+</div>
+<p class="legend-note">Focus ring in every frame: <code>box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #1A1A1A</code>, visible on white, charcoal, orange and both preview bars. <code>@media (forced-colors: active)</code> adds borders to bands, chips and items.</p>
+
+</body>
+</html>
