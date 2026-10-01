@@ -1,5 +1,5 @@
-// Holiday heads-up (owner, 2026-10-01): nothing moves; a weekday public holiday (EE or PL, treated the same)
-// is announced on the working day before it, chaining back over weekends and further holidays.
+// Holiday heads-up (owner, 2026-10-01): nothing moves; every public holiday (EE or PL, treated the same,
+// weekend ones included) is announced on the working day before it and marked on the day itself.
 // Shown for every role as a muted note at the top of "Today"; band, headline and sub-line do not change.
 import { describe, it, expect } from 'vitest';
 import { holidayWarnings, actionsFor, sprintDates, sprintByLabel, ROLES, addDays } from '../public/schedule.js';
@@ -28,29 +28,32 @@ describe('holidayWarnings(date, holidays)', () => {
     }]);
   });
 
-  it('Wed 23 Dec warns about Thu 24 and Fri 25 Dec; Fri 25 chains back over Thu 24', () => {
+  it('Wed 23 Dec warns about Thu 24, Fri 25 and Sat 26 Dec (weekend holidays included, owner)', () => {
     expect(W('2026-12-23').map((w) => w.text)).toEqual([
       'Tomorrow, Thu 24 Dec, is a public holiday (EE, PL): Christmas Eve.',
       'Fri 25 Dec is a public holiday (EE, PL): Christmas Day.',
+      'Sat 26 Dec is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.',
     ]);
-    // Sat 26 Dec (Boxing Day) is a weekend holiday and is not announced.
-    expect(brief('2026-12-23')).toEqual([['2026-12-24', 'EE,PL'], ['2026-12-25', 'EE,PL']]);
   });
 
-  it('no warning on the holidays themselves, on weekends, or on ordinary days', () => {
-    for (const d of ['2026-12-22', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-28', '2027-01-01', '2027-01-04', '2027-01-06', '2027-01-07']) {
-      expect(W(d), d).toEqual([]);
-    }
+  it('the holiday itself is marked "Today, …", also on a weekend', () => {
+    expect(W('2027-01-01').map((w) => w.text)).toEqual(["Today, Fri 1 Jan, is a public holiday (EE, PL): New Year's Day."]);
+    expect(W('2026-12-26').map((w) => w.text)).toEqual(['Today, Sat 26 Dec, is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.']);
+    expect(W('2027-01-06').map((w) => w.text)).toEqual(['Today, Wed 6 Jan, is a public holiday (PL): Epiphany.']);
   });
 
-  it('a Monday holiday is announced on the Friday, without "Tomorrow"', () => {
+  it('no note on ordinary days that are not the working day before a holiday', () => {
+    for (const d of ['2026-12-22', '2026-12-28', '2027-01-04', '2027-01-07']) expect(W(d), d).toEqual([]);
+  });
+
+  it('a Monday holiday is announced on the Friday, without "Tomorrow"; a Sunday holiday too', () => {
     const test = [{ date: '2027-03-29', country: 'PL', name: 'Easter Monday' }];
     expect(holidayWarnings('2027-03-26', test)).toEqual([{
       holidayDate: '2027-03-29', countries: ['PL'], names: ['Easter Monday'],
       text: 'Mon 29 Mar is a public holiday (PL): Easter Monday.',
     }]);
-    // With the real data Fri 26 Mar is itself an EE holiday (Good Friday), so Thu 25 Mar announces both.
-    expect(brief('2027-03-25')).toEqual([['2027-03-26', 'EE'], ['2027-03-29', 'PL']]);
+    // Real data: Fri 26 Mar is Good Friday (EE), so Thu 25 Mar announces Fri 26, Sun 28 (Easter Sunday) and Mon 29.
+    expect(brief('2027-03-25')).toEqual([['2027-03-26', 'EE'], ['2027-03-28', 'EE,PL'], ['2027-03-29', 'PL']]);
   });
 
   it('without a holiday list there are no warnings', () => {
@@ -64,8 +67,17 @@ describe('holidayWarnings(date, holidays)', () => {
     expect(got).toEqual([
       '2026-12-23: Tomorrow, Thu 24 Dec, is a public holiday (EE, PL): Christmas Eve.',
       '2026-12-23: Fri 25 Dec is a public holiday (EE, PL): Christmas Day.',
-      '2026-12-31: Tomorrow, Fri 1 Jan, is a public holiday (EE, PL): New Year\'s Day.',
+      '2026-12-23: Sat 26 Dec is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.',
+      '2026-12-24: Today, Thu 24 Dec, is a public holiday (EE, PL): Christmas Eve.',
+      '2026-12-24: Tomorrow, Fri 25 Dec, is a public holiday (EE, PL): Christmas Day.',
+      '2026-12-24: Sat 26 Dec is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.',
+      '2026-12-25: Today, Fri 25 Dec, is a public holiday (EE, PL): Christmas Day.',
+      '2026-12-25: Tomorrow, Sat 26 Dec, is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.',
+      '2026-12-26: Today, Sat 26 Dec, is a public holiday (EE, PL): Boxing Day, Second Day of Christmas.',
+      "2026-12-31: Tomorrow, Fri 1 Jan, is a public holiday (EE, PL): New Year's Day.",
+      "2027-01-01: Today, Fri 1 Jan, is a public holiday (EE, PL): New Year's Day.",
       '2027-01-05: Tomorrow, Wed 6 Jan, is a public holiday (PL): Epiphany.',
+      '2027-01-06: Today, Wed 6 Jan, is a public holiday (PL): Epiphany.',
     ]);
   });
 });

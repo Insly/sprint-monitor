@@ -189,6 +189,7 @@ describe('sprintDetail: other relations and timed milestones', () => {
     expect(d.actions[0].date).toBe('2026-11-24'); // describe-tasks-for-refinement, weekly Tue while 2027-1 is next
     expect(d.holidays.map((h) => `${h.date} ${h.country}`)).toEqual([
       '2026-12-24 EE', '2026-12-24 PL', '2026-12-25 EE', '2026-12-25 PL',
+      '2026-12-26 EE', '2026-12-26 PL', // Sat: weekend holidays are listed too (owner)
       '2027-01-01 EE', '2027-01-01 PL', '2027-01-06 PL',
     ]);
     // Owner correction: 2027-1's freeze starts Fri 1 Jan, so 24-25 Dec are in the build, not the release.
