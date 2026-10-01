@@ -1,5 +1,12 @@
 # Progress log
 
+## TODO (future)
+- Dev duty rota (public/duty.js) is a one-time paste from "Duty dev.xlsx" valid to end of 2026. Replace with a live source (SharePoint) when the sheet is available there; extend by hand for 2027 until then. Names: first name + last initial only (page and repo are public).
+
+## 2026-10-01 — UX redesign in progress
+- UX specialist: docs/ux/USE-CASES.md, ANALYSIS.md, DESIGN.md, mockup.html (v1). Reviews: docs/ux/REVIEW-1-ux-a11y.md, REVIEW-2-practitioner.md. v2 revision running (STATES.md, rule additions, rota component).
+- Rota data added (public/duty.js): Demo/Live deployers per release to Jan 2027, weekly support duty dev to 18 Oct. Sheet's 22/28 Dec release dropped (superseded by 2027-1 plan); sheet confirms 2027-1 Demo 5 Jan.
+
 ## 2026-10-01 — Kaspar's answers applied
 
 - Refinement rules now under the Next sprint column.
