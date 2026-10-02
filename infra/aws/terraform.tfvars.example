@@ -1,0 +1,23 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Nothing here is secret.
+owner_email      = "kaspar.ilves@insly.com"
+region           = "eu-north-1"
+site_bucket_name = "insly-sprint-monitor-site"
+log_bucket_name  = "insly-sprint-monitor-logs"
+
+# From IT (Entra app registration "MGA Sprint Board").
+entra_tenant_id = "00000000-0000-0000-0000-000000000000"
+entra_client_id = "00000000-0000-0000-0000-000000000000"
+session_hours   = 12
+
+# Hostname chosen by owner/IT. Leave attach_custom_domain false until the certificate is ISSUED.
+domain_name          = "" # e.g. "sprint.insly.com"
+attach_custom_domain = false
+route53_zone_id      = "" # only if insly.com (or the subdomain) is hosted in Route53
+
+github_repo                 = "Insly/sprint-monitor"
+github_environment          = "aws-production"
+create_github_oidc_provider = true # false if IT's account already has the GitHub OIDC provider
+
+budget_limit_usd     = 10
+budget_emails        = ["kaspar.ilves@insly.com"]
+budget_filter_by_tag = false # true if the AWS account is shared with other workloads
