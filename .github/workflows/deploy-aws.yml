@@ -1,0 +1,116 @@
+# DISABLED UNTIL THE AWS INFRA EXISTS.
+# Manual only (workflow_dispatch). It does nothing useful until infra/aws has been applied and the
+# repository variables AWS_ROLE_ARN, AWS_REGION, S3_BUCKET, CF_DISTRIBUTION_ID and the GitHub
+# environment "aws-production" (deployment branches: main only) exist. See docs/aws/MIGRATION.md.
+# Add a push trigger only at cut-over, when Render's deploy.yml is retired.
+#
+# Deploy: Run workflow on main with "sha" empty -> tests the commit, then deploys exactly that commit.
+# Roll back: Run workflow with "sha" = an older commit on main (gh workflow run deploy-aws.yml -f sha=<sha>).
+# No long-lived secrets: AWS credentials come from GitHub OIDC and last one hour.
+name: deploy-aws
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit on main to deploy (full 40-char SHA). Empty = the latest commit of the branch this run is on. Older SHA = rollback."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# One deploy at a time; a second run waits instead of racing the S3 sync.
+concurrency:
+  group: deploy-aws-production
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: Pick the commit
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.pick.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: pick
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          RUN_SHA: ${{ github.sha }}
+        run: |
+          SHA="${INPUT_SHA:-$RUN_SHA}"
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then echo "::error::sha must be a full 40-character commit SHA"; exit 1; fi
+          if ! git merge-base --is-ancestor "$SHA" origin/main; then echo "::error::$SHA is not on main"; exit 1; fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Deploying $SHA" >> "$GITHUB_STEP_SUMMARY"
+
+  test:
+    name: Test the commit
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+
+  deploy:
+    name: Deploy to S3 + CloudFront
+    needs: [resolve, test]
+    runs-on: ubuntu-latest
+    environment:
+      name: aws-production
+      url: ${{ vars.SITE_URL }}
+    permissions:
+      contents: read
+      id-token: write # GitHub OIDC token -> sts:AssumeRoleWithWebIdentity
+    env:
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CF_DISTRIBUTION_ID: ${{ vars.CF_DISTRIBUTION_ID }}
+    steps:
+      - name: Check configuration
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          missing=""
+          for v in AWS_ROLE_ARN AWS_REGION S3_BUCKET CF_DISTRIBUTION_ID; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then echo "::error::Repository variables not set:$missing (infra/aws not applied yet?)"; exit 1; fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: sprint-monitor-deploy-${{ github.run_id }}
+
+      # Same freshness as Render today: browsers and CloudFront revalidate every load,
+      # so an updated rules.js / schedule.js shows up on the next page load.
+      - name: Upload public/
+        run: |
+          aws s3 sync public/ "s3://$S3_BUCKET" --delete --no-progress \
+            --cache-control "no-cache" \
+            --exclude ".*"
+
+      - name: Invalidate CloudFront
+        run: |
+          id=$(aws cloudfront create-invalidation --distribution-id "$CF_DISTRIBUTION_ID" \
+                 --paths "/*" --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$CF_DISTRIBUTION_ID" --id "$id"
+          echo "Deployed ${{ needs.resolve.outputs.sha }} (invalidation $id)" >> "$GITHUB_STEP_SUMMARY"
