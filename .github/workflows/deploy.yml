@@ -1,7 +1,8 @@
-# Tests on every push; on main, triggers the Render deploy hook.
-# Render has no GitHub app access to this repo, so the hook triggers deploys.
+# Tests on every push; on main, triggers the Render deploy hook for the tested commit.
+# Render has no GitHub app access to this repo, so the hook triggers deploys (render.yaml is not applied).
 # Setup: Render > insly-sprint-monitor > Settings > Deploy Hook > copy URL >
 #        GitHub repo > Settings > Secrets and variables > Actions > new secret RENDER_DEPLOY_HOOK.
+# The freshness alarm (npm run freshness) is not run here: it must never block a deploy (see scheduled.yml).
 name: test-and-deploy
 on:
   push:
@@ -11,11 +12,18 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tz: [Europe/Tallinn, America/New_York]
+    name: test (${{ matrix.tz }})
+    env:
+      TZ: ${{ matrix.tz }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
@@ -23,10 +31,20 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # One deploy at a time; a newer push waits instead of cancelling a deploy in flight.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
     steps:
-      - name: Trigger Render deploy
+      - name: Trigger Render deploy of the tested commit
         env:
           HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          SHA: ${{ github.sha }}
         run: |
           if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK not set; skipping deploy."; exit 0; fi
-          curl -fsS -X POST "$HOOK" > /dev/null && echo "Render deploy triggered."
+          # Hook URLs look like https://api.render.com/deploy/srv-...?key=...; add ref with the right separator.
+          case "$HOOK" in
+            *\?*) URL="${HOOK}&ref=${SHA}" ;;
+            *)    URL="${HOOK}?ref=${SHA}" ;;
+          esac
+          curl -fsS -X POST "$URL" > /dev/null && echo "Render deploy triggered for ${SHA}."
