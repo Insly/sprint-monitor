@@ -300,8 +300,8 @@ Machine-readable. `roles` groups the roles that share an expectation. `time` is 
 
 ```json
 [
- {"date":"2026-09-28","time":"09:00","roles":["Everyone","IM/AM","Dev","QA"],"band":"heads-up","headline":"2026-21 starts today. Demo update tomorrow.","tab":"Demo tomorrow · 2026-21 day 1 · Sprint Board"},
- {"date":"2026-09-28","time":"09:00","roles":["Lead","Analyst"],"band":"event","headline":"2026-21 starts today. Demo update tomorrow.","tab":"Demo tomorrow · 2026-21 day 1 · Sprint Board"},
+ {"date":"2026-09-28","time":"09:00","roles":["Everyone","IM/AM","Dev","QA"],"band":"heads-up","headline":"2026-21 starts today. 2026-20 Demo update tomorrow.","tab":"Demo tomorrow · 2026-21 day 1 · Sprint Board"},
+ {"date":"2026-09-28","time":"09:00","roles":["Lead","Analyst"],"band":"event","headline":"2026-21 starts today. 2026-20 Demo update tomorrow.","tab":"Demo tomorrow · 2026-21 day 1 · Sprint Board"},
  {"date":"2026-09-29","time":"09:00","roles":["Dev","QA"],"band":"urgent","headline":"Demo update tonight","tab":"Demo update tonight · Sprint Board"},
  {"date":"2026-09-29","time":"09:00","roles":["Everyone","IM/AM","Lead","Analyst"],"band":"event","headline":"Demo update tonight","tab":"Demo update tonight · Sprint Board"},
  {"date":"2026-09-29","time":"16:59","roles":["Dev","QA"],"band":"urgent","headline":"Demo update tonight","tab":"Demo update tonight · Sprint Board"},
@@ -310,8 +310,8 @@ Machine-readable. `roles` groups the roles that share an expectation. `time` is 
  {"date":"2026-09-30","time":"09:00","roles":["Everyone","IM/AM","Dev","QA","Lead","Analyst"],"band":"event","headline":"UAT opens: deadline Mon 5 Oct 12:00","tab":"UAT opens · 2026-21 day 3 · Sprint Board"},
  {"date":"2026-10-01","time":"09:00","roles":["Everyone","IM/AM","Dev","QA","Analyst"],"band":"event","headline":"Full Refinement at 14:00","tab":"Refinement 14:00 · 2026-21 day 4 · Sprint Board"},
  {"date":"2026-10-01","time":"09:00","roles":["Lead"],"band":"quiet","headline":"No deadlines today","tab":"2026-21 day 4 · Sprint Board"},
- {"date":"2026-10-02","time":"09:00","roles":["Everyone","IM/AM","Dev"],"band":"heads-up","headline":"Cut-off Monday 12:00","tab":"Cut-off Mon 12:00 · Sprint Board"},
- {"date":"2026-10-02","time":"09:00","roles":["QA","Lead","Analyst"],"band":"event","headline":"Cut-off Monday 12:00","tab":"Cut-off Mon 12:00 · Sprint Board"},
+ {"date":"2026-10-02","time":"09:00","roles":["Everyone","IM/AM","Dev"],"band":"heads-up","headline":"Last working day before the 2026-20 cut-off","tab":"2026-20 cut-off Mon 12:00 · Sprint Board"},
+ {"date":"2026-10-02","time":"09:00","roles":["QA","Lead","Analyst"],"band":"event","headline":"Last working day before the 2026-20 cut-off","tab":"2026-20 cut-off Mon 12:00 · Sprint Board"},
  {"date":"2026-10-03","time":"09:00","roles":["*"],"band":"weekend","headline":"Weekend. Monday is cut-off and Live day.","tab":"Weekend · Mon cut-off 12:00 · Sprint Board"},
  {"date":"2026-10-05","time":"11:59","roles":["*"],"band":"urgent","headline":"Fix cut-off at 12:00","countdown":"1 min left","tab":"Cut-off 12:00 · Live tonight · Sprint Board"},
  {"date":"2026-10-05","time":"12:00","roles":["*"],"band":"after","headline":"Cut-off passed. Live update tonight.","tab":"Cut-off passed · Live tonight · Sprint Board"},
@@ -327,8 +327,8 @@ Machine-readable. `roles` groups the roles that share an expectation. `time` is 
  {"date":"2026-10-07","time":"09:00","roles":["IM/AM","Lead","Analyst"],"band":"event","headline":"Sprint planning tomorrow","tab":"Planning tomorrow · 2026-21 day 8 · Sprint Board"},
  {"date":"2026-10-08","time":"09:00","roles":["*"],"band":"event","headline":"Sprint planning today. Code freeze starts tomorrow.","tab":"Planning today · 2026-21 day 9 · Sprint Board"},
  {"date":"2026-10-09","time":"09:00","roles":["*"],"band":"event","headline":"Code freeze starts today","tab":"Code freeze starts · 2026-21 day 10 · Sprint Board"},
- {"date":"2026-10-12","time":"09:00","roles":["Everyone","IM/AM","Dev","QA"],"band":"heads-up","headline":"2026-22 starts today. Demo update tomorrow.","tab":"Demo tomorrow · 2026-22 day 1 · Sprint Board"},
- {"date":"2026-10-12","time":"09:00","roles":["Lead","Analyst"],"band":"event","headline":"2026-22 starts today. Demo update tomorrow.","tab":"Demo tomorrow · 2026-22 day 1 · Sprint Board"},
+ {"date":"2026-10-12","time":"09:00","roles":["Everyone","IM/AM","Dev","QA"],"band":"heads-up","headline":"2026-22 starts today. 2026-21 Demo update tomorrow.","tab":"Demo tomorrow · 2026-22 day 1 · Sprint Board"},
+ {"date":"2026-10-12","time":"09:00","roles":["Lead","Analyst"],"band":"event","headline":"2026-22 starts today. 2026-21 Demo update tomorrow.","tab":"Demo tomorrow · 2026-22 day 1 · Sprint Board"},
  {"date":"2026-10-13","time":"09:00","roles":["Dev","QA"],"band":"urgent","headline":"Demo update tonight","tab":"Demo update tonight · Sprint Board"},
  {"date":"2026-10-13","time":"20:00","roles":["Dev","QA"],"band":"evening","headline":"Demo update tonight","tab":"Demo update tonight · Sprint Board"}
 ]

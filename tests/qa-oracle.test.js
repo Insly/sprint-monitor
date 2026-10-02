@@ -285,7 +285,7 @@ describe('owner spot checks', () => {
   it('Mon 4 Jan: 2027-2 starts, 2027-1 bug retro, Demo heads-up; Tue 5 Jan Demo; Mon 11 Jan cut-off and Live', () => {
     const ids = (d) => actionsFor(d, RULES).filter((a) => a.status === 'today').map((a) => `${a.id}:${sprintDates(a.sprintNumber).label}`);
     expect(ids('2027-01-04')).toEqual(expect.arrayContaining(['sprint-start:2027-2', 'bug-retro:2027-1', 'matrix-before-demo:2027-1']));
-    expect(day('2027-01-04').headline).toBe('2027-2 starts today. Demo update tomorrow.');
+    expect(day('2027-01-04').headline).toBe('2027-2 starts today. 2027-1 Demo update tomorrow.');
     expect(ids('2027-01-05')).toEqual(expect.arrayContaining(['demo-update:2027-1']));
     expect(day('2027-01-05', '09:00', 'Dev').band).toBe('urgent');
     expect(ids('2027-01-11')).toEqual(expect.arrayContaining(['fix-cutoff:2027-1', 'live-update:2027-1']));

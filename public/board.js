@@ -76,9 +76,9 @@ export function headsUp(f) {
   const near = sprintsNear(context(d));
   const when = f.nwdIsTomorrow ? 'tomorrow' : WEEKDAY_LONG[weekdayOf(d)];
   const demo = near.find((s) => s.demoStart === d);
-  if (demo) return { key: true, kind: 'demo', sprint: demo, text: `Demo update ${when}`, short: f.nwdIsTomorrow ? 'Demo tomorrow' : `Demo ${weekdayOf(d)}` };
+  if (demo) return { key: true, kind: 'demo', sprint: demo, text: `${demo.label} Demo update ${when}`, short: f.nwdIsTomorrow ? 'Demo tomorrow' : `Demo ${weekdayOf(d)}` };
   const cut = near.find((s) => s.cutoff === d);
-  if (cut) return { key: true, kind: 'cutoff', sprint: cut, text: `Cut-off ${WEEKDAY_LONG[weekdayOf(d)]} ${f.times.cutoff}`, short: `Cut-off ${weekdayOf(d)} ${f.times.cutoff}` };
+  if (cut) return { key: true, kind: 'cutoff', sprint: cut, text: `Last working day before the ${cut.label} cut-off`, short: `${cut.label} cut-off ${weekdayOf(d)} ${f.times.cutoff}` };
   const plan = near.find((s) => s.planning === d);
   if (plan) return { key: false, kind: 'planning', sprint: plan, text: `Sprint planning ${when}`, short: `Planning ${when}` };
   const frz = near.find((s) => s.freezeStart === d);
@@ -864,7 +864,7 @@ const BAND_TAG = {
   urgent: (f) => (f.cut ? '<cut-off day>' : '<demo day>'),
   after: () => '<cut-off passed>',
   evening: () => '<tonight>',
-  'heads-up': (f) => (f.nwdIsTomorrow ? '<tomorrow>' : `<${WEEKDAY_LONG[weekdayOf(f.nwd)].toLowerCase()}>`),
+  'heads-up': () => '<heads-up>',
   weekend: () => '<weekend>',
 };
 const BAND_SR = {
