@@ -1,5 +1,12 @@
 # Progress log
 
+## 2026-10-02 — Ops: freshness alarm, scheduled checks, deploy hardening (review Batch 5; not pushed)
+- `npm run freshness` (tests/freshness.test.js + tests/freshness/checks.js): fails when today + 60 days passes the rota (fully assigned / listed releases), holidays, YEAR_STARTS, the year-end OVERRIDES entry for the sprint spanning Christmas, or LAST_CONFIRMED. Excluded from `npm test` by a root vitest.config.js (621 tests, 13 files, unchanged). `FRESHNESS_TODAY=YYYY-MM-DD` for dry runs.
+- Today it reports one item: rota fully assigned only to Live 2 Nov 2026 (16 Nov no backup, 30 Nov no Demo deployer). Next to trip: listed releases (from 13 Nov), LAST_CONFIRMED (from 17 Nov), YEAR_STARTS 2028 (from 21 Oct 2027), 2027 year-end override (from 26 Oct 2027), holidays 2028 (from 2 Nov 2027).
+- .github/workflows/scheduled.yml: weekly freshness (Mon 06:00 UTC), uptime every 30 min, workflow_dispatch. deploy.yml: Node 22, TZ matrix Tallinn/New York, concurrency group `deploy`, hook gets `ref=<GITHUB_SHA>`.
+- README: render.yaml marked not applied; runbooks (hook rotation, rollback, cooldown), yearly data-renewal calendar, maintainer and accounts (placeholders).
+- Follow-ups: CSP `<meta>` in public/index.html (AU12); Render headers from render.yaml are not live (add in Render > Settings > Headers); enable secret scanning / push protection (AU8).
+
 ## 2026-10-01 — v2.2 readability: Option B panels (owner-approved; developer, not pushed)
 - Spec: docs/ux/READABILITY.md (normative) + mockup-readability.html. Every collapsible section is a panel: white header strip with the orange tag, `--section-body` tray, white items and rail rows, 8 px radius; full bleed on ≤767. Headers 40 px (44 px on coarse pointers and ≤767).
 - Inline chevrons (§3.2): hidden on an open section until hover (tray tint) or keyboard focus (inset ring); always shown when folded, with "Folded · summary" (§3.1); small and quiet on touch / ≤767. Same header for the cycle explainer, which stays unboxed with a 2 px rule. Sprint view: Timeline and Actions panels; Holidays is a footer line in Timeline unless a holiday exists; `<deploys>` box on the tray.
