@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "vitest run",
+    "freshness": "vitest run --config tests/freshness/vitest.config.js",
     "serve": "npx --yes serve public"
   },
   "devDependencies": {
