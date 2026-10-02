@@ -30,7 +30,10 @@ Spec: `docs/SPEC.md`. Calendar model, rule schema and API: `docs/CONTRACT.md`. D
 | `public/duty.js` | Dev duty rota (Demo deployer, Live lead and backup, weekly support dev). Data only. |
 | `public/holidays.js` | Estonian and Polish public holidays, 2026 and 2027. Data only. |
 | `tests/*.test.js` | vitest. `states.test.js` asserts every row of `docs/ux/STATES.md`. |
-| `render.yaml` | Render Blueprint (static site). |
+| `tests/freshness.test.js` | Freshness alarm: does the static data cover the next 60 days? Not part of `npm test`; run `npm run freshness`. |
+| `.github/workflows/deploy.yml` | Tests on every push; on `main`, triggers the Render deploy hook for the tested commit. |
+| `.github/workflows/scheduled.yml` | Weekly freshness check and 30-minute uptime check. |
+| `render.yaml` | Render Blueprint, **not applied** (see "Deploys"). Kept as a record of the intended settings. |
 
 ## Run locally
 
@@ -47,7 +50,11 @@ cd public && python -m http.server 8000
 ```
 npm test
 TZ=America/New_York npm test      # the suite must pass in any device zone
+npm run freshness                 # data freshness alarm (not part of npm test)
+FRESHNESS_TODAY=2026-12-01 npm run freshness   # dry run for another day
 ```
+
+CI runs `npm test` under Europe/Tallinn and America/New_York on Node 22. The freshness alarm never runs on push, so data running out never blocks a deploy.
 
 ## Change the data
 
@@ -88,6 +95,60 @@ IT can push the page to every managed laptop with an Intune configuration profil
 - `HomepageLocation` = the page address, `ShowHomeButton` = enabled (Home button)
 - `NewTabPageLocation` = the page address (new tabs; the only way to set a custom new tab page without an extension)
 
-## Rollback
+## Deploys
 
-Render dashboard > insly-sprint-monitor > Events (deploys) > pick the previous good deploy > Rollback. Then fix or revert the commit in git so the next deploy does not bring the problem back.
+The Render service was created by hand in the dashboard, and Render has no GitHub app access to this repo. So `render.yaml` is **not applied**: Render does not read it, and a push does not redeploy by itself. The live service's settings (publish directory `public`, headers) are whatever the dashboard says; on 2 Oct 2026 the live site did not send the `Cache-Control: no-cache` and `Referrer-Policy` headers from `render.yaml`. To get them, add them under Render > service > Settings > Headers.
+
+Deploys come from CI only: `.github/workflows/deploy.yml` runs the tests (Tallinn and New York time zones) on every push, and on `main`, once they pass, POSTs the deploy hook from the GitHub secret `RENDER_DEPLOY_HOOK` with `ref=<tested commit SHA>`, so Render deploys exactly the commit that passed. Deploys run one at a time (concurrency group `deploy`; a newer push waits, it does not cancel a running deploy).
+
+## Scheduled checks
+
+`.github/workflows/scheduled.yml` (also runnable by hand: Actions > scheduled-checks > Run workflow):
+
+- **Freshness**, Monday 06:00 UTC: `npm run freshness`. Fails when today + 60 days passes the end of the rota, holidays, `YEAR_STARTS`, the year-end `OVERRIDES` entry or `LAST_CONFIRMED`. The failure message says what to update and in which file. See "Yearly data renewal".
+- **Uptime**, every 30 minutes: the live page returns 200 and contains `MGA Sprint Board`, and `/schedule.js`, `/board.js` and `/rules.js` return 200.
+
+A failed run makes GitHub email the **workflow owner**: the person who last changed the `cron` lines in `scheduled.yml` (or who re-enabled the workflow). That person must have Settings > Notifications > Actions > "Notify me for failed workflows only" (email) turned on. To move the alerts to someone else, that person makes a small commit to the cron lines.
+
+GitHub **disables scheduled workflows after 60 days without activity** in the repository (no commits). You get an email first. To re-enable: Actions > scheduled-checks > "Enable workflow" (or push any commit). Re-enabling also makes you the workflow owner.
+
+## Runbooks
+
+### Deploy hook leaked
+
+The hook URL is a secret: anyone with it can trigger deploys. If it appears in a log, chat, screenshot or commit, rotate it within 24 hours:
+
+1. Render > insly-sprint-monitor > Settings > Deploy Hook > Regenerate. The old URL stops working.
+2. GitHub > Insly/sprint-monitor > Settings > Secrets and variables > Actions > `RENDER_DEPLOY_HOOK` > Update, paste the new URL.
+3. Actions > test-and-deploy > Run workflow on `main` to check the new hook deploys.
+
+### Rollback
+
+Render dashboard > insly-sprint-monitor > Events > pick the last good deploy > Rollback. Then fix or `git revert` the bad commit on `main`, so the next deploy does not bring the problem back.
+
+Break-glass, when CI is down or the hook does not work: `git revert <bad commit>` and push to `main`, then in Render > Manual Deploy > "Deploy a specific commit" and pick the revert commit (or the last good one).
+
+### Dependency updates (cooldown)
+
+The page has no runtime dependencies; vitest is a dev dependency only. Do not take a new release the day it comes out: wait at least 1 to 3 days (malicious or broken releases are usually pulled within that time), then update with `npm install`, run `npm test`, and commit the lockfile. A security advisory for a version we use is the exception: update immediately.
+
+## Yearly data renewal
+
+The board runs on static data with an end date. The weekly freshness check warns 60 days ahead; this is the calendar it checks against.
+
+| Data | File | Covers to (Oct 2026) | Renew |
+|---|---|---|---|
+| Duty rota: fully assigned releases | `public/duty.js` `RELEASES` | Live 2 Nov 2026 (gaps from 16 Nov) | When the rota sheet changes; fill gaps as soon as known |
+| Duty rota: releases listed | `public/duty.js` `RELEASES` | Live 11 Jan 2027 | By early November each year, for the next quarter |
+| Public holidays EE + PL | `public/holidays.js` | 31 Dec 2027 | By 1 November of the last covered year, add the next year |
+| Release-year numbering | `public/schedule.js` `YEAR_STARTS` | 2027 series | By mid-October, add next year's first internal sprint number |
+| Year-end plan | `public/schedule.js` `OVERRIDES` | 2026 (sprint 26 = 2027-1) | By late October, add the sprint that spans Christmas |
+| Confirmed sprints | `public/schedule.js` `LAST_CONFIRMED` | 2027-2, ends 15 Jan 2027 | Each time the Confluence release calendar is extended |
+
+## Maintainer and accounts
+
+- Owner and maintainer: Kaspar Ilves (Insly). Backup maintainer: <owner to fill>.
+- GitHub: `Insly/sprint-monitor` (public). Org owner who can change repo visibility or install apps: <owner to fill>.
+- Render: workspace <owner to fill>, service `insly-sprint-monitor` (static site), URL https://insly-sprint-monitor.onrender.com. Dashboard access: <owner to fill>.
+- Deploy hook: GitHub Actions secret `RENDER_DEPLOY_HOOK` (repo Settings > Secrets and variables > Actions). The source is Render > service > Settings > Deploy Hook.
+- Alerts: GitHub Actions failure emails to the workflow owner of `scheduled.yml` (see "Scheduled checks").
