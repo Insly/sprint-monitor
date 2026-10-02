@@ -598,7 +598,6 @@ function foldable(key, head, ...body) {
   h('summary', null, foldHead(head)), h('div', { class: 'fold-body' }, body));
 }
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-const isClock = (t) => /^\d\d:\d\d$/.test(t || '');
 // Phone extras (READABILITY.md §6.1): Coming up shows 3 working days at ≤767 px, 7 above.
 const phoneMQ = matchMedia('(max-width: 767px)');
 const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
@@ -824,14 +823,8 @@ function itemNode(it, { everyoneView = false, todaySlot = false } = {}) {
       h('div', { class: 'links' }, itemLinks(it)))));
 }
 
-// Folded summaries (READABILITY.md §3.1), from data the renderer already has.
-function todaySummary(a, n) {
-  if (!a) return 'The action list could not load';
-  const items = a.groups.flatMap((g) => g.items);
-  if (!items.length) return a.weekend ? `Nothing due on ${a.heading}` : 'Nothing due today';
-  const next = items.find((it) => isClock(it.when) && (a.weekend || it.when >= n.time)) || items[0];
-  return `${plural(a.count || items.length, 'item')} · next ${isClock(next.when) ? `${next.when} ` : ''}${next.title}`;
-}
+// Folded summary (READABILITY.md §3.1): board.js computes it, so the tests read the same text.
+const todaySummary = (a) => (a ? a.summary : 'The action list could not load');
 
 function renderYourDay(n, m) {
   const a = m.agenda;
@@ -848,7 +841,7 @@ function renderYourDay(n, m) {
   // The picker sits at the top of the Today panel's body, as a card (READABILITY.md §5).
   const head = { tag: '<today>', title: heading, id: 'yourday-h', tabindex: '-1',
     aside: a && a.weekend ? 'Next working day' : a && a.count ? plural(a.count, 'item') : null,
-    sum: todaySummary(a, n) };
+    sum: todaySummary(a) };
   const out = () => fill($('yourday'), foldable('today', head, kids));
   if (m.holidayWarnings && m.holidayWarnings.length) kids.push(h('ul', { class: 'notices' }, m.holidayWarnings.map((w) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), w.text))));
 
@@ -1182,6 +1175,13 @@ let lastKey = null;
 let lastView = null;
 let lastSprint = null;
 
+// What a tick compares. Includes the time-dependent parts (passed items, the summary's "next"), so a meeting
+// moves to "Earlier today" when its time comes without a reload (review 1.7).
+function stateKey(n, m) {
+  const a = m.agenda;
+  return JSON.stringify([n.date, n.preview, m.band, m.headline, m.sub, m.tab, m.order, m.next, m.rail.map((r) => r.phaseLabel),
+    a && a.summary, a && a.groups.map((g) => [g.slot, g.items.map((it) => `${it.id}:${it.chip ? it.chip.text : ''}`)])]);
+}
 function openKeys() { return new Set([...document.querySelectorAll('details[data-k][open]')].map((d) => d.dataset.k)); }
 function closedKeys() { return new Set([...document.querySelectorAll('details[data-k]:not([open])')].map((d) => d.dataset.k)); }
 
@@ -1237,7 +1237,7 @@ function render({ keepFocus = false } = {}) {
     lastView = view;
   }
   lastHref = location.href;
-  lastKey = JSON.stringify([n.date, n.preview, m.band, m.headline, m.sub, m.tab, m.order, m.rail.map((r) => r.phaseLabel), m.agenda && m.agenda.groups.map((g) => [g.slot, g.items.length])]);
+  lastKey = stateKey(n, m);
 }
 
 // Every 20 s: a full render only when something visible changed (state, phase, day); otherwise just the countdown.
@@ -1245,8 +1245,7 @@ function tick() {
   const n = now();
   if (n.preview) return;
   const m = resolveDay({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS });
-  const key = JSON.stringify([n.date, n.preview, m.band, m.headline, m.sub, m.tab, m.order, m.rail.map((r) => r.phaseLabel), m.agenda && m.agenda.groups.map((g) => [g.slot, g.items.length])]);
-  if (key !== lastKey) { render(); return; }
+  if (stateKey(n, m) !== lastKey) { render(); return; }
   if (m.countdown && $('today-view').hidden === false) {
     const big = document.querySelector('#band-right .countdown .big');
     if (big) big.textContent = m.countdown.text.replace(/ left$/, '');

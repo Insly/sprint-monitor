@@ -76,8 +76,8 @@ const SUBS = [
   ['2027-01-04', '09:00', 'QA', '2027-1 regression runs until the Demo update tomorrow evening.'],
   // Review 1.14: "Run regression opens" -> "Regression runs from today until ...".
   ['2026-10-09', '09:00', 'QA', 'Regression runs from today until the Demo update Tue 13 Oct (evening).'],
-  // Review 1.11: the IM/AM task on 28 Dec is named under "Nothing key today".
-  ['2026-12-28', '09:00', 'Everyone', 'IM/AM: Make promised tickets queue-ready (2027-2).'],
+  // Review 1.11: the IM/AM task on 28 Dec is named under "Nothing key today". No label: it names no release event.
+  ['2026-12-28', '09:00', 'Everyone', 'IM/AM: Make promised tickets queue-ready.'],
 ];
 
 describe('key days: sub-lines (hand-written)', () => {

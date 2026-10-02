@@ -261,7 +261,8 @@ describe('owner spot checks', () => {
       const m = day('2026-12-28', '09:00', role);
       expect(m.meta).toBe('2027-1 · day 16 of 20');
       expect(m.band, role).toBe('quiet');
-      expect(m.headline, role).toBe('No deadlines today');
+      // The IM/AM desk task is due today, so their (and Everyone's) headline is not "No deadlines today" (review 1.11).
+      expect(m.headline, role).toBe(['IM/AM', 'Everyone'].includes(role) ? 'Nothing key today' : 'No deadlines today');
     }
     // Intent: no cut-off, deploy or other key event for any role. Since the Bi-weekly plan rules (2026-10-01)
     // the IM/AM have one desk task for the next sprint's planning (Thu 31 Dec); it must not change band or headline.

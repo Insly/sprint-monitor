@@ -6,7 +6,7 @@
 import {
   context, actionsFor, upcoming, sprintDates, nextWorkingDay, previousWorkingDay, addDays,
   daysBetween, isWeekendDay, weekdayOf, workingDaysBetween, workingDaysIn, roleMatches, keyTimes,
-  sprintPhase, fmtDay, fmtDM, formatAcrossZones, holidayTouchesKeyDates, sprintForDate, holidayWarnings,
+  sprintPhase, fmtDay, fmtDM, formatAcrossZones, holidayTouchesKeyDates, sprintForDate, holidayWarnings, ruleTime,
   LAST_CONFIRMED, UNCONFIRMED_FROM,
 } from './schedule.js';
 
@@ -26,7 +26,7 @@ const SHORT = {
   'full-refinement': 'Refinement',
   'priority-call-due': 'priority calls',
   'qa-estimate-present': 'QA estimates',
-  'uat-findings-to-planning': 'UAT findings',
+  'uat-findings-to-planning': 'UAT findings for planning',
   'bug-retro-prep': 'Bug retro page',
   'cutoff-reminder': 'Chase UAT results',
   'release-check-before-demo': 'Release check 12:00',
@@ -37,6 +37,12 @@ const roleWord = (role) => (role === 'IM/AM' ? 'IM / AM' : role);
 const endSentence = (s) => (/[.!?]$/.test(s) ? s : `${s}.`);
 /** The label of sprint s when it is not the sprint being built on f.date (copy names other sprints), else ''. */
 const otherLabel = (f, s) => (s && s.n !== f.ctx.current.n ? s.label : '');
+/** Words that name a release or planning event: an item title with one of them gets its sprint label. */
+const EVENT_WORDS = /\b(Demo update|UAT|cut-off|Live update|freeze|regression|planning)\b/i;
+/** ' (2026-20)' after an item that names an event of another sprint than the one being built, else ''. */
+const sprintSuffix = (f, a, text = a.title) => (a.sprintNumber != null && a.sprintNumber !== f.ctx.current.n && EVENT_WORDS.test(text) ? ` (${sprintDates(a.sprintNumber).label})` : '');
+/** 'IM/AM' / 'Dev, QA': the roles of a role-only item, as the Everyone view prefixes them. */
+export const whoText = (a) => (a.who || []).filter((w) => w !== 'All').join(', ');
 
 // ---------------------------------------------------------------- facts about one day
 
@@ -117,8 +123,8 @@ export function carryOverItems(date, rules, role) {
   return out;
 }
 
-/** STATES.md §3.1: today's event for a role, first match wins. */
-export function todayEvent(f, role) {
+/** STATES.md §3.1: today's event for a role, first match wins. A meeting counts only until its time. */
+export function todayEvent(f, role, time = '00:00') {
   const s = f.freezeStarts;
   if (s && f.acts.some((a) => a.id === 'code-freeze' && a.dates.from === f.date)) return { kind: 'freeze', text: 'Code freeze starts today', short: 'Code freeze starts' };
   const plan = f.acts.find((a) => a.id === 'sprint-planning');
@@ -144,7 +150,7 @@ export function todayEvent(f, role) {
     return { kind: 'carry', text: c.title, short: c.title, carry };
   }
 
-  const meeting = f.acts.find((a) => a.kind === 'meeting' && a.time && a.status === 'today' && roleMatches(a, role));
+  const meeting = f.acts.find((a) => a.kind === 'meeting' && a.time && a.time > time && a.status === 'today' && roleMatches(a, role));
   if (meeting) return { kind: 'meeting', text: `${meeting.title} at ${meeting.time}`, short: `${SHORT[meeting.id] || meeting.title} ${meeting.time}`, item: meeting };
   return null;
 }
@@ -171,7 +177,7 @@ export function bandState(f, time, role) {
     if (DEMO_ROLES.includes(role)) return time < f.times.demo ? 'urgent' : 'evening';
     return 'event';
   }
-  const e = todayEvent(f, role);
+  const e = todayEvent(f, role, time);
   const h = headsUp(f);
   if (h && h.key && headsUpActors(f, h).includes(role)) return 'heads-up';
   if (e || h) return 'event';
@@ -199,8 +205,9 @@ export function headline(f, time, role) {
     return `${L} Live update tonight`;
   }
   if (f.demo) return `${f.demo.label} Demo update tonight`;
-  const parts = [todayEvent(f, role)?.text, headsUp(f)?.text].filter(Boolean);
-  if (parts.length === 0) return 'No deadlines today';
+  const parts = [todayEvent(f, role, time)?.text, headsUp(f)?.text].filter(Boolean);
+  // "No deadlines today" only when nothing is due for the role; otherwise the sub-line names it (review 1.11).
+  if (parts.length === 0) return f.acts.some((a) => a.status === 'today' && a.kind === 'deadline' && roleMatches(a, role) && !(a.who || []).includes('All')) ? 'Nothing key today' : 'No deadlines today';
   if (parts.length === 1) return parts[0];
   return `${parts.join('. ')}.`;
 }
@@ -224,7 +231,7 @@ export function tabTitle(f, time, role, { preview = false } = {}) {
     const h = headsUp(f);
     if (h && h.kind === 'cutoff') core = h.short;
     else {
-      const e = todayEvent(f, role);
+      const e = todayEvent(f, role, time);
       const short = h && h.key ? h.short : e ? e.short : h ? h.short : null;
       const day = `${f.ctx.current.label} day ${f.ctx.dayOfSprint}`;
       core = short ? `${short} · ${day}` : day;
@@ -249,9 +256,9 @@ function nextForSentence(f, role) {
   const n = nextFor(f.date, f.rules, role);
   if (!n) return `Nothing due for ${roleWord(role)} today.`;
   const a = n.items[0];
-  return a.time
-    ? `Next for ${roleWord(role)}: ${a.title} ${fmtDay(n.date)} ${a.time}.`
-    : `Next for ${roleWord(role)}: ${a.title}, ${fmtDay(n.date)}.`;
+  const what = `${a.title}${sprintSuffix(f, a)}`;
+  const lead = role === 'Everyone' ? `Next, for ${whoText(a)}:` : `Next for ${roleWord(role)}:`;
+  return a.time ? `${lead} ${what} ${fmtDay(n.date)} ${a.time}.` : `${lead} ${what}, ${fmtDay(n.date)}.`;
 }
 
 const RULE_ORDER = (rules) => new Map(rules.map((r, i) => [r.id, i]));
@@ -297,7 +304,7 @@ export function subLine(f, time, role, band) {
   }
 
   const h = headsUp(f);
-  const e = todayEvent(f, R);
+  const e = todayEvent(f, R, time);
   const retro = f.acts.find((a) => a.id === 'bug-retro');
   const retroLine = retro ? `Bug retro for ${sprintDates(retro.sprintNumber).label} today.` : null;
 
@@ -356,8 +363,22 @@ export function subLine(f, time, role, band) {
   const headlineHasMeeting = (id) => headlineItem === id;
   const mine = f.acts
     .filter((a) => a.status === 'today' && roleMatches(a, R) && !(a.who || []).includes('All'))
-    .filter((a) => !headlineHasMeeting(a.id));
+    .filter((a) => !headlineHasMeeting(a.id))
+    .filter((a) => !(a.time && a.kind !== 'deploy' && a.time <= time)); // passed meetings and timed deadlines (review 1.7)
   const sentences = [];
+  if (R === 'Everyone') {
+    // Every task here belongs to some roles only: name them (review 1.5). One sentence per role group, at most three.
+    const rank = (a) => (a.kind === 'meeting' ? 0 : a.kind === 'deadline' ? 1 : 2);
+    const list = mine.map((a, i) => [a, i]).sort((x, y) => rank(x[0]) - rank(y[0]) || (order.get(x[0].id) ?? 0) - (order.get(y[0].id) ?? 0) || x[1] - y[1]).map(([a]) => a);
+    const groups = new Map();
+    for (const a of list) { const w = whoText(a); if (!groups.has(w)) groups.set(w, []); groups.get(w).push(a); }
+    for (const [w, g] of [...groups].slice(0, 3)) {
+      const a = g[0];
+      sentences.push(`${w}: ${a.title}${a.time ? ` at ${a.time}` : ''}${sprintSuffix(f, a)}${g.length > 1 ? ` and ${g.length - 1} more` : ''}.`);
+    }
+    if (groups.size > 3) sentences.push(`And more for ${[...groups.keys()].slice(3).join('; ')}.`);
+    if (sentences.length) return sentences.join(' ');
+  }
   for (const a of mine.filter((x) => x.kind === 'meeting' && x.time)) sentences.push(`${a.title} at ${a.time}.`);
   if (e && e.kind !== 'carry') {
     for (const c of carryOverItems(f.date, f.rules, R)) {
@@ -368,10 +389,12 @@ export function subLine(f, time, role, band) {
   const rank = mine.find((a) => a.id === 'rank-refinement-queue');
   const findings = mine.find((a) => a.id === 'uat-findings-to-planning');
   if (rank && R === 'Lead') {
+    const pre = ruleTime(f.rules, 'pre-refinement', '14:00');
+    const before = time < pre;
     if (findings) {
-      sentences.push('Rank the refinement queue before 14:00.', `Bring ${f.ctx.previous.label} UAT findings to ${f.ctx.next.label} planning.`);
+      sentences.push(before ? `Rank the refinement queue before ${pre}.` : 'Rank the refinement queue.', `Bring ${f.ctx.previous.label} UAT findings to ${f.ctx.next.label} planning.`);
       handled.add(findings.id);
-    } else sentences.push('Rank the refinement queue before Pre-Refinement at 14:00.');
+    } else sentences.push(before ? `Rank the refinement queue before Pre-Refinement at ${pre}.` : 'Rank the refinement queue.');
     handled.add(rank.id);
   }
   const parked = mine.find((a) => a.id === 'answer-parked-questions');
@@ -383,11 +406,12 @@ export function subLine(f, time, role, band) {
   const due = left.filter((a) => a.kind === 'deadline');
   const rest = left.filter((a) => a.kind !== 'deadline');
   if (due.length) {
-    sentences.push(`Due today: ${due[0].title}.`);
+    sentences.push(`Due today: ${due[0].title}${sprintSuffix(f, due[0])}.`);
     const also = [...due.slice(1), ...rest];
-    if (also.length) sentences.push(`Also: ${also.map((a) => SHORT[a.id] || a.title).join(', ')}.`);
+    const short = (a) => { const t = SHORT[a.id] || a.title; return `${t}${sprintSuffix(f, a, t)}`; };
+    if (also.length) sentences.push(`Also: ${also.map(short).join(', ')}.`);
   } else {
-    for (const a of rest) sentences.push(endSentence(a.title));
+    for (const a of rest) sentences.push(`${a.title.replace(/[.!?]$/, '')}${sprintSuffix(f, a)}.`);
   }
   if (sentences.length) return sentences.join(' ');
 
@@ -631,6 +655,18 @@ function slotFor(a, day, times, isCutDay) {
   return 'today';
 }
 
+const isClock = (t) => /^\d\d:\d\d$/.test(t || '');
+/** The folded "Today" panel's summary (READABILITY.md §3.1): the count and the next item that has not passed. */
+function todaySummary(groups, count, weekendDay) {
+  const items = groups.flatMap((g) => g.items);
+  if (!items.length) return weekendDay ? `Nothing due on ${weekendDay}` : 'Nothing due today';
+  const n = `${count} ${count === 1 ? 'item' : 'items'}`;
+  const ahead = items.filter((it) => it.slot !== 'earlier');
+  if (!ahead.length) return `${n} · all passed`;
+  const next = ahead.find((it) => isClock(it.when)) || ahead[0];
+  return `${n} · next ${isClock(next.when) ? `${next.when} ` : ''}${next.title}`;
+}
+
 /**
  * "Your day" for a role. On a weekend it lists the next working day's items (STATES.md §8 Sat 3 Oct).
  * Returns { day, heading, groups: [{ slot, heading, items }], running, everyday, carry, nextFor, also, gates, count }.
@@ -692,7 +728,9 @@ export function agenda(date, time, role, rules) {
   // Passed items move to "Earlier today" with the neutral Passed chip. Never claims completion.
   for (const m of items) {
     let passed = false;
-    if (isCutDay && phase !== 'before' && (m.slot === 'morning' || (m.time && m.time <= now && m.kind !== 'deploy'))) passed = true;
+    if (isCutDay && phase !== 'before' && m.slot === 'morning') passed = true;
+    // Any day: a meeting or timed deadline is over once its time has come (review 1.7). Deploys stay "Tonight".
+    if (!weekend && m.time && m.time <= now && m.kind !== 'deploy') passed = true;
     if (isCutDay && phase === 'evening' && m.slot === 'after-cutoff') passed = true;
     if (demoEvening && (m.slot === 'before-deploy' || m.id === 'code-freeze' || m.id === 'regression-run')) passed = true;
     if (passed) { m.slot = 'earlier'; m.chip = { text: 'Passed', cls: 'passed' }; m.key = false; }
@@ -750,6 +788,7 @@ export function agenda(date, time, role, rules) {
     day,
     weekend,
     heading: weekend ? fmtDay(day) : null,
+    summary: todaySummary(groups, all.length, weekend ? fmtDay(day) : null),
     groups,
     running,
     everyday,
