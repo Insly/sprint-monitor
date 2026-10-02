@@ -68,7 +68,8 @@ const SUBS = [
   ['2026-10-01', '09:00', 'Everyone', 'IM/AM: Collect UAT feedback from clients (2026-20).'],
   // Review 1.12: on the cut-off eve every role sees the cut-off time.
   ['2026-10-02', '09:00', 'QA', 'Nothing due for QA today. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
-  ['2026-10-02', '09:00', 'Lead', 'Nothing due for Lead today. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
+  // The Lead's own item that day (mid-sprint check, day 5) comes first.
+  ['2026-10-02', '09:00', 'Lead', 'Mid-sprint delivery check. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
   ['2026-10-02', '09:00', 'Analyst', 'Nothing due for Analyst today. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
   // Review 1.8: freeze lines on a new sprint's day 1 name the sprint that is frozen.
   ['2027-01-04', '09:00', 'Dev', '2027-1 code freeze holds until the Demo update tomorrow evening.'],

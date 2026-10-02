@@ -35,6 +35,8 @@ const SHORT = {
 const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
 const roleWord = (role) => (role === 'IM/AM' ? 'IM / AM' : role);
 const endSentence = (s) => (/[.!?]$/.test(s) ? s : `${s}.`);
+/** The label of sprint s when it is not the sprint being built on f.date (copy names other sprints), else ''. */
+const otherLabel = (f, s) => (s && s.n !== f.ctx.current.n ? s.label : '');
 
 // ---------------------------------------------------------------- facts about one day
 
@@ -76,13 +78,16 @@ export function headsUp(f) {
   const near = sprintsNear(context(d));
   const when = f.nwdIsTomorrow ? 'tomorrow' : WEEKDAY_LONG[weekdayOf(d)];
   const demo = near.find((s) => s.demoStart === d);
-  if (demo) return { key: true, kind: 'demo', sprint: demo, text: `${demo.label} Demo update ${when}`, short: f.nwdIsTomorrow ? 'Demo tomorrow' : `Demo ${weekdayOf(d)}` };
+  if (demo) return { key: true, kind: 'demo', sprint: demo, when, text: `${demo.label} Demo update ${when}`, short: `${demo.label} Demo ${f.nwdIsTomorrow ? 'tomorrow' : weekdayOf(d)}` };
   const cut = near.find((s) => s.cutoff === d);
-  if (cut) return { key: true, kind: 'cutoff', sprint: cut, text: `Last working day before the ${cut.label} cut-off`, short: `${cut.label} cut-off ${weekdayOf(d)} ${f.times.cutoff}` };
+  if (cut) return { key: true, kind: 'cutoff', sprint: cut, when, text: `Last working day before the ${cut.label} cut-off`, short: `${cut.label} cut-off ${weekdayOf(d)} ${f.times.cutoff}` };
   const plan = near.find((s) => s.planning === d);
-  if (plan) return { key: false, kind: 'planning', sprint: plan, text: `Sprint planning ${when}`, short: `Planning ${when}` };
+  if (plan) return { key: false, kind: 'planning', sprint: plan, when, text: `${plan.label} sprint planning ${when}`, short: `${plan.label} planning ${when}` };
   const frz = near.find((s) => s.freezeStart === d);
-  if (frz) return { key: false, kind: 'freeze', sprint: frz, text: `Code freeze starts ${when}`, short: `Code freeze ${when}` };
+  if (frz) {
+    const L = otherLabel(f, frz);
+    return { key: false, kind: 'freeze', sprint: frz, when, text: L ? `${L} code freeze starts ${when}` : `Code freeze starts ${when}`, short: `${L ? `${L} code` : 'Code'} freeze ${when}` };
+  }
   return null;
 }
 
@@ -116,8 +121,9 @@ export function carryOverItems(date, rules, role) {
 export function todayEvent(f, role) {
   const s = f.freezeStarts;
   if (s && f.acts.some((a) => a.id === 'code-freeze' && a.dates.from === f.date)) return { kind: 'freeze', text: 'Code freeze starts today', short: 'Code freeze starts' };
-  if (f.acts.some((a) => a.id === 'sprint-planning')) return { kind: 'planning', text: 'Sprint planning today', short: 'Planning today' };
-  if (f.uatOpens) return { kind: 'uat', text: `UAT opens: deadline ${fmtDay(f.uatOpens.cutoff)} ${f.times.cutoff}`, short: 'UAT opens' };
+  const plan = f.acts.find((a) => a.id === 'sprint-planning');
+  if (plan) { const L = sprintDates(plan.sprintNumber).label; return { kind: 'planning', text: `${L} sprint planning today`, short: `${L} planning today` }; }
+  if (f.uatOpens) return { kind: 'uat', text: `${f.uatOpens.label} UAT opens: deadline ${fmtDay(f.uatOpens.cutoff)} ${f.times.cutoff}`, short: `${f.uatOpens.label} UAT opens` };
   const start = f.acts.find((a) => a.id === 'sprint-start');
   if (start) return { kind: 'start', text: `${sprintDates(start.sprintNumber).label} starts today`, short: `${sprintDates(start.sprintNumber).label} starts` };
 
@@ -128,11 +134,11 @@ export function todayEvent(f, role) {
     const prevLive = sprintDates(c.sprintNumber).live === c.from;
     if (role === 'Everyone') {
       return prevLive
-        ? { kind: 'carry', text: `Morning after the ${label} Live update`, short: 'Morning after Live', carry }
-        : { kind: 'carry', text: `Morning after the ${label} Demo update`, short: 'Morning after Demo', carry };
+        ? { kind: 'carry', text: `Morning after the ${label} Live update`, short: `Morning after ${label} Live`, carry }
+        : { kind: 'carry', text: `Morning after the ${label} Demo update`, short: `Morning after ${label} Demo`, carry };
     }
     const byId = (id) => carry.find((a) => a.id === id);
-    if (byId('confirm-live-to-client')) return { kind: 'carry', text: 'Confirm the Live update to clients', short: 'Confirm Live to clients', carry };
+    if (byId('confirm-live-to-client')) return { kind: 'carry', text: `Confirm the ${label} Live update to clients`, short: `Confirm ${label} Live to clients`, carry };
     if (byId('golive-page')) return { kind: 'carry', text: `Create the Golive Release ${label} page`, short: 'Golive page', carry };
     if (byId('release-page')) return { kind: 'carry', text: `Create the Release ${label} page`, short: 'Release page', carry };
     return { kind: 'carry', text: c.title, short: c.title, carry };
@@ -175,7 +181,8 @@ export function bandState(f, time, role) {
 function weekendHeadline(f) {
   const mon = f.nwd;
   const near = sprintsNear(context(mon));
-  if (near.some((s) => s.cutoff === mon)) return `Weekend. ${WEEKDAY_LONG[weekdayOf(mon)]} is cut-off and Live day.`;
+  const cut = near.find((s) => s.cutoff === mon);
+  if (cut) return `Weekend. ${fmtDay(mon)}: ${cut.label} fix cut-off ${f.times.cutoff} and Live update.`;
   const start = near.find((s) => s.start === mon);
   if (start) return `Weekend. ${start.label} starts ${WEEKDAY_LONG[weekdayOf(mon)]}.`;
   return 'Weekend';
@@ -186,11 +193,12 @@ export function headline(f, time, role) {
   if (isWeekendDay(f.date)) return weekendHeadline(f);
   if (f.cut) {
     const p = cutoffPhase(f, time);
-    if (p === 'before') return `Fix cut-off at ${f.times.cutoff}`;
-    if (p === 'after') return 'Cut-off passed. Live update tonight.';
-    return 'Live update tonight';
+    const L = f.cut.label;
+    if (p === 'before') return `${L} fix cut-off at ${f.times.cutoff}`;
+    if (p === 'after') return `${L} cut-off passed. Live update tonight.`;
+    return `${L} Live update tonight`;
   }
-  if (f.demo) return 'Demo update tonight';
+  if (f.demo) return `${f.demo.label} Demo update tonight`;
   const parts = [todayEvent(f, role)?.text, headsUp(f)?.text].filter(Boolean);
   if (parts.length === 0) return 'No deadlines today';
   if (parts.length === 1) return parts[0];
@@ -204,13 +212,14 @@ export function tabTitle(f, time, role, { preview = false } = {}) {
   let core;
   if (isWeekendDay(f.date)) {
     const mon = f.nwd;
-    const cut = sprintsNear(context(mon)).some((s) => s.cutoff === mon);
-    core = cut ? `Weekend · ${weekdayOf(mon)} cut-off ${T.cutoff}` : 'Weekend';
+    const cut = sprintsNear(context(mon)).find((s) => s.cutoff === mon);
+    core = cut ? `Weekend · ${cut.label} cut-off ${weekdayOf(mon)} ${T.cutoff}` : 'Weekend';
   } else if (f.cut) {
     const p = cutoffPhase(f, time);
-    core = p === 'before' ? `Cut-off ${T.cutoff} · Live tonight` : p === 'after' ? 'Cut-off passed · Live tonight' : 'Live update tonight';
+    const L = f.cut.label;
+    core = p === 'before' ? `${L} cut-off ${T.cutoff} · Live tonight` : p === 'after' ? `${L} cut-off passed · Live tonight` : `${L} Live update tonight`;
   } else if (f.demo) {
-    core = 'Demo update tonight';
+    core = `${f.demo.label} Demo update tonight`;
   } else {
     const h = headsUp(f);
     if (h && h.kind === 'cutoff') core = h.short;
@@ -258,14 +267,14 @@ export function subLine(f, time, role, band) {
     const L = f.cut.label;
     const p = cutoffPhase(f, time);
     if (p === 'before') {
-      if (R === 'IM/AM') return `Raise blocking UAT bugs with the developers now. Anything not fixed by ${T.cutoff} is reverted.`;
-      if (R === 'Dev') return `Blocking UAT fixes in by ${T.cutoff}. Live update tonight.`;
+      if (R === 'IM/AM') return `Raise blocking bugs with the developers now. Anything not fixed by ${T.cutoff} is reverted.`;
+      if (R === 'Dev') return `Blocking fixes in by ${T.cutoff}. ${L} goes Live tonight.`;
       if (R === 'Everyone') return `A bugfix that misses ${T.cutoff} means a revert, not a fix.`;
       return `${nothing} ${L} goes Live tonight.`;
     }
     if (p === 'after') {
       if (R === 'IM/AM') return 'Agree reverts with the developers and tell affected clients.';
-      if (R === 'Dev') return 'If anything missed the cut-off, revert it before Live. The IM/AM decide which.';
+      if (R === 'Dev') return `If anything missed the ${L} cut-off, revert it before Live. The IM/AM decide which.`;
       if (R === 'Everyone') return `Fixes after ${T.cutoff} are reverts, not fixes.`;
       return nothing;
     }
@@ -278,9 +287,9 @@ export function subLine(f, time, role, band) {
   if (f.demo) {
     const L = f.demo.label;
     const evening = time >= T.demo;
-    if (R === 'Dev') return evening ? `After the update: create the Release ${L} page, tonight or tomorrow morning.` : `Code freeze holds until the update. Afterwards: Release ${L} page.`;
-    if (R === 'QA') return evening ? 'Regression closes with the update.' : 'Before the update: all tasks tested and Ready for Demo.';
-    if (R === 'IM/AM') return `Don't tell clients yet. Tomorrow: tell them, UAT deadline ${fmtDay(f.demo.cutoff)} ${T.cutoff}.`;
+    if (R === 'Dev') return evening ? `After the update: create the Release ${L} page, tonight or tomorrow morning.` : `${L} code freeze holds until the update. Afterwards: Release ${L} page.`;
+    if (R === 'QA') return evening ? `${L} regression closes with the update.` : 'Before the update: all tasks tested and Ready for Demo.';
+    if (R === 'IM/AM') return `Don't tell clients yet. Tomorrow: tell them, ${L} UAT deadline ${fmtDay(f.demo.cutoff)} ${T.cutoff}.`;
     if (R === 'Everyone') return 'QA: Ready for Demo before the update. IM/AM: tell clients tomorrow.';
     // Lead / Analyst: name their own item if they have one today (e.g. the Tuesday refinement prep).
     const own = f.acts.find((a) => a.status === 'today' && roleMatches(a, R) && !(a.who || []).includes('All'));
@@ -293,25 +302,31 @@ export function subLine(f, time, role, band) {
   const retroLine = retro ? `Bug retro for ${sprintDates(retro.sprintNumber).label} today.` : null;
 
   if (h && h.kind === 'demo') {
-    if (R === 'Dev') return 'Code freeze holds until the Demo update tomorrow evening.';
-    if (R === 'QA') return 'Run regression until the Demo update tomorrow evening.';
+    const L = h.sprint.label;
+    if (R === 'Dev') return `${L} code freeze holds until the Demo update ${h.when} evening.`;
+    if (R === 'QA') return `${L} regression runs until the Demo update ${h.when} evening.`;
     if (R === 'Everyone') return [retroLine, 'IM/AM: Demo/Live matrix due.'].filter(Boolean).join(' ');
     if ((R === 'Lead' || R === 'Analyst') && retroLine) return retroLine;
   }
   if (h && h.kind === 'cutoff') {
+    const L = h.sprint.label;
+    const by = `${fmtDay(h.sprint.cutoff)} ${T.cutoff}`;
     const matrix = f.acts.find((a) => a.id === 'matrix-before-live');
-    if (R === 'IM/AM') return matrix ? `Due today: ${matrix.title}. Chase UAT results.` : 'Chase UAT results.';
-    if (R === 'Dev') return `Blocking UAT fixes must be in by ${weekdayOf(h.sprint.cutoff)} ${T.cutoff}.`;
-    if (R === 'Everyone') return `IM/AM: Demo/Live matrix for Live, chase UAT results. Dev: blocking fixes in by ${weekdayOf(h.sprint.cutoff)} ${T.cutoff}.`;
-    return nothing;
+    if (R === 'IM/AM') return matrix ? `Due today: ${matrix.title}. Chase ${L} UAT results.` : `Chase ${L} UAT results.`;
+    if (R === 'Dev') return `Blocking ${L} UAT fixes must be in by ${by}.`;
+    if (R === 'Everyone') return `IM/AM: Demo/Live matrix for Live, chase ${L} UAT results. Dev: blocking fixes in by ${by}.`;
+    // Every other role still sees when the cut-off is (review 1.12), after their own items if they have any.
+    const own = f.acts.filter((a) => a.status === 'today' && roleMatches(a, R) && !(a.who || []).includes('All'));
+    return `${own.length ? own.map((a) => endSentence(a.title)).join(' ') : nothing} ${L} fix cut-off ${by}.`;
   }
   if (f.uatOpens) {
-    if (R === 'IM/AM') return 'Once the developers confirm the Demo update, tell clients what is on Demo.';
-    if (R === 'Everyone') return `IM/AM: tell clients what is on Demo. UAT deadline ${fmtDay(f.uatOpens.cutoff)} ${T.cutoff}.`;
+    const L = f.uatOpens.label;
+    if (R === 'IM/AM') return `Once the developers confirm the ${L} Demo update, tell clients what is on Demo.`;
+    if (R === 'Everyone') return `IM/AM: tell clients what is on Demo. ${L} UAT deadline ${fmtDay(f.uatOpens.cutoff)} ${T.cutoff}.`;
   }
   if (f.freezeStarts) {
     const u = `until the Demo update ${fmtDay(f.freezeStarts.demoStart)} (evening)`;
-    if (R === 'QA') return `Run regression opens today, ${u}.`;
+    if (R === 'QA') return `Regression runs from today ${u}.`;
     if (R === 'Dev') return `Only QA-approved bug fixes go to Beta ${u}.`;
     if (R === 'IM/AM') return `Config changes on Beta need QA approval ${u}.`;
     if (R === 'Everyone') return `Code freeze ${u}. Beta reopens ${fmtDay(f.freezeStarts.uatStart)}.`;
@@ -354,7 +369,7 @@ export function subLine(f, time, role, band) {
   const findings = mine.find((a) => a.id === 'uat-findings-to-planning');
   if (rank && R === 'Lead') {
     if (findings) {
-      sentences.push('Rank the refinement queue before 14:00.', `Bring ${f.ctx.previous.label} UAT findings to planning.`);
+      sentences.push('Rank the refinement queue before 14:00.', `Bring ${f.ctx.previous.label} UAT findings to ${f.ctx.next.label} planning.`);
       handled.add(findings.id);
     } else sentences.push('Rank the refinement queue before Pre-Refinement at 14:00.');
     handled.add(rank.id);
@@ -895,7 +910,7 @@ export function resolveDay({ date, time = '09:00', role = 'Everyone', rules, dut
   const meta = isWeekendDay(f.date)
     ? `${f.ctx.current.label} · weekend`
     : f.cut || f.demo
-      ? `${(f.cut || f.demo).label} · ${f.ctx.current.label} day ${f.ctx.dayOfSprint} of ${workingDaysIn(f.ctx.current)}`
+      ? `${f.cut ? `${f.cut.label} cut-off` : `${f.demo.label} Demo update`} · ${f.ctx.current.label} day ${f.ctx.dayOfSprint} of ${workingDaysIn(f.ctx.current)}`
       : `${f.ctx.current.label} · day ${f.ctx.dayOfSprint} of ${workingDaysIn(f.ctx.current)}`;
   if (!ok) {
     return {

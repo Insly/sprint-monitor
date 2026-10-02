@@ -294,7 +294,7 @@ describe('owner spot checks', () => {
 
   it('2027-2 planning shows on Thu 31 Dec', () => {
     const m = day('2026-12-31');
-    expect(m.headline).toBe('Sprint planning today. Code freeze starts tomorrow.');
+    expect(m.headline).toBe('2027-2 sprint planning today. Code freeze starts tomorrow.');
     expect(m.rail.find((r) => r.label === '2027-2').phaseLabel).toBe('Sprint planning today · starts Mon 4 Jan');
     const p = actionsFor('2026-12-31', RULES).find((a) => a.id === 'sprint-planning');
     expect(sprintDates(p.sprintNumber).label).toBe('2027-2');

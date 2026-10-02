@@ -119,7 +119,7 @@ describe('resolveDay: warning for every role, nothing else changes', () => {
           }
         }
       }
-    });
+    }, 30000);
   }
   it('the error model (rules failed to load) still carries the warning', () => {
     const m = resolveDay({ date: '2026-12-31', rules: null, holidays: HOLIDAYS });

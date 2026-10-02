@@ -98,39 +98,39 @@ describe('STATES.md §6 / §8 sprint rail', () => {
 // §8 sub-lines, verbatim. [date, time, role, text]
 const SUBS = [
   ['2026-09-28', '09:00', 'IM/AM', 'Due today: Update Demo/Live matrix for Demo. Also: Tell clients what this sprint delivers.'],
-  ['2026-09-28', '09:00', 'Dev', 'Code freeze holds until the Demo update tomorrow evening.'],
-  ['2026-09-28', '09:00', 'QA', 'Run regression until the Demo update tomorrow evening.'],
+  ['2026-09-28', '09:00', 'Dev', '2026-20 code freeze holds until the Demo update tomorrow evening.'],
+  ['2026-09-28', '09:00', 'QA', '2026-20 regression runs until the Demo update tomorrow evening.'],
   ['2026-09-28', '09:00', 'Lead', 'Bug retro for 2026-20 today.'],
   ['2026-09-28', '09:00', 'Analyst', 'Bug retro for 2026-20 today.'],
   ['2026-09-28', '09:00', 'Everyone', 'Bug retro for 2026-20 today. IM/AM: Demo/Live matrix due.'],
-  ['2026-09-29', '09:00', 'Dev', 'Code freeze holds until the update. Afterwards: Release 2026-20 page.'],
+  ['2026-09-29', '09:00', 'Dev', '2026-20 code freeze holds until the update. Afterwards: Release 2026-20 page.'],
   ['2026-09-29', '09:00', 'QA', 'Before the update: all tasks tested and Ready for Demo.'],
-  ['2026-09-29', '09:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, UAT deadline Mon 5 Oct 12:00.'],
+  ['2026-09-29', '09:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, 2026-20 UAT deadline Mon 5 Oct 12:00.'],
   ['2026-09-29', '09:00', 'Lead', 'Nothing due for Lead today.'],
   ['2026-09-29', '09:00', 'Analyst', 'Due today: Describe and label tasks for refinement.'],
   ['2026-09-29', '09:00', 'Everyone', 'QA: Ready for Demo before the update. IM/AM: tell clients tomorrow.'],
   ['2026-09-29', '17:00', 'Dev', 'After the update: create the Release 2026-20 page, tonight or tomorrow morning.'],
-  ['2026-09-29', '17:00', 'QA', 'Regression closes with the update.'],
-  ['2026-09-29', '17:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, UAT deadline Mon 5 Oct 12:00.'],
-  ['2026-09-30', '09:00', 'IM/AM', 'Once the developers confirm the Demo update, tell clients what is on Demo.'],
+  ['2026-09-29', '17:00', 'QA', '2026-20 regression closes with the update.'],
+  ['2026-09-29', '17:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, 2026-20 UAT deadline Mon 5 Oct 12:00.'],
+  ['2026-09-30', '09:00', 'IM/AM', 'Once the developers confirm the 2026-20 Demo update, tell clients what is on Demo.'],
   ['2026-09-30', '09:00', 'Dev', 'Pre-Refinement at 14:00. From last night: Release 2026-20 page.'],
   ['2026-09-30', '09:00', 'QA', 'Pre-Refinement at 14:00.'],
   ['2026-09-30', '09:00', 'Lead', 'Rank the refinement queue before Pre-Refinement at 14:00.'],
   ['2026-09-30', '09:00', 'Analyst', 'Answer parked refinement questions before tomorrow\'s Full Refinement.'],
   ['2026-10-01', '09:00', 'IM/AM', 'Collect UAT feedback from clients.'],
   ['2026-10-01', '09:00', 'Lead', 'Next for Lead: Mid-sprint delivery check, Fri 2 Oct.'],
-  ['2026-10-02', '09:00', 'IM/AM', 'Due today: Update Demo/Live matrix for Live. Chase UAT results.'],
-  ['2026-10-02', '09:00', 'Dev', 'Blocking UAT fixes must be in by Mon 12:00.'],
-  ['2026-10-02', '09:00', 'QA', 'Nothing due for QA today.'],
-  ['2026-10-02', '09:00', 'Lead', 'Nothing due for Lead today.'],
-  ['2026-10-02', '09:00', 'Analyst', 'Nothing due for Analyst today.'],
-  ['2026-10-05', '09:00', 'IM/AM', 'Raise blocking UAT bugs with the developers now. Anything not fixed by 12:00 is reverted.'],
-  ['2026-10-05', '09:00', 'Dev', 'Blocking UAT fixes in by 12:00. Live update tonight.'],
+  ['2026-10-02', '09:00', 'IM/AM', 'Due today: Update Demo/Live matrix for Live. Chase 2026-20 UAT results.'],
+  ['2026-10-02', '09:00', 'Dev', 'Blocking 2026-20 UAT fixes must be in by Mon 5 Oct 12:00.'],
+  ['2026-10-02', '09:00', 'QA', 'Nothing due for QA today. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
+  ['2026-10-02', '09:00', 'Lead', 'Mid-sprint delivery check. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
+  ['2026-10-02', '09:00', 'Analyst', 'Nothing due for Analyst today. 2026-20 fix cut-off Mon 5 Oct 12:00.'],
+  ['2026-10-05', '09:00', 'IM/AM', 'Raise blocking bugs with the developers now. Anything not fixed by 12:00 is reverted.'],
+  ['2026-10-05', '09:00', 'Dev', 'Blocking fixes in by 12:00. 2026-20 goes Live tonight.'],
   ['2026-10-05', '09:00', 'Everyone', 'A bugfix that misses 12:00 means a revert, not a fix.'],
   ['2026-10-05', '09:00', 'QA', 'Nothing due for QA today. 2026-20 goes Live tonight.'],
   ['2026-10-05', '11:59', 'Lead', 'Nothing due for Lead today. 2026-20 goes Live tonight.'],
   ['2026-10-05', '12:00', 'IM/AM', 'Agree reverts with the developers and tell affected clients.'],
-  ['2026-10-05', '13:20', 'Dev', 'If anything missed the cut-off, revert it before Live. The IM/AM decide which.'],
+  ['2026-10-05', '13:20', 'Dev', 'If anything missed the 2026-20 cut-off, revert it before Live. The IM/AM decide which.'],
   ['2026-10-05', '19:59', 'Everyone', 'Fixes after 12:00 are reverts, not fixes.'],
   ['2026-10-05', '12:00', 'Analyst', 'Nothing due for Analyst today.'],
   ['2026-10-05', '20:00', 'IM/AM', 'Confirm to clients once the developers confirm it, tonight or tomorrow morning.'],
@@ -143,7 +143,7 @@ const SUBS = [
   ['2026-10-06', '09:00', 'Lead', 'Next for Lead: Rank the refinement queue, Wed 7 Oct.'],
   ['2026-10-06', '09:00', 'Analyst', 'Describe and label tasks for refinement.'],
   ['2026-10-07', '09:00', 'IM/AM', 'Due today: Check Definition of Ready. Also: Chase client approval of estimates, priority calls, QA estimates, UAT findings.'],
-  ['2026-10-07', '09:00', 'Lead', 'Rank the refinement queue before 14:00. Bring 2026-20 UAT findings to planning.'],
+  ['2026-10-07', '09:00', 'Lead', 'Rank the refinement queue before 14:00. Bring 2026-20 UAT findings to 2026-22 planning.'],
   ['2026-10-07', '09:00', 'QA', 'QA estimates on sprint candidates.'],
   ['2026-10-07', '09:00', 'Analyst', 'Nothing due for Analyst today.'],
   ['2026-10-08', '09:00', 'QA', 'Due today: Regression plans ready in TestRail.'],
@@ -151,7 +151,7 @@ const SUBS = [
   ['2026-10-08', '09:00', 'IM/AM', 'Plan 2/3 of capacity, keep 1/3 as buffer. Release check 12:00 due tomorrow.'],
   ['2026-10-08', '09:00', 'Dev', 'Plan 2/3 of capacity, keep 1/3 as buffer. Release check 12:00 due tomorrow.'],
   ['2026-10-08', '09:00', 'Analyst', 'Nothing due for Analyst today.'],
-  ['2026-10-09', '09:00', 'QA', 'Run regression opens today, until the Demo update Tue 13 Oct (evening).'],
+  ['2026-10-09', '09:00', 'QA', 'Regression runs from today until the Demo update Tue 13 Oct (evening).'],
   ['2026-10-09', '09:00', 'Dev', 'Only QA-approved bug fixes go to Beta until the Demo update Tue 13 Oct (evening).'],
   ['2026-10-09', '09:00', 'IM/AM', 'Config changes on Beta need QA approval until the Demo update Tue 13 Oct (evening).'],
   ['2026-10-09', '09:00', 'Lead', 'Due today: Prepare the bug retro page. Also: Release check 12:00.'],
@@ -160,8 +160,8 @@ const SUBS = [
   ['2026-10-12', '09:00', 'Lead', 'Bug retro for 2026-21 today.'],
   ['2026-10-12', '09:00', 'IM/AM', 'Due today: Update Demo/Live matrix for Demo. Also: Tell clients what this sprint delivers.'],
   // Tue 13 Oct: "Same as Tue 29 Sep ... UAT deadline Mon 19 Oct 12:00, release page Release 2026-21"
-  ['2026-10-13', '09:00', 'Dev', 'Code freeze holds until the update. Afterwards: Release 2026-21 page.'],
-  ['2026-10-13', '09:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, UAT deadline Mon 19 Oct 12:00.'],
+  ['2026-10-13', '09:00', 'Dev', '2026-21 code freeze holds until the update. Afterwards: Release 2026-21 page.'],
+  ['2026-10-13', '09:00', 'IM/AM', 'Don\'t tell clients yet. Tomorrow: tell them, 2026-21 UAT deadline Mon 19 Oct 12:00.'],
 ];
 
 describe('STATES.md §8 sub-lines', () => {
@@ -237,7 +237,7 @@ describe('other resolver states', () => {
 
   it('preview prefixes the tab title', () => {
     const f = dayFacts('2026-10-12', RULES);
-    expect(tabTitle(f, '09:00', 'Everyone', { preview: true })).toBe('Preview Mon 12 Oct · Demo tomorrow · 2026-22 day 1 · Sprint Board');
+    expect(tabTitle(f, '09:00', 'Everyone', { preview: true })).toBe('Preview Mon 12 Oct · 2026-21 Demo tomorrow · 2026-22 day 1 · Sprint Board');
   });
 
   it('weekend that is not before a cut-off', () => {
