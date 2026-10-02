@@ -1,0 +1,53 @@
+# Scheduled checks (review 2026-10-02, Batch 5: AU15 freshness, AU16 uptime).
+# A failed run makes GitHub email the workflow owner: the user who last edited the cron
+# schedule in this file (or who re-enabled the workflow). See README "Scheduled checks".
+# GitHub disables scheduled workflows after 60 days without repository activity.
+name: scheduled-checks
+on:
+  schedule:
+    - cron: '0 6 * * 1'      # Monday 06:00 UTC: data freshness
+    - cron: '*/30 * * * *'   # every 30 min: uptime
+  workflow_dispatch:
+    inputs:
+      check:
+        description: Which check to run
+        type: choice
+        options: [both, freshness, uptime]
+        default: both
+permissions:
+  contents: read
+jobs:
+  freshness:
+    if: github.event.schedule == '0 6 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.check != 'uptime')
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Tallinn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run freshness
+  uptime:
+    if: github.event.schedule == '*/30 * * * *' || (github.event_name == 'workflow_dispatch' && inputs.check != 'freshness')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: https://insly-sprint-monitor.onrender.com
+    steps:
+      - name: Check the live page and its scripts
+        run: |
+          fail=0
+          check() {  # $1 = path; prints status, sets fail on non-200
+            code=$(curl -sS -o "$2" -w '%{http_code}' --retry 2 --retry-delay 10 --max-time 30 "$SITE$1" || true)
+            echo "$1 -> HTTP $code"
+            if [ "$code" != "200" ]; then echo "::error::$SITE$1 returned HTTP $code"; fail=1; fi
+          }
+          check / page.html
+          if ! grep -q 'MGA Sprint Board' page.html; then
+            echo "::error::$SITE/ does not contain 'MGA Sprint Board'"; fail=1
+          fi
+          for f in /schedule.js /board.js /rules.js; do check "$f" /dev/null; done
+          exit $fail
