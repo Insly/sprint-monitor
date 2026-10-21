@@ -102,6 +102,30 @@ export const YEAR_STARTS = { 2026: 1, 2027: 26 };
  */
 export const UNCONFIRMED_FROM = 28;
 
+/** The last year with a numbering start in YEAR_STARTS. Sprints that start after it have no label yet. */
+export const LAST_NUMBERED_YEAR = Math.max(...Object.keys(YEAR_STARTS).map(Number));
+
+/** Does sprint n start no later than the last numbered year (so its label is right)? Before the anchor see ANCHOR. */
+export function isNumbered(n) {
+  return Number.isInteger(n) && Number(sprintDates(n).start.slice(0, 4)) <= LAST_NUMBERED_YEAR;
+}
+
+/**
+ * Review 2.3: a date the board cannot label. null when every sprint the page shows for it (current and next) is
+ * numbered; else { kind: 'before' | 'after', year?, text }: "No board before 2026-17" /
+ * "Sprint numbering for 2028 is not configured".
+ */
+export function numberingGap(date) {
+  const key = toKey(date);
+  if (key < ANCHOR.start) return { kind: 'before', text: `No board before ${labelOf(ANCHOR.number)}` };
+  const n = sprintForDate(key);
+  for (const m of [n, n + 1]) {
+    const year = Number(sprintDates(m).start.slice(0, 4));
+    if (year > LAST_NUMBERED_YEAR) return { kind: 'after', year, text: `Sprint numbering for ${year} is not configured` };
+  }
+  return null;
+}
+
 function labelOf(n) {
   let year = null;
   for (const [y, first] of Object.entries(YEAR_STARTS)) if (n >= first && (year === null || first >= YEAR_STARTS[year])) year = y;
@@ -426,6 +450,8 @@ export function sprintByLabel(label) {
   const n = first + k - 1;
   const nextFirst = YEAR_STARTS[year + 1];
   if (nextFirst != null && n >= nextFirst) return null;
+  // Past the configured years a label like "2027-28" would name a 2028 sprint (review 2.3).
+  if (!isNumbered(n)) return null;
   return n;
 }
 

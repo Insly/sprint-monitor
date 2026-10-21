@@ -553,7 +553,7 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
 import {
   context, sprintDates, sprintByLabel, sprintDetail, keyTimes, zonedNow, formatAcrossZones,
   deviceDiffersFromTallinn, toKey, addDays, fmtDay, fmtDM, isWeekendDay, workingDaysIn, actionsFor,
-  ANCHOR, LAST_CONFIRMED, ROLES,
+  ANCHOR, LAST_CONFIRMED, ROLES, isNumbered,
 } from './schedule.js';
 import { resolveDay, deployPeople, holidayNotice, NOT_ASSIGNED, dayFacts, untilText, sortWithinDay, dutyParts } from './board.js';
 
@@ -635,7 +635,9 @@ let sprintViewEveryone = false; // the sprint view's own toggle; never stored, n
 const SAFE = /^[A-Za-z0-9._~-]+$/;
 function readRoute() {
   const out = { date: null, sprint: null, sprintRaw: null };
-  const hash = decodeURIComponent(location.hash.slice(1));
+  // A malformed link (e.g. #%E0) must not blank the page: treat it as no route (review 2.1).
+  let hash = '';
+  try { hash = decodeURIComponent(location.hash.slice(1)); } catch { hash = ''; }
   if (hash && SAFE.test(hash)) {
     for (const seg of hash.split('~')) {
       if (seg.startsWith('date-')) { try { out.date = toKey(seg.slice(5)); } catch { /* ignore */ } }
@@ -677,7 +679,7 @@ function renderTop(n, model) {
   $('date-long').textContent = fmtLong(n.date);
   $('date-short').textContent = fmtDay(n.date);
   const c = context(n.date);
-  $('day-short').textContent = c.dayOfSprint ? `${c.current.label} · day ${c.dayOfSprint}` : `${c.current.label} · weekend`;
+  $('day-short').textContent = model && model.range ? model.range.text : c.dayOfSprint ? `${c.current.label} · day ${c.dayOfSprint}` : `${c.current.label} · weekend`;
   const seg = $('role-seg');
   if (!seg.childElementCount) {
     for (const r of ROLES) {
@@ -693,7 +695,6 @@ function renderTop(n, model) {
   for (const input of seg.querySelectorAll('input')) input.checked = input.value === role;
   $('role-select').value = role;
   $('viewdate-input').value = n.date;
-  void model;
 }
 
 function setRole(r, { from } = {}) {
@@ -842,7 +843,7 @@ function renderYourDay(n, m) {
   if (m.holidayWarnings && m.holidayWarnings.length) kids.push(h('ul', { class: 'notices' }, m.holidayWarnings.map((w) => h('li', null, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), w.text))));
 
   if (!a) {
-    kids.push(h('p', { class: 'empty' }, 'The action list could not load. Sprint dates below are still correct.'));
+    kids.push(h('p', { class: 'empty' }, m.range ? `${m.range.text}. ${m.sub}` : 'The action list could not load. Sprint dates below are still correct.'));
     out();
     return;
   }
@@ -858,7 +859,7 @@ function renderYourDay(n, m) {
   if (a.gates && a.gates.items.length) {
     kids.push(h('details', { class: 'group', open: true, 'data-k': 'gates' },
       h('summary', null, h('b', null, a.gates.heading), h('span', { class: 'cnt' }, `due ${fmtDay(a.gates.due)}`), h('i', { class: 'chev', 'aria-hidden': 'true' })),
-      h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, it.who.map(roleLabel).join(', ')))))));
+      h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, (it.who || []).map(roleLabel).join(', ')))))));
   }
   if (!a.groups.length) {
     const nf = a.next;
@@ -894,6 +895,7 @@ function stepsBar(phase) {
     h('li', { class: p === phase ? 'now' : null, 'aria-current': p === phase ? 'step' : null }, p)));
 }
 function renderRail(m) {
+  if (m.range) { fill($('rail-sec'), foldable('sprints', { tag: '<sprints>', title: 'Three sprints in play', id: 'rail-h', sum: m.range.text }, h('p', { class: 'empty' }, `${m.range.text}.`))); return; }
   const hot = m.rail.find((r) => r.hot) || m.rail[1] || m.rail[0];
   fill($('rail-sec'),
     foldable('sprints', { tag: '<sprints>', title: 'Three sprints in play', id: 'rail-h', sum: hot ? `${hot.label} · ${hot.phaseLabel}` : null },
@@ -977,7 +979,7 @@ function renderSprintView(n) {
   const T = keyTimes(RULES || []);
   document.title = `${n.preview ? `Preview ${fmtDay(n.date)} · ` : ''}Sprint ${s.label} · Sprint Board`;
   const prev = sNum - 1 >= ANCHOR.number ? sprintDates(sNum - 1) : null;
-  const next = sprintDates(sNum + 1);
+  const next = isNumbered(sNum + 1) ? sprintDates(sNum + 1) : null; // no link to an unlabelled sprint (review 2.3)
   const svHref = (label) => (n.preview ? routeHref({ date: n.date, sprint: label }) : `#sprint-${label}`);
   const demoPeople = DUTY ? deployPeople(DUTY, 'Demo', s.demoStart) : null;
   const livePeople = DUTY ? deployPeople(DUTY, 'Live', s.live) : null;
@@ -986,7 +988,7 @@ function renderSprintView(n) {
     h('a', { href: todayHref }, '← Today'),
     h('span', { class: 'sv-arrows' },
       prev ? h('a', { href: svHref(prev.label), 'aria-label': `Previous sprint ${prev.label}` }, `‹ ${prev.label}`) : null,
-      h('a', { href: svHref(next.label), 'aria-label': `Next sprint ${next.label}` }, `${next.label} ›`)),
+      next ? h('a', { href: svHref(next.label), 'aria-label': `Next sprint ${next.label}` }, `${next.label} ›`) : null),
     h('button', { type: 'button', class: 'btn', onclick: async () => {
       const url = `${location.origin}${location.pathname}#sprint-${s.label}`;
       try { await navigator.clipboard.writeText(url); $('status').textContent = 'Link copied'; } catch { $('status').textContent = url; }
@@ -1165,6 +1167,14 @@ function renderFooter() {
 }
 
 // ---------------------------------------------------------------- render
+// One bad data line (a rule's `when`, an override date, a time) must not blank the page (review 2.2): log it and
+// fall back to the error band (rules: null), which still shows the sprint dates.
+function safeResolve(args) {
+  try { return resolveDay(args); } catch (err) {
+    console.error('resolveDay failed; showing the error band', err);
+    return resolveDay({ ...args, rules: null });
+  }
+}
 let lastModel = null;
 let lastHref = null;
 let lastKey = null;
@@ -1195,7 +1205,7 @@ function render({ keepFocus = false } = {}) {
   void keepFocus;
   const view = n.route.sprintRaw != null ? 'sprint' : 'today';
 
-  const m = resolveDay({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS, preview: !!n.preview });
+  const m = safeResolve({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS, preview: !!n.preview });
   lastModel = m;
   renderPreview(n);
   renderTop(n, m);
@@ -1213,7 +1223,8 @@ function render({ keepFocus = false } = {}) {
   } else {
     renderSprintView(n);
   }
-  renderCycle(n);
+  if (m.range) fill($('cycle-body'), h('p', { class: 'muted' }, `${m.range.text}.`));
+  else renderCycle(n);
   renderFooter();
 
   for (const d of document.querySelectorAll('details[data-k]')) {
@@ -1240,7 +1251,7 @@ function render({ keepFocus = false } = {}) {
 function tick() {
   const n = now();
   if (n.preview) return;
-  const m = resolveDay({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS });
+  const m = safeResolve({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS });
   if (stateKey(n, m) !== lastKey) { render(); return; }
   if (m.countdown && $('today-view').hidden === false) {
     const big = document.querySelector('#band-right .countdown .big');

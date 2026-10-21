@@ -7,7 +7,7 @@ import {
   context, actionsFor, upcoming, sprintDates, nextWorkingDay, previousWorkingDay, addDays,
   daysBetween, isWeekendDay, weekdayOf, workingDaysBetween, workingDaysIn, roleMatches, keyTimes,
   sprintPhase, fmtDay, fmtDM, formatAcrossZones, holidayTouchesKeyDates, sprintForDate, holidayWarnings, ruleTime,
-  LAST_CONFIRMED, UNCONFIRMED_FROM,
+  LAST_CONFIRMED, UNCONFIRMED_FROM, numberingGap, toKey,
 } from './schedule.js';
 
 export const BOARD = 'Sprint Board';
@@ -367,7 +367,7 @@ export function subLine(f, time, role, band) {
     const out = ['Plan 2/3 of capacity, keep 1/3 as buffer.'];
     if (R !== 'Everyone') {
       for (const a of actionsFor(f.nwd, f.rules)) {
-        if (a.status === 'today' && a.kind === 'deadline' && roleMatches(a, R) && !a.who.includes('All')) out.push(`${SHORT[a.id] || a.title} due ${f.nwdIsTomorrow ? 'tomorrow' : fmtDay(f.nwd)}.`);
+        if (a.status === 'today' && a.kind === 'deadline' && roleMatches(a, R) && !(a.who || []).includes('All')) out.push(`${SHORT[a.id] || a.title} due ${f.nwdIsTomorrow ? 'tomorrow' : fmtDay(f.nwd)}.`);
       }
     }
     return out.join(' ');
@@ -678,7 +678,7 @@ function itemModel(a, day, time, times, { other = false } = {}) {
     title: a.title,
     detail: a.detail,
     kind: a.kind,
-    who: a.who,
+    who: a.who || [],
     time: a.time ?? null,
     source: a.source,
     links: a.links || [],
@@ -976,11 +976,27 @@ export function railNotices(rows) {
   return out;
 }
 
+/** The Today model for a date the board cannot label (review 2.3): an explicit notice, no sprint labels. */
+function outOfRange(date, time, role, gap, preview) {
+  return {
+    date, time, role, band: 'error', range: gap, tag: null, srTag: '', meta: gap.text,
+    headline: gap.text,
+    sub: gap.kind === 'before' ? `The board starts with sprint ${gap.text.slice('No board before '.length)}.` : `Add ${gap.year} to YEAR_STARTS in schedule.js to show its sprints.`,
+    countdown: null, order: null, next: null, blinks: [],
+    tab: `${preview ? `Preview ${fmtDay(date)} · ` : ''}${gap.text} · ${BOARD}`,
+    favicon: 'normal', duty: null, agenda: null, rail: [], notices: [], comingUp: [], holidayWarnings: [],
+  };
+}
+
 /**
  * The complete Today model. Inputs: date 'YYYY-MM-DD' and time 'HH:MM' (both Tallinn), role, rules
  * (null when rules.js failed), duty (duty.js module or null), holidays (array or null).
  */
 export function resolveDay({ date, time = '09:00', role = 'Everyone', rules, duty = null, holidays = [], preview = false }) {
+  // Review 2.3: before the anchor or past the configured years there is no label to show. Say so instead of
+  // "-155 day 3" or "2027-28".
+  const gap = numberingGap(date);
+  if (gap) return outOfRange(toKey(date), time, role, gap, preview);
   const ok = Array.isArray(rules);
   const R = ok ? rules : [];
   const f = dayFacts(date, R);
