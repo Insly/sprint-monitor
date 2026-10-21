@@ -1,5 +1,13 @@
 # Progress log
 
+## 2026-10-21 — Review 2026-10-02: Batch 1 finished, Batch 2 done (developer; not pushed)
+- Batch 1 (copy): Next for you built in board.js (`agenda().next`): order of the day (sortWithinDay), "if needed", sprint labels, "Tomorrow" only for the real next day, "Next · …" with role prefixes for Everyone. Coming up: 17:00 / 20:00 instead of "Tonight", role prefixes, "if needed · 2026-20". Weekend Your day: "Evening" + time. "in N working days" skips EE holidays (15 Dec: 12, was 15). "UAT findings" items name the UAT's sprint. Duty line has one builder (`dutyParts`); index.html's copy removed. "Update tonight." (screen reader), sprint view "Every day this sprint", one spelling "Golive Release page". Dead `also` / `alsoOpen` removed.
+- Batch 2 (robustness): `#%E0` renders today; resolveDay failures in render and the 20 s tick fall back to the error band (logged); `(a.who || [])` everywhere; "No board before 2026-17" and "Sprint numbering for 2028 is not configured" instead of wrong labels (tests/range.test.js).
+- Oracle change (own commit): invariants.lib.js `inPlay` treats "UAT findings" as the last closed UAT (the oracle demanded the next one). Fixture: states.test 7 Oct IM/AM "2026-20 UAT findings for planning (2026-22)".
+- Docs: STATES.md §3, §4, §7, §8 and DESIGN.md describe the current copy (no support duty, no "Also today").
+- 776 tests pass (19 files) in Europe/Tallinn and America/New_York. Headless Chrome smoke (Fri 2 Oct, Sat 3 Oct, Mon 5 Oct, Thu 8 Oct, #sprint-2026-21, #%E0, 2028, before the anchor): no console errors, no blank page.
+- Open: review Batch 4 (accessibility) and Batch 6 leftovers (hard-coded "Monday 12:00"/"Release 2026-NN" in the glossary, CONTRACT SUPPORT_WEEKS, index.html split); 1.14 "Last night … not assigned yet" wording not changed; the range notice starts in late Dec 2027 (next sprint in 2028), so add YEAR_STARTS 2028 before then (freshness alarm trips from 21 Oct 2027).
+
 ## 2026-10-02 — Ops: freshness alarm, scheduled checks, deploy hardening (review Batch 5; not pushed)
 - `npm run freshness` (tests/freshness.test.js + tests/freshness/checks.js): fails when today + 60 days passes the rota (fully assigned / listed releases), holidays, YEAR_STARTS, the year-end OVERRIDES entry for the sprint spanning Christmas, or LAST_CONFIRMED. Excluded from `npm test` by a root vitest.config.js (621 tests, 13 files, unchanged). `FRESHNESS_TODAY=YYYY-MM-DD` for dry runs.
 - Today it reports one item: rota fully assigned only to Live 2 Nov 2026 (16 Nov no backup, 30 Nov no Demo deployer). Next to trip: listed releases (from 13 Nov), LAST_CONFIRMED (from 17 Nov), YEAR_STARTS 2028 (from 21 Oct 2027), 2027 year-end override (from 26 Oct 2027), holidays 2028 (from 2 Nov 2027).
