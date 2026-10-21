@@ -142,7 +142,7 @@ const SUBS = [
   ['2026-10-06', '09:00', 'QA', 'Next for QA: Pre-Refinement Wed 7 Oct 14:00.'],
   ['2026-10-06', '09:00', 'Lead', 'Next for Lead: Rank the refinement queue, Wed 7 Oct.'],
   ['2026-10-06', '09:00', 'Analyst', 'Describe and label tasks for refinement.'],
-  ['2026-10-07', '09:00', 'IM/AM', 'Due today: Check Definition of Ready. Also: Chase client approval of estimates, priority calls, QA estimates, UAT findings for planning (2026-22).'],
+  ['2026-10-07', '09:00', 'IM/AM', 'Due today: Check Definition of Ready. Also: Chase client approval of estimates, priority calls, QA estimates, 2026-20 UAT findings for planning (2026-22).'],
   ['2026-10-07', '09:00', 'Lead', 'Rank the refinement queue before 14:00. Bring 2026-20 UAT findings to 2026-22 planning.'],
   ['2026-10-07', '09:00', 'QA', 'QA estimates on sprint candidates.'],
   ['2026-10-07', '09:00', 'Analyst', 'Nothing due for Analyst today.'],

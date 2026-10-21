@@ -43,6 +43,29 @@ const EVENT_WORDS = /\b(Demo update|UAT|cut-off|Live update|freeze|regression|pl
 const sprintSuffix = (f, a, text = a.title) => (a.sprintNumber != null && a.sprintNumber !== f.ctx.current.n && EVENT_WORDS.test(text) ? ` (${sprintDates(a.sprintNumber).label})` : '');
 /** 'IM/AM' / 'Dev, QA': the roles of a role-only item, as the Everyone view prefixes them. */
 export const whoText = (a) => (a.who || []).filter((w) => w !== 'All').join(', ');
+/** Unit events (meetings, deploys, the code freeze, the fix cut-off) and "All" habits concern everyone: no role prefix. */
+const isUnitEvent = (a) => ['meeting', 'deploy'].includes(a.kind) || ['code-freeze', 'fix-cutoff'].includes(a.id) || (a.who || []).includes('All');
+/** 'IM/AM: ' before a role-only item in the Everyone view (review 1.5), else ''. */
+export const rolePrefix = (a, role) => (role === 'Everyone' && !isUnitEvent(a) && whoText(a) ? `${whoText(a)}: ` : '');
+/** What follows an item in a list of another day: its sprint label, after "if needed" for after-cut-off items. */
+export const itemSuffix = (a) => {
+  const L = a.sprintNumber != null ? sprintDates(a.sprintNumber).label : null;
+  if (a.slot === 'after-cutoff') return L ? `if needed · ${L}` : 'if needed';
+  return L;
+};
+/**
+ * An item's title in lists of other days. "UAT findings" are the last closed UAT's: the sprint two before the one
+ * being planned (2026-21 findings go to 2026-23 planning).
+ */
+export const listTitle = (a, t = a.title) => (a.id === 'uat-findings-to-planning' && a.sprintNumber != null
+  ? t.replace('UAT findings', `${sprintDates(a.sprintNumber - 2).label} UAT findings`) : t);
+/** Weekdays in (a, b] that are not EE public holidays (decision 2026-10-02: the board runs on Tallinn time). */
+export function workingDaysEE(a, b, holidays = []) {
+  const ee = new Set((holidays || []).filter((h) => h && h.country === 'EE').map((h) => h.date));
+  let n = 0;
+  for (let d = addDays(a, 1); d <= b; d = addDays(d, 1)) if (!isWeekendDay(d) && !ee.has(d)) n += 1;
+  return n;
+}
 
 // ---------------------------------------------------------------- facts about one day
 
@@ -255,8 +278,9 @@ export function countdown(f, time) {
 function nextForSentence(f, role) {
   const n = nextFor(f.date, f.rules, role);
   if (!n) return `Nothing due for ${roleWord(role)} today.`;
-  const a = n.items[0];
-  const what = `${a.title}${sprintSuffix(f, a)}`;
+  // One item for the sentence: the timed one, else the weekly rhythm (rank the queue before the session), else the first.
+  const a = n.items.find((x) => x.time) || n.items.find((x) => 'weekly' in (x.when || {})) || n.items[0];
+  const what = `${listTitle(a)}${sprintSuffix(f, a)}`;
   const lead = role === 'Everyone' ? `Next, for ${whoText(a)}:` : `Next for ${roleWord(role)}:`;
   return a.time ? `${lead} ${what} ${fmtDay(n.date)} ${a.time}.` : `${lead} ${what}, ${fmtDay(n.date)}.`;
 }
@@ -324,7 +348,7 @@ export function subLine(f, time, role, band) {
     if (R === 'Everyone') return `IM/AM: Demo/Live matrix for Live, chase ${L} UAT results. Dev: blocking fixes in by ${by}.`;
     // Every other role still sees when the cut-off is (review 1.12), after their own items if they have any.
     const own = f.acts.filter((a) => a.status === 'today' && roleMatches(a, R) && !(a.who || []).includes('All'));
-    return `${own.length ? own.map((a) => endSentence(a.title)).join(' ') : nothing} ${L} fix cut-off ${by}.`;
+    return `${own.length ? own.map((a) => endSentence(listTitle(a))).join(' ') : nothing} ${L} fix cut-off ${by}.`;
   }
   if (f.uatOpens) {
     const L = f.uatOpens.label;
@@ -374,7 +398,7 @@ export function subLine(f, time, role, band) {
     for (const a of list) { const w = whoText(a); if (!groups.has(w)) groups.set(w, []); groups.get(w).push(a); }
     for (const [w, g] of [...groups].slice(0, 3)) {
       const a = g[0];
-      sentences.push(`${w}: ${a.title}${a.time ? ` at ${a.time}` : ''}${sprintSuffix(f, a)}${g.length > 1 ? ` and ${g.length - 1} more` : ''}.`);
+      sentences.push(`${w}: ${listTitle(a)}${a.time ? ` at ${a.time}` : ''}${sprintSuffix(f, a)}${g.length > 1 ? ` and ${g.length - 1} more` : ''}.`);
     }
     if (groups.size > 3) sentences.push(`And more for ${[...groups.keys()].slice(3).join('; ')}.`);
     if (sentences.length) return sentences.join(' ');
@@ -406,12 +430,12 @@ export function subLine(f, time, role, band) {
   const due = left.filter((a) => a.kind === 'deadline');
   const rest = left.filter((a) => a.kind !== 'deadline');
   if (due.length) {
-    sentences.push(`Due today: ${due[0].title}${sprintSuffix(f, due[0])}.`);
+    sentences.push(`Due today: ${listTitle(due[0])}${sprintSuffix(f, due[0])}.`);
     const also = [...due.slice(1), ...rest];
-    const short = (a) => { const t = SHORT[a.id] || a.title; return `${t}${sprintSuffix(f, a, t)}`; };
+    const short = (a) => { const t = listTitle(a, SHORT[a.id] || a.title); return `${t}${sprintSuffix(f, a, t)}`; };
     if (also.length) sentences.push(`Also: ${also.map(short).join(', ')}.`);
   } else {
-    for (const a of rest) sentences.push(`${a.title.replace(/[.!?]$/, '')}${sprintSuffix(f, a)}.`);
+    for (const a of rest) sentences.push(`${listTitle(a).replace(/[.!?]$/, '')}${sprintSuffix(f, a)}.`);
   }
   if (sentences.length) return sentences.join(' ');
 
@@ -428,10 +452,24 @@ export function nextFor(date, rules, role, horizon = 15) {
   const list = upcoming(date, rules, horizon).filter((a) => a.status === 'today' && roleMatches(a, role) && !(a.who || []).includes('All'));
   if (!list.length) return null;
   const first = list[0].date;
-  // Within the day: timed first, then weekly-rhythm items (e.g. rank the queue before the 14:00 session).
-  const rank = (a) => (a.time ? 0 : 'weekly' in (a.when || {}) ? 1 : 2);
-  const items = list.filter((a) => a.date === first).map((a, i) => [a, i]).sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1]).map(([a]) => a);
+  // Within the day: the order of Your day and Coming up (review 1.10): morning, timed, the rest, the evening deploy, after it.
+  const items = sortWithinDay(list.filter((a) => a.date === first));
   return { date: first, items };
+}
+
+/**
+ * "Next for you" under Your day: { date, heading, items: [{ id, time, prefix, title, suffix }] } or null.
+ * "Tomorrow" only when the day is the real date + 1 (review 1.4); "Next" in the Everyone view (review 1.14).
+ */
+export function nextView(date, day, rules, role) {
+  const n = nextFor(day, rules, role);
+  if (!n) return null;
+  const heading = n.date === addDays(date, 1) ? `Tomorrow, ${fmtDay(n.date)}` : `${role === 'Everyone' ? 'Next' : 'Next for you'} · ${fmtDay(n.date)}`;
+  return {
+    date: n.date,
+    heading,
+    items: n.items.map((a) => ({ id: a.id, time: a.time ?? null, prefix: rolePrefix(a, role), title: listTitle(a), suffix: itemSuffix(a) })),
+  };
 }
 
 // ---------------------------------------------------------------- rail
@@ -580,16 +618,24 @@ export function peopleText(people) {
   return people.map((p) => `${p.name ?? NOT_ASSIGNED}${p.role ? ` (${p.role})` : ''}`).join(', ');
 }
 
-/** The duty line as plain text parts in display order (STATES.md §7 patterns). */
+/**
+ * The duty line's parts, the one source for the page and the tests (review 1.14, B8):
+ * { state, before, label, after, people }. The page renders `before`, the sprint label as a link, `after`, a space,
+ * then the people. null when there is nothing to show. Support duty is not shown: it differs per team (owner, 2026-10-01).
+ */
+export function dutyParts(line) {
+  const dep = line && line.deploy;
+  if (!dep) return null;
+  const base = { state: line.state, label: dep.label, people: dep.people };
+  if (line.state === 'tonight') return { ...base, before: `Tonight · ${dep.kind} update `, after: ` · ${dep.zones}:` };
+  if (line.state === 'last-night') return { ...base, before: `Last night · ${dep.kind} update `, after: ':' };
+  return { ...base, before: `Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (`, after: '):' };
+}
+
+/** The duty line as plain text, as the page shows it (STATES.md §7 patterns). */
 export function dutyTexts(line) {
-  if (!line) return [];
-  // Support duty is not shown: it differs per team (owner, 2026-10-01).
-  const dep = line.deploy;
-  if (!dep) return [];
-  const who = peopleText(dep.people);
-  if (line.state === 'tonight') return [`Tonight · ${dep.kind} update ${dep.label} · ${dep.zones}: ${who}`];
-  if (line.state === 'last-night') return [`Last night · ${dep.kind} update ${dep.label}: ${who}`];
-  return [`Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (${dep.label}): ${who}`];
+  const p = dutyParts(line);
+  return p ? [`${p.before}${p.label}${p.after} ${peopleText(p.people)}`] : [];
 }
 
 // ---------------------------------------------------------------- agenda ("Your day")
@@ -616,6 +662,8 @@ const SLOT_HEAD = {
   'after-deploy': 'After the update (tonight or tomorrow morning)',
   earlier: 'Earlier today',
 };
+/** Slot headings on a weekend, when the list is the next working day's. */
+const WEEKEND_HEAD = { evening: 'Evening', 'after-deploy': 'After the update (that evening or the next morning)' };
 const WHEN = { morning: 'Morning', today: 'Today', 'after-cutoff': 'After 12:00', 'before-deploy': 'Before', evening: 'Tonight', 'after-deploy': 'After', carry: 'From last night' };
 
 /** One agenda item for the page. */
@@ -669,7 +717,7 @@ function todaySummary(groups, count, weekendDay) {
 
 /**
  * "Your day" for a role. On a weekend it lists the next working day's items (STATES.md §8 Sat 3 Oct).
- * Returns { day, heading, groups: [{ slot, heading, items }], running, everyday, carry, nextFor, also, gates, count }.
+ * Returns { day, weekend, heading, summary, groups: [{ slot, heading, items }], running, everyday, next, gates, count }.
  */
 export function agenda(date, time, role, rules) {
   const weekend = isWeekendDay(date);
@@ -682,7 +730,6 @@ export function agenda(date, time, role, rules) {
   const demoEvening = !!f.demo && now >= T.demo;
 
   const mine = f.acts.filter((a) => roleMatches(a, role));
-  const others = role === 'Everyone' ? [] : f.acts.filter((a) => !roleMatches(a, role));
 
   const items = [];
   const running = [];
@@ -706,12 +753,13 @@ export function agenda(date, time, role, rules) {
       return;
     }
     m.slot = slotFor(a, day, T, isCutDay);
-    m.when = m.time && m.slot !== 'evening' ? m.time : WHEN[m.slot] || 'Today';
+    // On a weekend the list is Monday's: the deploy shows its time, not "Tonight".
+    m.when = m.time && (m.slot !== 'evening' || weekend) ? m.time : WHEN[m.slot] || 'Today';
     if (!opts.other) {
       m.chip = a.slot === 'after-cutoff' ? { text: 'If needed', cls: 'outl' } : { text: CHIP[a.kind] || 'Check', cls: a.kind === 'deadline' ? 'due' : a.kind === 'meeting' ? 'meet' : a.kind === 'deploy' ? 'upd' : 'check' };
       if (a.id === 'fix-cutoff' && phase === 'before') m.key = true;
       if (a.slot === 'after-cutoff' && phase === 'after') m.when = 'Now';
-      if (a.slot === 'after-deploy') m.sub = 'Tonight or tomorrow morning';
+      if (a.slot === 'after-deploy') m.sub = weekend ? 'That evening or the next morning' : 'Tonight or tomorrow morning';
     }
     list.push(m);
   };
@@ -762,17 +810,8 @@ export function agenda(date, time, role, rules) {
     let list = all.filter((m) => m.slot === slot);
     // By 12:00: untimed items, then the 12:00 row, then windows that end at 12:00 (mockup frame B).
     if (slot === 'morning') list = list.map((m, i) => [m, i]).sort((x, y) => mRank(x[0]) - mRank(y[0]) || x[1] - y[1]).map(([m]) => m);
-    if (list.length) groups.push({ slot, heading: slot === 'morning' ? (isCutDay ? `By ${T.cutoff}` : 'Morning') : SLOT_HEAD[slot], items: list });
-  }
-
-  const also = [];
-  for (const a of others) {
-    if (a.status === 'active-window') {
-      const short = daysBetween(a.dates.from, a.dates.to) <= SHORT_WINDOW_DAYS;
-      if (short && (a.dates.from === day || a.dates.to === day)) place(a, also, { other: true });
-      continue;
-    }
-    place(a, also, { other: true });
+    const head = slot === 'morning' ? (isCutDay ? `By ${T.cutoff}` : 'Morning') : weekend && WEEKEND_HEAD[slot] ? WEEKEND_HEAD[slot] : SLOT_HEAD[slot];
+    if (list.length) groups.push({ slot, heading: head, items: list });
   }
 
   let gates = null;
@@ -792,10 +831,7 @@ export function agenda(date, time, role, rules) {
     groups,
     running,
     everyday,
-    nextFor: nextFor(day, rules, role),
-    nextForIsTomorrow: (() => { const n = nextFor(day, rules, role); return !!n && n.date === addDays(day, 1); })(),
-    also,
-    alsoOpen: role === 'Lead',
+    next: nextView(date, day, rules, role),
     gates,
     count: all.length,
   };
@@ -832,7 +868,7 @@ export function orderStrip(f, time, role) {
 }
 
 /** The right-hand box on calm days: the next key moment (Demo update or fix cut-off). */
-export function nextKeyMoment(f, time) {
+export function nextKeyMoment(f, time, holidays = []) {
   const T = f.times;
   const cands = [];
   for (const s of f.nearNext) {
@@ -842,7 +878,7 @@ export function nextKeyMoment(f, time) {
   const now = `${f.date} ${time}`;
   const next = cands.filter((c) => `${c.date} ${c.time}` > now).sort((a, b) => (`${a.date} ${a.time}` < `${b.date} ${b.time}` ? -1 : 1))[0];
   if (!next) return null;
-  const n = workingDaysBetween(f.date, next.date);
+  const n = workingDaysEE(f.date, next.date, holidays); // EE public holidays are not working days (review 1.13)
   const inText = next.date === f.date ? 'today'
     : next.date === addDays(f.date, 1) ? 'tomorrow'
       : n <= 1 ? `on ${WEEKDAY_LONG[weekdayOf(next.date)]}` : `in ${n} working days`;
@@ -884,12 +920,15 @@ export function comingUp(date, rules, role, holidays = [], days = 10) {
       }
       if (a.id === 'sprint-start' && role !== 'Everyone' && !roleMatches(a, role)) continue;
       const s = a.sprintNumber != null ? sprintDates(a.sprintNumber) : null;
-      let title = a.title;
+      let title = listTitle(a);
       if (a.status === 'active-window') title = a.id === 'code-freeze' ? `Code freeze starts, ${untilText(a, T)}` : `${a.title} opens, ${untilText(a, T)}`;
       list.push({
         id: a.id,
         title,
-        time: a.kind === 'deploy' ? 'Tonight' : a.time ?? null,
+        // Another day: the deploy's time, never "Tonight" (review 1.6).
+        time: a.time ?? (a.id === 'demo-update' ? T.demo : a.id === 'live-update' ? T.live : null),
+        prefix: rolePrefix(a, role),
+        suffix: itemSuffix(a),
         label: s ? s.label : null,
         unit,
         ifNeeded: a.slot === 'after-cutoff',
@@ -924,7 +963,7 @@ const BAND_TAG = {
 const BAND_SR = {
   urgent: (f) => (f.cut ? 'Cut-off day. ' : 'Demo update day. '),
   after: () => 'Cut-off passed. ',
-  evening: () => 'Deploy tonight. ',
+  evening: () => 'Update tonight. ',
   'heads-up': (f) => (f.nwdIsTomorrow ? 'Heads-up for tomorrow. ' : 'Heads-up. '),
   weekend: () => '',
 };
@@ -964,7 +1003,7 @@ export function resolveDay({ date, time = '09:00', role = 'Everyone', rules, dut
   const isKey = ['urgent', 'after', 'evening'].includes(band);
   let next = null;
   if (band === 'urgent' && f.demo) next = { kicker: 'Tonight', big: 'Beta → Demo', what: 'Everything on Beta moves to Demo unless excluded in the matrix', extra: null, href: `#sprint-${f.demo.label}` };
-  else if (!f.cut && !(f.demo && DEMO_ROLES.includes(role))) next = nextKeyMoment(isWeekendDay(f.date) ? dayFacts(f.date, R) : f, isWeekendDay(f.date) ? '00:00' : time);
+  else if (!f.cut && !(f.demo && DEMO_ROLES.includes(role))) next = nextKeyMoment(isWeekendDay(f.date) ? dayFacts(f.date, R) : f, isWeekendDay(f.date) ? '00:00' : time, holidays || []);
   const blinks = [];
   if (f.cut || f.demo || (band === 'heads-up')) blinks.push('demoLiveMatrix');
   return {

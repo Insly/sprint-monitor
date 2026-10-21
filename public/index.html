@@ -555,7 +555,7 @@ import {
   deviceDiffersFromTallinn, toKey, addDays, fmtDay, fmtDM, isWeekendDay, workingDaysIn, actionsFor,
   ANCHOR, LAST_CONFIRMED, ROLES,
 } from './schedule.js';
-import { resolveDay, deployPeople, holidayNotice, NOT_ASSIGNED, dayFacts, untilText, sortWithinDay } from './board.js';
+import { resolveDay, deployPeople, holidayNotice, NOT_ASSIGNED, dayFacts, untilText, sortWithinDay, dutyParts } from './board.js';
 
 // ---------------------------------------------------------------- data (each file may fail on its own)
 let RULES = null, SOURCES = {}, DUTY = null, HOLIDAYS = [];
@@ -759,15 +759,11 @@ function renderDuty(m) {
   const line = m.duty;
   $('duty').hidden = !line;
   if (!line) return;
-  // A text space after each key keeps screen readers from running "London" and the name together.
-  const d = line.deploy;
-  let dep = null;
-  if (d) {
-    const href = linkTo(`#sprint-${d.label}`);
-    if (line.state === 'tonight') dep = h('span', { class: 'tonight' }, h('span', { class: 'dk' }, `Tonight · ${d.kind} update `, h('a', { href }, d.label), ` · ${d.zones}`), ' ', personNodes(d.people));
-    else if (line.state === 'last-night') dep = h('span', null, h('span', { class: 'dk' }, `Last night · ${d.kind} update `, h('a', { href }, d.label)), ' ', personNodes(d.people));
-    else dep = h('span', null, h('span', { class: 'dk' }, `Next · ${d.kind} update ${fmtDay(d.date)} · ${d.zones} (`, h('a', { href }, d.label), ')'), ' ', personNodes(d.people));
-  }
+  // The text comes from board.js dutyParts, as in the tests. A text space after the key keeps screen readers from
+  // running "London:" and the name together.
+  const p = dutyParts(line);
+  const dep = p ? h('span', { class: p.state === 'tonight' ? 'tonight' : null },
+    h('span', { class: 'dk' }, p.before, h('a', { href: linkTo(`#sprint-${p.label}`) }, p.label), p.after), ' ', personNodes(p.people)) : null;
   $('duty').hidden = !dep;
   fill($('duty-inner'), dep);
 }
@@ -865,8 +861,9 @@ function renderYourDay(n, m) {
       h('ul', { class: 'rows' }, a.gates.items.map((it) => h('li', null, h('b', null, it.title), h('span', null, it.who.map(roleLabel).join(', ')))))));
   }
   if (!a.groups.length) {
-    const nf = a.nextFor;
-    const next = nf ? ` Next: ${nf.items[0].title} ${fmtDay(nf.date)}${nf.items[0].time ? ` ${nf.items[0].time}` : ''}.` : '';
+    const nf = a.next;
+    const x = nf && nf.items[0];
+    const next = x ? ` Next: ${x.prefix}${x.title} ${fmtDay(nf.date)}${x.time ? ` ${x.time}` : ''}${x.suffix ? ` (${x.suffix})` : ''}.` : '';
     kids.push(h('p', { class: 'empty' }, `Nothing due for ${roleLabel(role)} ${a.weekend ? `on ${a.heading}` : 'today'}.${next}`));
   }
   if (a.running.length) {
@@ -879,15 +876,14 @@ function renderYourDay(n, m) {
       h('summary', null, h('b', null, 'Every day this sprint'), h('span', { class: 'cnt' }, String(a.everyday.length), h('span', { class: 'cnt-list' }, ` · ${a.everyday.map((x) => x.title).join(' · ')}`)), h('i', { class: 'chev', 'aria-hidden': 'true' })),
       h('ul', { class: 'agenda' }, a.everyday.map((it) => itemNode({ ...it, chip: { text: 'Every day', cls: 'check' }, when: 'Daily' }, { everyoneView })))));
   }
-  if (a.nextFor && a.groups.length) {
-    const nf = a.nextFor;
-    const k = nf.date === addDays(a.day, 1) ? `Tomorrow, ${fmtDay(nf.date)}` : `Next for you · ${fmtDay(nf.date)}`;
+  if (a.next && a.groups.length) {
+    const nf = a.next;
+    const k = nf.heading; // board.js: "Tomorrow, …" only for the real next day; "Next · …" for Everyone
     // A dot-separated run on >=768 px; on phones a short list of up to 3, then "+N more" (READABILITY.md §6.3).
     kids.push(h('div', { class: 'nextfor' }, h('b', { class: 'k' }, k),
-      h('ul', { class: 'nf-list' }, nf.items.map((x, i) => h('li', { class: i >= 3 ? 'nf-x' : null }, x.time ? `${x.time} ` : null, x.title)),
+      h('ul', { class: 'nf-list' }, nf.items.map((x, i) => h('li', { class: i >= 3 ? 'nf-x' : null }, x.time ? `${x.time} ` : null, x.prefix, x.title, x.suffix ? h('span', { class: 's' }, ` · ${x.suffix}`) : null)),
         nf.items.length > 3 ? h('li', { class: 'nf-more' }, `+${nf.items.length - 3} more`) : null)));
   }
-  // "Also today" for other roles is not shown: switch to Everyone to see them (owner, 2026-10-01).
   out();
   $('body').dataset.band = m.band;
 }
@@ -928,8 +924,8 @@ function renderComingUp(m) {
       h('ul', null, d.items.map((x) => h('li', { class: x.unit ? 'unit' : null },
         x.unit ? h('span', { class: 'sr' }, 'Unit milestone: ') : null,
         x.time ? h('span', { class: 't' }, x.time) : null,
-        x.title,
-        h('span', { class: x.ifNeeded ? 's ifn' : 's' }, x.ifNeeded ? 'if needed' : x.label || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
+        x.prefix, x.title,
+        h('span', { class: x.ifNeeded ? 's ifn' : 's' }, x.suffix || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
     hiddenDays.length && limit < 10 ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuLimit = nextLimit; renderComingUp(lastModel); } }, `+${plural(hiddenDays.length, 'more day', 'more days')} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
 }
 
@@ -1046,8 +1042,8 @@ function renderSprintView(n) {
   }
   if (!markerPlaced) items.push(marker());
 
-  // Actions, grouped Passed / Today / Running / Coming.
-  const groups = [['passed', 'Passed', false], ['today', 'Today', true], ['running', 'Running', true], ['coming', 'Coming', true]];
+  // Actions, grouped Passed / Today / Every day this sprint / Coming. "Running" is kept for Your day's short windows (review 1.14).
+  const groups = [['passed', 'Passed', false], ['today', 'Today', true], ['running', 'Every day this sprint', true], ['coming', 'Coming', true]];
   const toggle = role === 'Everyone' ? null : h('div', { class: 'seg2', role: 'radiogroup', 'aria-label': 'Show actions for' },
     h('button', { type: 'button', role: 'radio', 'aria-checked': String(!sprintViewEveryone), onclick: () => { sprintViewEveryone = false; render(); } }, roleLabel(role)),
     h('button', { type: 'button', role: 'radio', 'aria-checked': String(sprintViewEveryone), onclick: () => { sprintViewEveryone = true; render(); } }, 'Everyone'));
@@ -1061,7 +1057,7 @@ function renderSprintView(n) {
         h('span', { class: 's' }, a.slot === 'after-cutoff' ? 'if needed' : a.slot === 'after-deploy' ? 'after the update' : '')))))));
   };
   const count = (st) => det.actions.filter((a) => a.status === st).length;
-  const actionsSum = RULES ? groups.map(([st]) => [count(st), st]).filter(([c]) => c).map(([c, st]) => `${c} ${st}`).join(' · ') || 'No actions' : 'Actions unavailable';
+  const actionsSum = RULES ? groups.map(([st]) => [count(st), st]).filter(([c]) => c).map(([c, st]) => `${c} ${st === 'running' ? 'every day' : st}`).join(' · ') || 'No actions' : 'Actions unavailable';
   const actions = foldable('sv-actions',
     { tag: '<actions>', title: `Actions for ${sprintViewEveryone ? 'Everyone' : roleLabel(role)}`, sum: actionsSum },
     h('div', { class: 'sv-toggle' }, toggle),
