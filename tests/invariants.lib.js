@@ -72,9 +72,12 @@ const KINDS = {
   planning: /\bplanning\b/i,
 };
 /** The sprint whose event of this kind is in play on date d when the text names no date. */
-function inPlay(kind, d) {
+function inPlay(kind, d, text = '') {
   const within = SPRINTS.find((s) => KIND_DATES[kind](s).includes(d));
   if (within) return within;
+  // "UAT findings" are those of the last UAT that closed (they go to the next planning), not of the next UAT.
+  // Fix 2026-10-21: the oracle picked the next UAT, e.g. 2026-22 for Wed 21 Oct, when the findings are 2026-21's.
+  if (kind === 'uat' && /UAT findings/.test(text)) return SPRINTS.filter((s) => KIND_DATES.uat(s).at(-1) < d).at(-1);
   return SPRINTS.find((s) => KIND_DATES[kind](s)[0] >= d);
 }
 
@@ -106,7 +109,7 @@ function labelViolation(text, ref, cur) {
   for (const [kind, re] of Object.entries(KINDS)) {
     if (!re.test(text)) continue;
     let refs = SPRINTS.filter((s) => KIND_DATES[kind](s).some((d) => named.has(d)));
-    if (!refs.length) refs = [inPlay(kind, ref)].filter(Boolean);
+    if (!refs.length) refs = [inPlay(kind, ref, text)].filter(Boolean);
     if (!refs.length) continue;
     if (refs.some((s) => s.label === cur.label || hasLabel(text, s.label))) continue;
     return `${kind} of ${refs.map((s) => s.label).join('/')} without its label`;
