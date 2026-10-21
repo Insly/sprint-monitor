@@ -1,6 +1,6 @@
 # MGA Sprint Board: design direction (v2)
 
-Status: v2.1, 2026-10-01 (the owner approved the v2 direction; the v2.1 addendum is below). Companions: `USE-CASES.md` (who and why), `ANALYSIS.md` (what is wrong with the current page), **`STATES.md` (normative state table and fixtures)**, `mockup.html` (visual reference).
+Status: v2.1, 2026-10-01 (the owner approved the v2 direction; the v2.1 addendum is below). Copy and components updated 2026-10-21 for review 2026-10-02 (support duty and "Also today" removed, other sprints always named, one duty-line builder). Where copy here and `STATES.md` / `tests/key-days.test.js` differ, those win. Companions: `USE-CASES.md` (who and why), `ANALYSIS.md` (what is wrong with the current page), **`STATES.md` (normative state table and fixtures)**, `mockup.html` (visual reference).
 Reviews addressed: `REVIEW-1-ux-a11y.md`, `REVIEW-2-practitioner.md`. The owner's decisions of 2026-10-01 override both where they conflict.
 
 Scope: presentation, plus a precise list of rule changes (§14) and one new static data file (`duty.js`, §9). Everything on screen comes from `schedule.js`, `rules.js`, `duty.js`, the Tallinn clock and one remembered role. Static deep links to Confluence pages are allowed. No Jira API.
@@ -17,7 +17,7 @@ Scope: presentation, plus a precise list of rule changes (§14) and one new stat
 | 4 | **One "IM / AM" role button.** "Everyone" is the only name for the all-roles view. First visit is derived from "no stored role" | Owner decision 3. R2 §3.3. R1 §6 |
 | 5 | **No completion claims.** A neutral "Passed" chip, "Earlier today" in the order strip, no ✓, no strikethrough. Deploys are always described as *scheduled* | Owner decision 6. R1 M-4. R2 C3, §4 |
 | 6 | **Freeze copy fixed everywhere:** "until the Demo update Tue {date} (evening)". Beta reopens Wednesday. `code-freeze` window now ends at `demoStart` (§14) | Owner decision 2. R2 C6 |
-| 7 | **Duty line** (one component) from the new static rota `duty.js`: tonight's deployer(s), and this week's support duty dev | Owner decision (new data) |
+| 7 | **Duty line** (one component) from the new static rota `duty.js`: tonight's, last night's or the next deployer(s). Support duty is not shown: it differs per team (owner, 2026-10-01) | Owner decision (new data) |
 | 8 | **Carry-over is required:** "Confirm Live update to clients", "Golive Release page" and "Release page" also appear on the next working day | R2 A5, C7. R1 §8 |
 | 9 | **First-day and last-day promotion** of short windows (Run regression on freeze Friday, UAT window on Wednesday) | R2 D2 |
 | 10 | **Focus ring that works on every surface** (white, charcoal, orange, preview bar). Forced-colours styles. Focus and a status message on role change | R1 M-1, m-4, M-6 |
@@ -118,14 +118,15 @@ Unchanged from v1, and both reviewers agree. Every critical (C1) question is "wh
 ```
 1. Top bar           Date · "Viewing as" role · View date
 2. Headline band     What kind of day is it?                  (state, headline, sub-line, countdown/order)
-3. Duty line         Who deploys tonight / last night / next · support duty this week
+3. Duty line         Who deploys tonight / last night / next
 4. Your day          <your day>
    4a. From last night  (carry-over items, next working day only)
    4b. Slots: By 12:00 · Today · 14:00 … · Tonight · After the update
    4c. Running          one row per short window (expandable)
    4d. Every day this sprint   one row per sprint-long habit (expandable)
-   4e. Next for you     first upcoming working day with items for the role
-   4f. Also today       other roles' items (expanded by default for Lead)
+   4e. Next for you     first upcoming working day with items for the role ("Next" in the Everyone view)
+   4f. Gates for planning   Lead only, planning eve and planning day
+   ("Also today" for other roles is not shown: switch to Everyone to see them. Owner, 2026-10-01.)
 5. Sprint rail       <sprints>
 6. Coming up         <coming up> 7 working days on desktop ("+3 more"), 10 on expand
 7. How the cycle works   <cycle> collapsed; open on first visit
@@ -180,14 +181,14 @@ Target, met in every frame above: on key days the band, the duty line and every 
 | **Headline band** | The day in one sentence | State tag, h1 headline, role-aware sub-line, countdown or next milestone, order strip | 7 states (§6). The h1 text node is updated only when its string changes |
 | **Countdown** | Time to 12:00 (cut-off morning only) | "2 h 50 min left until 12:00" + " (Tallinn time)" when the zones differ | Shows the date big and "in 2 working days" small on other days |
 | **Order strip** | The key day's sequence | e.g. Fix cut-off 12:00 → Reverts (if any) → Tonight · Live update → After · Confirm to clients (IM/AM) / Golive page (Dev) | `ol`. The current step has `aria-current="step"` and a visible word ("Now", "Tonight"). Steps before now say "Earlier today". **No ✓.** Only timed steps can be "earlier" |
-| **Duty line** | Who is on duty | Tonight's / last night's / next deployer(s); support duty dev this week | §9. One component, all roles. "not assigned yet" in muted text |
+| **Duty line** | Who deploys | Tonight's / last night's / next deployer(s), with the sprint label | §9. One component, all roles, built once in `board.js` `dutyParts()` (the page and the tests use it). "not assigned yet" in muted text |
 | **Agenda item** | One action | Slot or time · chip · title · sprint tag · chevron | Native `<details>`, collapsed by default. Expanded: rule `detail`, computed facts (e.g. UAT deadline with Copy), links (matrix, release pages), source |
 | **Chips** | Kind and status, always words | `Due` (orange tint, charcoal text) · `Meeting` (purple) · `Update` (Green 1 fill, charcoal text) · `Check` (grey) · `Opens today` / `Last day` (**outlined**, charcoal border) · `Passed` (**neutral** grey) · `If needed` (outlined) | Every item has a chip, so colour is never the only signal. Other roles' items always use the grey chip. Items with `slot: 'after-cutoff'` show `If needed` instead of `Due` |
 | **Slot heading** | Group by when | `By 12:00` · `Today` · `14:00` · `Tonight` · `After the update` · `From last night` | From the `slot` field (§14) |
 | **Running list** | Short windows (≤ 7 days) between first and last day | One row each: title · "until the Demo update Tue 13 Oct (evening)" / "until Mon 5 Oct 12:00" | A `ul` of `<details>`, 44 px rows. No pipe separators |
 | **Every day this sprint** | Sprint-long habits | One row each | Same pattern, collapsed group with a count |
-| **Next for you** | Prepare a day ahead | "Tomorrow, Fri 2 Oct: …" or "Next for you: Mon 5 Oct …" | From `upcoming()` |
-| **Also today** | Team awareness | Other roles' items for today, grey chips | Open by default for Lead, headed "Gates for planning (check in Jira)" on planning eve and planning day |
+| **Next for you** | Prepare a day ahead | "Tomorrow, Tue 29 Sep" only when it is the real next day; else "Next for you · Mon 5 Oct" (Everyone: "Next · Mon 5 Oct"). Items in the order of that day, with time, "if needed" and the sprint label: `12:00 Fix cut-off 2026-20 · Revert items that missed the cut-off if needed · 2026-20 · 20:00 Live update 2026-20` | `board.js` `agenda().next`. The Everyone view prefixes role-only items (`IM/AM: …`) |
+| **Gates for planning** | Lead's checks | "Gates for planning (check in Jira)" on planning eve and planning day | Lead only. Other roles' items ("Also today") are not shown |
 | **Empty state** | Nothing due | "Nothing due for QA today. Next: Pre-Refinement Wed 7 Oct 14:00." | One per page |
 | **Sprint rail row** | Status of one sprint | Label · state label (STATES.md §6) · 5-step bar `Plan · Build · Freeze · UAT · Live` with the current step **labelled in text** | Rows = previous / current / next from the engine. The same bar on every row (R1 M-9) |
 | **Coming up day** | Agenda | Date · role items · unit milestones (Demo update, Live update, freeze, planning) always shown, marked with an orange square and the word "Unit" in visually hidden text | 7 working days on desktop with "+3 more" |
@@ -222,7 +223,7 @@ Evening switches (v2.1, owner): Demo Tuesday from **17:00**, Live Monday from **
 | Pick | Store the role, re-render, move focus to "Today for {role}", announce via `role="status"`. |
 | Returning | The role is applied. The top bar shows "Viewing as IM / AM". |
 | `?role=imam` / `dev` / `qa` / `lead` / `analyst` / `everyone` | Overrides and stores the role (rollout links). |
-| Lead | "Also today" is expanded by default. |
+| Lead | "Gates for planning" shows on planning eve and planning day. |
 | Storage blocked | The role holds for the session. The picker shows again next visit. |
 | Stored keys | **One**: `mgaSprintBoard.role`. Nothing else is persisted (the explainer state is derived from first visit). |
 
@@ -253,13 +254,12 @@ export const RELEASES = {
   '2026-21': { demo: { date: '2026-10-13', dev: 'Dev C.' }, live: { date: '2026-10-19', lead: null, backup: null } },
   '2027-1':  { demo: { date: '2027-01-05', dev: null },     live: { date: '2027-01-11', lead: null, backup: null } },
 };
-// Keyed by the Monday of the Mon–Sun week.
-export const SUPPORT = { '2026-09-28': 'Dev D.', '2026-10-05': 'Dev E.', '2026-10-12': null };
 ```
 
-- Display: `Support this week: Dev E.` · `Tonight · Live update 2026-20: Dev B. (lead), Dev C. (backup)` · `Next · Demo update Tue 13 Oct (2026-21): Dev C.` · `null` or a missing key → `not assigned yet` (muted, no warning colour) · file missing → the line is not rendered.
+- As built (2026-10-01): `RELEASES` is a list of `{ demo, demoBy, live, liveLead, liveBackup }`; there is no support rota (support duty differs per team and is not shown).
+- Display (STATES.md §7): `Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Dev B. (lead), Dev C. (backup)` · `Last night · Live update 2026-20: Dev B. (lead), Dev C. (backup)` · `Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.` · `null` or a missing key → `not assigned yet` (muted, no warning colour) · file missing → the line is not rendered.
 - States: `tonight`, `last-night` (the next working day), `next`, `unassigned`, `no-data` (STATES.md §7).
-- Tests: names match `/^\p{L}[\p{L}'-]* \p{Lu}\.$/u`. Rota dates equal engine dates. The weekly keys are Mondays.
+- Tests: names match `/^\p{L}[\p{L}'-]* \p{Lu}\.$/u`. Rota dates equal the sprint dates in `schedule.js`.
 - The sheet confirms **2027-1: Demo Tue 5 Jan 2027, Live Mon 11 Jan 2027**. This closes the "Demo 5 Jan assumed" open item. Update the comment in `OVERRIDES[26]` and SPEC accordingly.
 - No "this is me" highlighting. It would need a second stored key holding a person's name. Deferred.
 
@@ -273,7 +273,7 @@ Arial everywhere, `font-variant-numeric: tabular-nums`, minimum 13 px. 4 px radi
 |---|---|
 | Cut-off morning / Demo day for Dev and QA | `urgent`: Insly Orange `#FF7D00` fill, charcoal text (6.78) |
 | Cut-off passed | `after`: charcoal fill, white text, orange tag |
-| Deploy tonight | `evening`: Green 1 bar and green tag (green = "goes out") |
+| Update tonight | `evening`: Green 1 bar and green tag (green = "goes out"); screen-reader tag "Update tonight." |
 | Key day tomorrow | `heads-up`: orange tint + orange left bar |
 | Due | Orange-tint chip, **charcoal** text |
 | Update (deploy) | Green 1 fill chip, charcoal text |
