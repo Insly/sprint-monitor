@@ -29,8 +29,10 @@ const SHORT = {
   'uat-findings-to-planning': 'UAT findings for planning',
   'bug-retro-prep': 'Bug retro page',
   'cutoff-reminder': 'Chase UAT results',
-  'release-check-before-demo': 'Release check 12:00',
+  'release-check-before-demo': (a) => (a.time ? `Release check ${a.time}` : 'Release check'), // the time comes from rules.js
 };
+/** An item's short word (SHORT), else its title. */
+const shortTitle = (a) => (typeof SHORT[a.id] === 'function' ? SHORT[a.id](a) : SHORT[a.id] || a.title);
 
 const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
 const roleWord = (role) => (role === 'IM/AM' ? 'IM / AM' : role);
@@ -174,7 +176,7 @@ export function todayEvent(f, role, time = '00:00') {
   }
 
   const meeting = f.acts.find((a) => a.kind === 'meeting' && a.time && a.time > time && a.status === 'today' && roleMatches(a, role));
-  if (meeting) return { kind: 'meeting', text: `${meeting.title} at ${meeting.time}`, short: `${SHORT[meeting.id] || meeting.title} ${meeting.time}`, item: meeting };
+  if (meeting) return { kind: 'meeting', text: `${meeting.title} at ${meeting.time}`, short: `${shortTitle(meeting)} ${meeting.time}`, item: meeting };
   return null;
 }
 
@@ -367,7 +369,7 @@ export function subLine(f, time, role, band) {
     const out = ['Plan 2/3 of capacity, keep 1/3 as buffer.'];
     if (R !== 'Everyone') {
       for (const a of actionsFor(f.nwd, f.rules)) {
-        if (a.status === 'today' && a.kind === 'deadline' && roleMatches(a, R) && !(a.who || []).includes('All')) out.push(`${SHORT[a.id] || a.title} due ${f.nwdIsTomorrow ? 'tomorrow' : fmtDay(f.nwd)}.`);
+        if (a.status === 'today' && a.kind === 'deadline' && roleMatches(a, R) && !(a.who || []).includes('All')) out.push(`${shortTitle(a)} due ${f.nwdIsTomorrow ? 'tomorrow' : fmtDay(f.nwd)}.`);
       }
     }
     return out.join(' ');
@@ -432,7 +434,7 @@ export function subLine(f, time, role, band) {
   if (due.length) {
     sentences.push(`Due today: ${listTitle(due[0])}${sprintSuffix(f, due[0])}.`);
     const also = [...due.slice(1), ...rest];
-    const short = (a) => { const t = listTitle(a, SHORT[a.id] || a.title); return `${t}${sprintSuffix(f, a, t)}`; };
+    const short = (a) => { const t = listTitle(a, shortTitle(a)); return `${t}${sprintSuffix(f, a, t)}`; };
     if (also.length) sentences.push(`Also: ${also.map(short).join(', ')}.`);
   } else {
     for (const a of rest) sentences.push(`${listTitle(a).replace(/[.!?]$/, '')}${sprintSuffix(f, a)}.`);
@@ -657,9 +659,7 @@ const CHIP = { deadline: 'Due', meeting: 'Meeting', deploy: 'Update', reminder: 
 const SLOT_ORDER = ['carry', 'morning', 'today', 'timed', 'after-cutoff', 'before-deploy', 'evening', 'after-deploy', 'earlier'];
 const SLOT_HEAD = {
   carry: 'From last night',
-  morning: 'By 12:00',
   today: 'Today',
-  'after-cutoff': 'After 12:00',
   'before-deploy': 'Before the update',
   evening: 'Tonight',
   'after-deploy': 'After the update (tonight or tomorrow morning)',
@@ -667,7 +667,7 @@ const SLOT_HEAD = {
 };
 /** Slot headings on a weekend, when the list is the next working day's. */
 const WEEKEND_HEAD = { evening: 'Evening', 'after-deploy': 'After the update (that evening or the next morning)' };
-const WHEN = { morning: 'Morning', today: 'Today', 'after-cutoff': 'After 12:00', 'before-deploy': 'Before', evening: 'Tonight', 'after-deploy': 'After', carry: 'From last night' };
+const WHEN = { morning: 'Morning', today: 'Today', 'before-deploy': 'Before', evening: 'Tonight', 'after-deploy': 'After', carry: 'From last night' };
 
 /** One agenda item for the page. */
 function itemModel(a, day, time, times, { other = false } = {}) {
@@ -757,7 +757,7 @@ export function agenda(date, time, role, rules) {
     }
     m.slot = slotFor(a, day, T, isCutDay);
     // On a weekend the list is Monday's: the deploy shows its time, not "Tonight".
-    m.when = m.time && (m.slot !== 'evening' || weekend) ? m.time : WHEN[m.slot] || 'Today';
+    m.when = m.time && (m.slot !== 'evening' || weekend) ? m.time : (m.slot === 'after-cutoff' ? `After ${T.cutoff}` : WHEN[m.slot] || 'Today');
     if (!opts.other) {
       m.chip = a.slot === 'after-cutoff' ? { text: 'If needed', cls: 'outl' } : { text: CHIP[a.kind] || 'Check', cls: a.kind === 'deadline' ? 'due' : a.kind === 'meeting' ? 'meet' : a.kind === 'deploy' ? 'upd' : 'check' };
       if (a.id === 'fix-cutoff' && phase === 'before') m.key = true;
@@ -813,7 +813,7 @@ export function agenda(date, time, role, rules) {
     let list = all.filter((m) => m.slot === slot);
     // By 12:00: untimed items, then the 12:00 row, then windows that end at 12:00 (mockup frame B).
     if (slot === 'morning') list = list.map((m, i) => [m, i]).sort((x, y) => mRank(x[0]) - mRank(y[0]) || x[1] - y[1]).map(([m]) => m);
-    const head = slot === 'morning' ? (isCutDay ? `By ${T.cutoff}` : 'Morning') : weekend && WEEKEND_HEAD[slot] ? WEEKEND_HEAD[slot] : SLOT_HEAD[slot];
+    const head = slot === 'morning' ? (isCutDay ? `By ${T.cutoff}` : 'Morning') : slot === 'after-cutoff' ? `After ${T.cutoff}` : weekend && WEEKEND_HEAD[slot] ? WEEKEND_HEAD[slot] : SLOT_HEAD[slot];
     if (list.length) groups.push({ slot, heading: head, items: list });
   }
 

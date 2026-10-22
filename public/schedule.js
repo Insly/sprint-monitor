@@ -179,7 +179,6 @@ export function sprintDates(n) {
   };
 }
 
-/** Sprint number whose [start, next start) window contains the date (Mon to the Sunday after end). */
 /** Number of working days (Mon–Fri) from sprint start to end, inclusive. 10 unless overridden. */
 export function workingDaysIn(sprint) {
   let n = 0;
@@ -187,6 +186,7 @@ export function workingDaysIn(sprint) {
   return n;
 }
 
+/** Sprint number whose [start, next start) window contains the date (Mon to the Sunday after end). */
 export function sprintForDate(date) {
   const key = toKey(date);
   let n = ANCHOR.number + Math.floor(daysBetween(ANCHOR.start, key) / SPRINT_LENGTH_DAYS);

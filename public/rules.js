@@ -329,7 +329,7 @@ export const RULES = [
   {
     id: 'release-page',
     title: 'Create the Release page',
-    detail: 'Publish the "Release 2026-NN" page with the deployed PRs and per-tenant configuration results from the Demo update.',
+    detail: 'Publish the "Release YYYY-NN" page with the deployed PRs and per-tenant configuration results from the Demo update.',
     who: ['Dev'],
     sprint: 'previous',
     when: { on: 'demoStart' },
@@ -462,7 +462,7 @@ export const RULES = [
   {
     id: 'golive-page',
     title: 'Create the Golive Release page',
-    detail: 'Publish the "Golive Release 2026-NN" page with the deployed PRs and per-tenant Live results.',
+    detail: 'Publish the "Golive Release YYYY-NN" page with the deployed PRs and per-tenant Live results.',
     who: ['Dev'],
     sprint: 'previous',
     when: { on: 'live' },

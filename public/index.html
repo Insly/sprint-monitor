@@ -461,7 +461,7 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
   .controls { flex-wrap: nowrap; flex: none; }
   .viewdate { position: static; }
   .viewdate .menu { left: 16px; right: 16px; min-width: 0; top: calc(100% - 4px); }
-  .band--event .nextbox { display: none !important; } /* !important: the link carries an inline display:block */ /* mockup G and I: the day's items come first on mobile */
+  .band--event .nextbox { display: none !important; } /* mockup G and I: the day's items come first on mobile; !important beats the link's inline display:block */
   .group > summary .cnt-list { display: none; }
   .previewbar .back { margin-left: 0; }
 }
@@ -574,7 +574,7 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
 import {
   context, sprintDates, sprintByLabel, sprintDetail, keyTimes, zonedNow, formatAcrossZones,
   deviceDiffersFromTallinn, toKey, addDays, fmtDay, fmtDM, isWeekendDay, workingDaysIn, actionsFor,
-  ANCHOR, LAST_CONFIRMED, ROLES, isNumbered,
+  ANCHOR, LAST_CONFIRMED, UNCONFIRMED_FROM, ROLES, isNumbered, sprintPhase, ruleTime,
 } from './schedule.js';
 import { resolveDay, deployPeople, holidayNotice, NOT_ASSIGNED, dayFacts, untilText, sortWithinDay, dutyParts } from './board.js';
 
@@ -848,10 +848,11 @@ function itemLinks(it) {
   return links.filter(Boolean);
 }
 
-function copyButton(text) {
+// Copy a fact. Without clipboard access the fact's text is selected instead, as in Home page setup (review B20).
+function copyButton(text, shown) {
   return h('button', { type: 'button', class: 'btn', onclick: async (e) => {
-    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; $('status').textContent = 'Copied'; }
-    catch { e.target.textContent = 'Select and copy'; }
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; announce('Copied'); }
+    catch { getSelection().selectAllChildren(shown); e.target.textContent = 'Press Ctrl+C'; }
     setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
   } }, 'Copy');
 }
@@ -871,7 +872,7 @@ function itemNode(it, { everyoneView = false, todaySlot = false } = {}) {
       roles || (tagText ? h('span', { class: 'stag' }, tagText) : h('span')),
       h('i', { class: 'chev', 'aria-hidden': 'true' })),
     h('div', { class: 'more' },
-      it.facts.map((f) => h('div', { class: 'fact' }, h('span', null, f.text, TALLINN_NOTE()), copyButton(f.copy))),
+      it.facts.map((f) => { const shown = h('span', null, f.text, TALLINN_NOTE()); return h('div', { class: 'fact' }, shown, copyButton(f.copy, shown)); }),
       h('p', null, it.detail),
       h('div', { class: 'links' }, itemLinks(it)))));
 }
@@ -1054,15 +1055,19 @@ function renderSprintView(n) {
       next ? h('a', { href: svHref(next.label), 'aria-label': `Next sprint ${next.label}` }, `${next.label} ›`) : null),
     h('button', { type: 'button', class: 'btn', onclick: async () => {
       const url = `${location.origin}${location.pathname}#sprint-${s.label}`;
-      try { await navigator.clipboard.writeText(url); $('status').textContent = 'Link copied'; } catch { $('status').textContent = url; }
+      try { await navigator.clipboard.writeText(url); announce('Link copied'); } catch { announce(url); }
     } }, 'Copy link')));
 
   const flags = [];
   if (s.yearEndUnconfirmed) flags.push(h('span', { class: 'chip outl' }, 'plain projection'));
   else if (s.projected) flags.push(h('span', { class: 'chip outl' }, 'projected'));
   const notes = [];
-  if (s.n === 26) notes.push('2027-1 is the longer year-end sprint (owner): Mon 7 Dec to Fri 1 Jan, 20 working days. There is no release on 28 Dec.');
-  if (s.yearEndUnconfirmed) notes.push('Dates from 2027-3 on are plain projections of the 2-week cadence. Nobody has confirmed them yet.');
+  // A sprint that OVERRIDES make longer than the 2-week cadence (2027-1): its dates, and the release the cadence would have had.
+  if (s.end > addDays(s.start, 11)) {
+    const yearEnd = s.end.slice(0, 4) !== s.start.slice(0, 4) ? 'year-end ' : '';
+    notes.push(`${s.label} is the longer ${yearEnd}sprint (owner): ${fmtDay(s.start)} to ${fmtDay(s.end)}, ${workingDaysIn(s)} working days. There is no release on ${fmtDM(addDays(s.start, 21))}.`);
+  }
+  if (s.yearEndUnconfirmed) notes.push(`Dates from ${sprintDates(UNCONFIRMED_FROM).label} on are plain projections of the 2-week cadence. Nobody has confirmed them yet.`);
   const notice = holidayNotice(s, HOLIDAYS);
 
   const head = h('section', { class: 'sv-head' }, h('div', { class: 'wrap pad' },
@@ -1086,7 +1091,7 @@ function renderSprintView(n) {
   const marker = () => h('li', { class: 'now', 'aria-current': 'step' },
     h('span', { class: 'tld' }, fmtDay(n.date)),
     h('b', null, det.relation === 'current' && ctx.dayOfSprint ? `Today · sprint day ${ctx.dayOfSprint} of ${workingDaysIn(s)}` : 'Today'),
-    h('span', { class: 'tls' }, 'Today'));
+    h('span', { class: 'tls' }));
   let firstComing = true;
   for (const ms of det.milestones) {
     if (!markerPlaced && ms.status !== 'passed') { items.push(marker()); markerPlaced = true; }
@@ -1137,7 +1142,13 @@ function renderSprintView(n) {
   // Holidays is its own panel only when a holiday exists; otherwise one line at the foot of Timeline (READABILITY.md §5).
   const hols = !det.holidays.length ? null : foldable('sv-holidays',
     { tag: '<holidays>', title: 'Holidays', sum: plural(det.holidays.length, 'public holiday') },
-    h('ul', { class: 'rows' }, det.holidays.map((x) => h('li', null, h('b', null, fmtDay(x.date)), h('span', null, `${x.name} · ${x.country}`)))),
+    // One row per date: 'Thu 24 Dec  Christmas Eve · EE, PL' (review B22).
+    h('ul', { class: 'rows' }, [...new Set(det.holidays.map((x) => x.date))].map((d) => {
+      const on = det.holidays.filter((x) => x.date === d);
+      const names = [...new Set(on.map((x) => x.name))];
+      const text = names.length === 1 ? `${names[0]} · ${[...new Set(on.map((x) => x.country))].join(', ')}` : on.map((x) => `${x.name} · ${x.country}`).join('; ');
+      return h('li', null, h('b', null, fmtDay(d)), h('span', null, text));
+    })),
     det.holidaysAffecting.length ? h('p', { class: 'note' }, 'Key dates affected: ', [...new Set(det.holidaysAffecting.map((x) => x.date))].map((d) => {
       const k = Object.entries(MILESTONE_NAME).find(([key]) => s[key] === d);
       const c = [...new Set(det.holidaysAffecting.filter((x) => x.date === d).map((x) => x.country))].join(', ');
@@ -1171,9 +1182,16 @@ function renderCycle(n) {
   const span = (a, b, px = 0) => `calc(${(pc(b) - pc(a)).toFixed(3)}% + ${px}px)`;
   const axis = [];
   for (let d = start; d < endKey; d = addDays(d, 7)) axis.push(h('span', { style: `left:${dx(d)}` }, fmtDM(d)));
+  const T = keyTimes(RULES || []);
+  // The lane label follows the sprint's phase on this date (review B22), not its position.
+  const laneWord = (s) => {
+    const p = sprintPhase(s, n.date, n.time, T).phase;
+    if (p === 'Plan') return n.date < s.planning ? 'being refined' : 'planned';
+    return { Build: 'building', Freeze: 'code freeze', UAT: 'in UAT' }[p] || (n.date <= s.live ? 'release' : 'released');
+  };
   const lanes = sprints.map((s, i) => {
     const kids = [
-      h('span', { class: 'ln', style: `left:max(4px, ${dx(s.planning, -40)})` }, h('b', null, s.label), i === 0 ? 'release' : i === 1 ? 'building' : 'being refined'),
+      h('span', { class: 'ln', style: `left:max(4px, ${dx(s.planning, -40)})` }, h('b', null, s.label), laneWord(s)),
       h('span', { class: 'bar build', style: `left:${dx(s.start)};width:${span(s.start, addDays(s.end, 1), -2)}` }),
       h('span', { class: 'blab', style: `left:${dx(s.start, 30)}` }, 'Build on Beta'),
       h('span', { class: 'bar freeze', style: `left:${dx(s.freezeStart)};width:${span(s.freezeStart, addDays(s.demoStart, 1), -2)}` }),
@@ -1197,17 +1215,17 @@ function renderCycle(n) {
   fill($('cycle-body'),
     h('div', { class: 'track-wrap', tabindex: '0', role: 'region', 'aria-label': 'Cycle timeline' },
       h('div', { class: 'track', role: 'img', 'aria-label': alt, style: `--weeks:${total / 7}` }, h('div', { class: 'axis' }, axis), lanes, today)),
-    h('p', { class: 'muted', style: 'font-size:13px;margin:8px 0 0' }, 'Bars: outlined grey = build on Beta (10 working days) · blue "Freeze" = code freeze until the Demo update (Tue evening) · light orange "UAT" = clients test on Demo until the fix cut-off · ◆ = refinement sessions, which feed the next sprint\'s planning · weekends shaded.'),
+    h('p', { class: 'muted', style: 'font-size:13px;margin:8px 0 0' }, 'Bars: outlined grey = build on Beta (working days of the sprint) · blue "Freeze" = code freeze until the Demo update (Tue evening) · light orange "UAT" = clients test on Demo until the fix cut-off · ◆ = refinement sessions, which feed the next sprint\'s planning · weekends shaded.'),
     h('dl', { class: 'gloss' }, [
       ['Beta → Demo → Live', 'The three environments. A sprint is built on Beta, moves to Demo on Tuesday evening, and to Live on Monday evening.'],
       ['Code freeze', 'From the sprint\'s last Friday until the Demo update on Tuesday evening. Beta reopens Wednesday.'],
-      ['Demo update / Live update', 'The 2-weekly deploys, usually 17:00 and 20:00 Tallinn time. Client project go-lives are not on this board.'],
+      ['Demo update / Live update', `The 2-weekly deploys, usually ${T.demo} and ${T.live} Tallinn time. Client project go-lives are not on this board.`],
       ['Demo/Live matrix', 'Per-tenant configuration switches. Code always deploys to all tenants.'],
       ['UAT', 'Clients test on Demo from Wednesday until the fix cut-off.'],
-      ['Fix cut-off', 'Monday 12:00 Tallinn time. After it: reverts, not fixes.'],
+      ['Fix cut-off', `Monday ${T.cutoff} Tallinn time. After it: reverts, not fixes.`],
       ['Ready for Demo / Ready for Live', 'Task states set by QA before the Demo update, and by IM / AM after the client signs off.'],
-      ['Release / Golive Release page', 'Confluence pages "Release 2026-NN" and "Golive Release 2026-NN", written by developers after each update.'],
-      ['Pre-Refinement / Full Refinement', 'Wednesday 14:00 every week / Thursday 14:00 in week 1. Both estimate work for the next sprint.'],
+      ['Release / Golive Release page', 'Confluence pages "Release YYYY-NN" and "Golive Release YYYY-NN", written by developers after each update.'],
+      ['Pre-Refinement / Full Refinement', `Wednesday ${ruleTime(RULES, 'pre-refinement', '14:00')} every week / Thursday ${ruleTime(RULES, 'full-refinement', '14:00')} in week 1. Both estimate work for the next sprint.`],
       ['Definition of Ready, priority call', 'What a ticket needs before planning; the call where each client fixes its priorities.'],
       ['Bug retro', 'Monday after a sprint ends: review its bugs and escaped defects.'],
       ['Hotfix', 'The only change that bypasses the freeze. Event-driven, not on this calendar.'],
