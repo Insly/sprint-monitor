@@ -169,8 +169,8 @@ body.maintenance > *:not(#maint):not(script) { display: none !important; }
    the body is a neutral tray with white items. */
 .fold { background: var(--surface); border: 1px solid var(--section-edge); border-radius: var(--radius-section); overflow: hidden; }
 .fold + .fold { margin-top: 16px; }
-.fold > summary { padding: 0 12px 0 16px; min-height: 40px; }
-.fold[open] > summary { border-bottom: 1px solid var(--section-edge); }
+.fold > .fold-head { padding: 0 12px 0 16px; min-height: 40px; }
+.fold.is-open > .fold-head { border-bottom: 1px solid var(--section-edge); }
 .fold > .fold-body { padding: 0 16px 14px; background: var(--section-body); }
 .fold > .fold-body > :first-child { margin-top: 12px; }
 .fold > .fold-body > .slot:first-child { margin-top: 4px; }
@@ -182,26 +182,30 @@ body.maintenance > *:not(#maint):not(script) { display: none !important; }
 .tl-foot { margin: 10px 0 0; font-size: 13px; }
 
 /* Fold headers: panels and the cycle explainer (READABILITY.md §3.2). The chevron sits inline after the
-   title (and the count when open). Folded: chevron, then "Folded ·" and a one-line summary. */
-:is(.fold, .cycle) > summary { list-style: none; cursor: pointer; display: flex; align-items: center; }
-:is(.fold, .cycle) > summary::-webkit-details-marker { display: none; }
-:is(.fold, .cycle) > summary .sec-head { flex: 1 1 auto; min-width: 0; margin: 0; align-items: center; row-gap: 0; padding: 6px 0; }
-:is(.fold, .cycle) > summary .sec-head h2 { flex: 0 1 auto; min-width: 0; }
-:is(.fold, .cycle) > summary .sec-head .ltag { flex: none; }
-:is(.fold, .cycle) > summary .chev { flex: none; margin: -4px 2px 0; justify-self: auto; }
-:is(.fold, .cycle)[open] > summary .chev { margin-top: 4px; width: 8px; height: 8px; border-color: var(--control); } /* touch and ≤767: small and quiet */
-:is(.fold, .cycle):not([open]) > summary .chev { border-color: var(--text-2); }
-:is(.fold, .cycle) > summary .sum { flex: 1 1 200px; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-:is(.fold, .cycle) > summary .sum b { color: var(--text-2); }
-:is(.fold, .cycle)[open] > summary .sum, :is(.fold, .cycle):not([open]) > summary .aside:not(.sum) { display: none; }
-:is(.fold, .cycle) > summary:focus-visible { outline: 2px solid transparent; border-radius: 0; box-shadow: inset 0 0 0 2px #1A1A1A, inset 0 0 0 4px #FFFFFF; }
-@media (prefers-color-scheme: dark) { :is(.fold, .cycle) > summary:focus-visible { box-shadow: inset 0 0 0 2px #FFFFFF, inset 0 0 0 4px #1A1A1A; } }
-@media (pointer: coarse) { .fold > summary { min-height: 44px; } }
+   title (and the count when open). Folded: chevron, then "Folded ·" and a one-line summary.
+   Disclosure pattern (review B5): <h2><button aria-expanded aria-controls>Title</button></h2>; the button's
+   ::after covers the whole header strip, so the strip still clicks as one, and the strip shows the focus ring. */
+:is(.fold, .cycle) > .fold-head { position: relative; cursor: pointer; display: flex; align-items: center; }
+:is(.fold, .cycle) > .fold-head .sec-head { flex: 1 1 auto; min-width: 0; margin: 0; align-items: center; row-gap: 0; padding: 6px 0; }
+:is(.fold, .cycle) > .fold-head .sec-head h2 { flex: 0 1 auto; min-width: 0; }
+.fold-btn { margin: 0; padding: 0; border: 0; border-radius: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.fold-btn::after { content: ""; position: absolute; inset: 0; }
+.fold-btn:focus-visible { outline: none; box-shadow: none; }
+:is(.fold, .cycle) > .fold-head .sec-head .ltag { flex: none; }
+:is(.fold, .cycle) > .fold-head .chev { flex: none; margin: -4px 2px 0; justify-self: auto; }
+:is(.fold, .cycle).is-open > .fold-head .chev { margin-top: 4px; width: 8px; height: 8px; border-color: var(--control); } /* touch and ≤767: small and quiet */
+:is(.fold, .cycle):not(.is-open) > .fold-head .chev { border-color: var(--text-2); }
+:is(.fold, .cycle) > .fold-head .sum { flex: 1 1 200px; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.fold, .cycle) > .fold-head .sum b { color: var(--text-2); }
+:is(.fold, .cycle).is-open > .fold-head .sum, :is(.fold, .cycle):not(.is-open) > .fold-head .aside:not(.sum) { display: none; }
+:is(.fold, .cycle) > .fold-head:has(.fold-btn:focus-visible) { outline: 2px solid transparent; border-radius: 0; box-shadow: inset 0 0 0 2px #1A1A1A, inset 0 0 0 4px #FFFFFF; }
+@media (prefers-color-scheme: dark) { :is(.fold, .cycle) > .fold-head:has(.fold-btn:focus-visible) { box-shadow: inset 0 0 0 2px #FFFFFF, inset 0 0 0 4px #1A1A1A; } }
+@media (pointer: coarse) { .fold > .fold-head { min-height: 44px; } }
 /* Mouse and trackpad: no chevron on an open section until hover or keyboard focus; the header tints on hover. */
 @media (hover: hover) and (pointer: fine) and (min-width: 768px) {
-  :is(.fold, .cycle)[open] > summary .chev { visibility: hidden; width: 9px; height: 9px; border-color: var(--muted); }
-  :is(.fold, .cycle)[open] > summary:hover .chev, :is(.fold, .cycle)[open] > summary:focus-visible .chev { visibility: visible; }
-  :is(.fold, .cycle) > summary:hover { background: var(--section-body); }
+  :is(.fold, .cycle).is-open > .fold-head .chev { visibility: hidden; width: 9px; height: 9px; border-color: var(--muted); }
+  :is(.fold, .cycle).is-open > .fold-head:hover .chev, :is(.fold, .cycle).is-open > .fold-head:has(.fold-btn:focus-visible) .chev { visibility: visible; }
+  :is(.fold, .cycle) > .fold-head:hover { background: var(--section-body); }
   .group > summary .chev { visibility: hidden; }
   .group > summary:hover .chev, .group > summary:focus-visible .chev { visibility: visible; }
 }
@@ -224,7 +228,7 @@ body.maintenance > *:not(#maint):not(script) { display: none !important; }
 .ttl { font-size: 16px; font-weight: 700; }
 .ttl small { display: block; font-size: 13px; font-weight: 400; color: var(--text-2); }
 .chev { width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; justify-self: center; display: inline-block; }
-details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
+details[open] > summary .chev, .fold.is-open > .fold-head .chev { transform: rotate(-135deg); margin-top: 4px; }
 .chip { display: inline-block; font-size: 13px; line-height: 20px; padding: 0 7px; border-radius: 3px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
 .chip.due { background: var(--accent-soft); color: var(--text); border-color: var(--accent); }
 .item.key .chip.due { background: var(--accent); color: #1A1A1A; }
@@ -259,7 +263,7 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .nf-list .nf-more { display: none; }
 .empty { padding: 12px 0; color: var(--text-2); }
 .picker { border: 2px solid var(--accent); border-radius: 4px; padding: 14px; background: var(--surface); margin-bottom: 16px; }
-.picker h2 { margin: 0 0 4px; font-size: 18px; }
+.picker h3 { margin: 0 0 4px; font-size: 18px; }
 .picker p { margin: 0 0 10px; color: var(--text-2); }
 .picker .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
 .picker .grid button { min-height: 44px; border: 1px solid var(--control); border-radius: 4px; font-weight: 700; background: var(--surface); cursor: pointer; }
@@ -294,6 +298,7 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 .cu ul li.unit { font-weight: 700; }
 .cu ul li.unit::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; align-self: center; margin-left: -16px; }
 .cu-more { margin-top: 8px; }
+.cu > li[tabindex="-1"]:focus-visible { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #1A1A1A; } /* the first day "+N more" shows */
 
 /* ---------------------------------------------------------------- sprint view */
 .sv-nav { border-bottom: 1px solid var(--line); }
@@ -327,8 +332,8 @@ details[open] > summary .chev { transform: rotate(-135deg); margin-top: 4px; }
 
 /* ---------------------------------------------------------------- cycle, footer */
 .cycle { margin-top: 16px; } /* reference material, now a panel like the others (owner) */
-.cycle > summary { min-height: 44px; }
-.cycle > summary .sec-head h2 { font-size: 18px; }
+.cycle > .fold-head { min-height: 44px; }
+.cycle > .fold-head .sec-head h2 { font-size: 18px; }
 #cycle-body { padding-bottom: 8px; }
 .track-wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 4px; }
 .track { position: relative; height: 350px; min-width: 760px; background-image: linear-gradient(to right, transparent 71.43%, var(--surface-2) 71.43%, var(--surface-2) 100%); background-size: calc(100% / var(--weeks)) 100%; }
@@ -420,7 +425,7 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
   .lower > section + section, .fold + .fold { margin-top: 12px; }
   /* Panels and the footer bar go full bleed: no width lost (READABILITY.md §3 B) */
   .fold, .foot-bar { margin-left: -16px; margin-right: -16px; border-left: 0; border-right: 0; border-radius: 0; }
-  .fold > summary { min-height: 44px; padding: 0 16px; }
+  .fold > .fold-head { min-height: 44px; padding: 0 16px; }
   .foot-meta { padding-bottom: 4px; }
   .foot-links { padding-bottom: 6px; }
   .fd > summary { min-height: 44px; }
@@ -466,7 +471,8 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
   .band, .chip, .item, .rail > li, .seq li, .bar, .previewbar, .nextbox { border: 1px solid CanvasText; }
   .fold, .foot-bar, .sv-duty { border: 1px solid CanvasText; }
   .fold > .fold-body, .foot-bar { background: Canvas; }
-  :is(.fold, .cycle) > summary:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+  :is(.fold, .cycle) > .fold-head:has(.fold-btn:focus-visible) { outline: 2px solid Highlight; outline-offset: -2px; }
+  .seg input:focus-visible + span { outline: 2px solid Highlight; outline-offset: -2px; }
   .seg input:checked + span, .seg2 button[aria-checked="true"] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
   .steps li.now { border-top-color: Highlight; }
   :focus-visible { outline: 2px solid Highlight; }
@@ -514,7 +520,7 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
       <div class="wrap pad">
         <div>
           <span class="ltag" id="band-tag"></span> <span class="meta" id="band-meta"></span>
-          <h1 id="headline" aria-live="polite"><span class="sr" id="headline-sr"></span><span id="headline-text"></span></h1>
+          <h1 id="headline"><span class="sr" id="headline-sr"></span><span id="headline-text"></span></h1>
           <p class="subl" id="band-sub"></p>
           <div class="blinks" id="band-links"></div>
         </div>
@@ -535,10 +541,10 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
 </main>
 
 <div class="wrap pad">
-  <details class="cycle fold" id="cycle">
-    <summary><div class="sec-head"><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2>How the 2-week cycle works</h2><i class="chev" aria-hidden="true"></i><span class="aside sum"><b>Folded</b> · Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></div></summary>
-    <div class="fold-body" id="cycle-body"></div>
-  </details>
+  <div class="cycle fold" id="cycle" data-fold="cycle">
+    <div class="fold-head"><div class="sec-head"><span class="ltag" aria-hidden="true">&lt;cycle&gt;</span><h2><button type="button" class="fold-btn" id="cycle-btn" data-focus-key="fold:cycle" aria-expanded="false" aria-controls="cycle-body" aria-describedby="cycle-sum">How the 2-week cycle works</button></h2><i class="chev" aria-hidden="true"></i><span class="aside sum" id="cycle-sum"><b>Folded</b> · Three sprints overlap: one is refined, one is built on Beta, one is tested on Demo and then released to Live.</span></div></div>
+    <div class="fold-body" id="cycle-body" hidden></div>
+  </div>
 </div>
 
 <footer class="foot" id="footer">
@@ -597,21 +603,39 @@ function h(tag, attrs, ...kids) {
 }
 // Sections the viewer can fold. Open by default; a fold lasts for this page visit only (nothing stored).
 const folded = new Set();
-// Panel header (READABILITY.md §3.2): tag, h2, the open aside (count), the inline chevron, then the folded summary.
-// CSS shows the aside only when open and "Folded · summary" only when folded. No interactive children.
-function foldHead({ tag, title, id = null, tabindex = null, aside = null, sum = null }) {
-  return h('div', { class: 'sec-head' },
-    h('span', { class: 'ltag', 'aria-hidden': 'true' }, tag),
-    h('h2', { id, tabindex }, title),
-    aside ? h('span', { class: 'aside' }, aside) : null,
-    h('i', { class: 'chev', 'aria-hidden': 'true' }),
-    h('span', { class: 'aside sum' }, h('b', null, 'Folded'), sum ? ` · ${sum}` : null));
+// Panel (READABILITY.md §3.2) in the disclosure pattern (review B5): tag, <h2><button>title</button></h2>, the open
+// aside (count), the inline chevron, then the folded summary; below it the body the button shows and hides.
+// CSS shows the aside only when open and "Folded · summary" only when folded. The button's name is the title only;
+// the visible aside or summary is its description.
+function foldable(key, { tag, title, id = null, tabindex = null, aside = null, sum = null }, ...body) {
+  const open = !folded.has(key);
+  const bodyId = `fold-${key}`;
+  return h('div', { class: `fold${open ? ' is-open' : ''}`, 'data-fold': key },
+    h('div', { class: 'fold-head' }, h('div', { class: 'sec-head' },
+      h('span', { class: 'ltag', 'aria-hidden': 'true' }, tag),
+      h('h2', { id, tabindex }, h('button', { type: 'button', class: 'fold-btn', 'data-focus-key': `fold:${key}`,
+        'aria-expanded': String(open), 'aria-controls': bodyId, 'aria-describedby': open ? (aside ? `${bodyId}-aside` : null) : `${bodyId}-sum` }, title)),
+      aside ? h('span', { class: 'aside', id: `${bodyId}-aside` }, aside) : null,
+      h('i', { class: 'chev', 'aria-hidden': 'true' }),
+      h('span', { class: 'aside sum', id: `${bodyId}-sum` }, h('b', null, 'Folded'), sum ? ` · ${sum}` : null))),
+    h('div', { class: 'fold-body', id: bodyId, hidden: !open }, body));
 }
-function foldable(key, head, ...body) {
-  return h('details', { class: 'fold', open: folded.has(key) ? null : true, 'data-fold': key,
-    ontoggle: (e) => { if (e.currentTarget.open) folded.delete(key); else folded.add(key); } },
-  h('summary', null, foldHead(head)), h('div', { class: 'fold-body' }, body));
+/** Open or fold a panel (also the static cycle explainer). */
+function setFold(panel, open) {
+  const btn = panel.querySelector(':scope > .fold-head .fold-btn');
+  const body = $(btn.getAttribute('aria-controls'));
+  panel.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+  body.hidden = !open;
+  const aside = panel.querySelector(':scope > .fold-head .aside:not(.sum)');
+  const desc = open ? aside && aside.id : panel.querySelector(':scope > .fold-head .sum').id;
+  if (desc) btn.setAttribute('aria-describedby', desc); else btn.removeAttribute('aria-describedby');
+  if (open) folded.delete(panel.dataset.fold); else folded.add(panel.dataset.fold);
 }
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.fold-btn');
+  if (btn) setFold(btn.closest('.fold'), btn.getAttribute('aria-expanded') !== 'true');
+});
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 // Phone extras (READABILITY.md §6.1): Coming up shows 3 working days at ≤767 px, 7 above.
 const phoneMQ = matchMedia('(max-width: 767px)');
@@ -712,14 +736,32 @@ function renderTop(n, model) {
   $('viewdate-input').value = n.date;
 }
 
+// The one live region (#status). Cleared first, so the same message twice is announced twice.
+function announce(text) {
+  const st = $('status');
+  st.textContent = '';
+  setTimeout(() => { st.textContent = text; }, 50);
+}
+
+// What the role change shows, counted from the page (review B15): the day's items, or the sprint view's actions.
+function roleMessage(r) {
+  const who = roleLabel(r);
+  if (!$('sprint-view').hidden) {
+    const n = $('sprint-view').querySelectorAll('[data-fold="sv-actions"] .cu > li > ul > li').length;
+    return n ? `Showing ${plural(n, 'action')} for ${sprintViewEveryone ? 'Everyone' : who}` : `No actions for ${who} in this sprint`;
+  }
+  const n = $('yourday').querySelectorAll('.fold-body > ul.agenda > li').length;
+  const a = lastModel && lastModel.agenda;
+  if (n) return `Showing ${plural(n, 'item')} for ${who}`;
+  return a && a.weekend ? `Nothing due on ${a.heading} for ${who}` : `Nothing due today for ${who}`;
+}
+
 function setRole(r, { from } = {}) {
   role = r;
   storedRole = r;
   saveRole(r);
-  render({ keepFocus: from === 'control' });
-  const m = lastModel;
-  const count = m && m.agenda ? m.agenda.count : 0;
-  $('status').textContent = `Showing ${count} item${count === 1 ? '' : 's'} for ${roleLabel(r)}`;
+  render();
+  announce(roleMessage(r));
   if (from === 'picker') { const h2 = $('yourday-h'); if (h2) h2.focus(); }
 }
 
@@ -785,7 +827,6 @@ function renderDuty(m) {
 }
 
 // ---------------------------------------------------------------- your day
-let currentDate = null;
 const linkTo = (href) => {
   // Keep the previewed date on in-page links (#sprint-… becomes #date-…~sprint-…).
   const r = readRoute();
@@ -843,11 +884,11 @@ function renderYourDay(n, m) {
   const kids = [];
   if (firstVisit && storedRole == null) {
     kids.push(h('div', { class: 'picker', role: 'group', 'aria-labelledby': 'picker-h' },
-      h('h2', { id: 'picker-h' }, 'Show only what is yours'),
+      h('h3', { id: 'picker-h' }, 'Show only what is yours'),
       h('p', null, 'Which of these are you? You can change it any time under "Viewing as".'),
       h('div', { class: 'grid' }, PICK_ORDER.map((r) => h('button', { type: 'button', title: ROLE_TIP[r] || null, onclick: () => setRole(r, { from: 'picker' }) }, roleLabel(r)))),
       // In-page jump without touching the hash: a hash change would end a preview (#date-…).
-      h('a', { class: 'new', href: '#cycle', onclick: (e) => { e.preventDefault(); $('cycle').open = true; const s = $('cycle').querySelector('summary'); s.scrollIntoView({ block: 'start' }); s.focus(); } }, 'New here? See how the 2-week cycle works ↓')));
+      h('a', { class: 'new', href: '#cycle', onclick: (e) => { e.preventDefault(); setFold($('cycle'), true); const b = $('cycle-btn'); b.scrollIntoView({ block: 'start' }); b.focus(); } }, 'New here? See how the 2-week cycle works ↓')));
   }
   const heading = a && a.weekend ? `${a.heading} for ${roleLabel(role)}` : `Today for ${roleLabel(role)}`;
   // The picker sits at the top of the Today panel's body, as a card (READABILITY.md §5).
@@ -936,14 +977,19 @@ function renderComingUp(m) {
   const sum = first ? `${first.label} · ${first.items.length} for ${role === 'Everyone' ? 'everyone' : 'you'}` : 'Nothing in the next working days';
   fill($('cu-sec'), foldable('coming',
     { tag: '<coming up>', title: `Next ${limit} working days`, id: 'cu-h', aside: roleLabel(role), sum },
-    visible.length ? h('ul', { class: 'cu' }, visible.map((d) => h('li', null,
+    visible.length ? h('ul', { class: 'cu' }, visible.map((d) => h('li', { 'data-focus-key': `cu-day:${d.index}`, tabindex: '-1' },
       h('div', { class: 'd' }, h('b', null, d.label), d.cutoff ? 'cut-off' : null, d.holiday ? h('span', null, ` · ${d.holiday}`) : null),
       h('ul', null, d.items.map((x) => h('li', { class: x.unit ? 'unit' : null },
         x.unit ? h('span', { class: 'sr' }, 'Unit milestone: ') : null,
         x.time ? h('span', { class: 't' }, x.time) : null,
         x.prefix, x.title,
         h('span', { class: x.ifNeeded ? 's ifn' : 's' }, x.suffix || ''))))))) : h('p', { class: 'empty' }, 'Nothing in the next working days.'),
-    hiddenDays.length && limit < 10 ? h('button', { type: 'button', class: 'btn cu-more', onclick: () => { cuLimit = nextLimit; renderComingUp(lastModel); } }, `+${plural(hiddenDays.length, 'more day', 'more days')} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
+    hiddenDays.length && limit < 10 ? h('button', { type: 'button', class: 'btn cu-more', 'data-focus-key': 'cu-more', onclick: () => {
+      // Focus moves to the first newly shown day (review B4); the button itself is gone or moved.
+      cuLimit = nextLimit; renderComingUp(lastModel);
+      const first = $('cu-sec').querySelector(`[data-focus-key="cu-day:${hiddenDays[0].index}"]`);
+      if (first) first.focus();
+    } }, `+${plural(hiddenDays.length, 'more day', 'more days')} to ${hiddenDays[hiddenDays.length - 1].label}`) : null));
 }
 
 // ---------------------------------------------------------------- preview bar
@@ -960,11 +1006,11 @@ function renderPreview(n) {
   const nextTime = cycle[(cycle.indexOf(n.time) + 1) % cycle.length];
   fill(el, h('div', { class: 'wrap pad' },
     h('span', null, 'Preview · ', h('b', null, fmtLong(n.date)), isCut ? ` · ${n.time} Tallinn` : null),
-    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Previous day', onclick: () => go(addDays(n.date, -1)) }, '‹'),
-    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Next day', onclick: () => go(addDays(n.date, 1)) }, '›'),
+    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Previous day', 'data-focus-key': 'pv-prev', onclick: () => go(addDays(n.date, -1)) }, '‹'),
+    h('button', { type: 'button', class: 'pbtn', 'aria-label': 'Next day', 'data-focus-key': 'pv-next', onclick: () => go(addDays(n.date, 1)) }, '›'),
     h('label', { class: 'sr', for: 'pv-date' }, 'Pick a date'),
     h('input', { type: 'date', id: 'pv-date', value: n.date, onchange: (e) => { if (e.target.value) go(e.target.value); } }),
-    isCut ? h('button', { type: 'button', class: 'pbtn', onclick: () => { previewTime = nextTime; render(); } }, `Show at ${nextTime}`) : null,
+    isCut ? h('button', { type: 'button', class: 'pbtn', 'data-focus-key': 'pv-time', onclick: () => { previewTime = nextTime; render(); } }, `Show at ${nextTime}`) : null,
     h('a', { class: 'back', href: r.sprintRaw ? `#sprint-${r.sprintRaw}` : location.pathname, onclick: (e) => {
       if (!r.sprintRaw) { e.preventDefault(); history.pushState(null, '', location.pathname); render(); }
     } }, 'Back to today')));
@@ -1064,8 +1110,8 @@ function renderSprintView(n) {
   // Actions, grouped Passed / Today / Every day this sprint / Coming. "Running" is kept for Your day's short windows (review 1.14).
   const groups = [['passed', 'Passed', false], ['today', 'Today', true], ['running', 'Every day this sprint', true], ['coming', 'Coming', true]];
   const toggle = role === 'Everyone' ? null : h('div', { class: 'seg2', role: 'radiogroup', 'aria-label': 'Show actions for' },
-    h('button', { type: 'button', role: 'radio', 'aria-checked': String(!sprintViewEveryone), onclick: () => { sprintViewEveryone = false; render(); } }, roleLabel(role)),
-    h('button', { type: 'button', role: 'radio', 'aria-checked': String(sprintViewEveryone), onclick: () => { sprintViewEveryone = true; render(); } }, 'Everyone'));
+    h('button', { type: 'button', role: 'radio', 'aria-checked': String(!sprintViewEveryone), 'data-focus-key': 'sv-role', onclick: () => { sprintViewEveryone = false; render(); } }, roleLabel(role)),
+    h('button', { type: 'button', role: 'radio', 'aria-checked': String(sprintViewEveryone), 'data-focus-key': 'sv-everyone', onclick: () => { sprintViewEveryone = true; render(); } }, 'Everyone'));
   const byDate = (list) => {
     const dates = [...new Set(list.map((a) => a.date))];
     return h('ul', { class: 'cu', style: 'margin-top:4px' }, dates.map((d) => h('li', null,
@@ -1208,19 +1254,23 @@ function stateKey(n, m) {
 function openKeys() { return new Set([...document.querySelectorAll('details[data-k][open]')].map((d) => d.dataset.k)); }
 function closedKeys() { return new Set([...document.querySelectorAll('details[data-k]:not([open])')].map((d) => d.dataset.k)); }
 
-function render({ keepFocus = false } = {}) {
+// Keep focus on the same control across a re-render (nodes are rebuilt): by id, data-focus-key (panel buttons,
+// the sprint view's role toggle, preview buttons, Coming up days), sprint link, or details summary (review B4).
+function focusSelector(ae) {
+  if (!ae || ae === document.body) return null;
+  if (ae.id) return `#${CSS.escape(ae.id)}`;
+  if (ae.dataset.focusKey) return `[data-focus-key="${CSS.escape(ae.dataset.focusKey)}"]`;
+  if (ae.matches('a.lab[data-sprint]')) return `a.lab[data-sprint="${CSS.escape(ae.dataset.sprint)}"]`;
+  if (ae.matches('details[data-k] > summary')) return `details[data-k="${CSS.escape(ae.parentElement.dataset.k)}"] > summary`;
+  return null;
+}
+
+function render() {
   if (maintenanceOn) return;
   const n = now();
-  currentDate = n.date;
   const opened = openKeys();
   const closed = closedKeys();
-  // Keep focus on the same control across a re-render (nodes are rebuilt).
-  const ae = document.activeElement;
-  const focusSel = !ae || ae === document.body ? null
-    : ae.id ? `#${CSS.escape(ae.id)}`
-      : ae.matches('a.lab[data-sprint]') ? `a.lab[data-sprint="${ae.dataset.sprint}"]`
-        : ae.matches('details[data-k] > summary') ? `details[data-k="${ae.parentElement.dataset.k}"] > summary` : null;
-  void keepFocus;
+  const focusSel = focusSelector(document.activeElement);
   const view = n.route.sprintRaw != null ? 'sprint' : 'today';
 
   const m = safeResolve({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS, preview: !!n.preview });
@@ -1270,7 +1320,14 @@ function tick() {
   const n = now();
   if (n.preview) return;
   const m = safeResolve({ date: n.date, time: n.time, role, rules: RULES, duty: DUTY, holidays: HOLIDAYS });
-  if (stateKey(n, m) !== lastKey) { render(); return; }
+  if (stateKey(n, m) !== lastKey) {
+    // The h1 is not a live region (one announcement per change, review B15): a headline the clock changed is announced here.
+    const before = $('headline').textContent;
+    render();
+    const after = $('headline').textContent;
+    if (after !== before && !$('today-view').hidden) announce(after);
+    return;
+  }
   if (m.countdown && $('today-view').hidden === false) {
     const big = document.querySelector('#band-right .countdown .big');
     if (big) big.textContent = m.countdown.text.replace(/ left$/, '');
@@ -1310,7 +1367,7 @@ $('viewdate-today').addEventListener('click', () => {
     setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
   });
 }
-$('cycle').open = firstVisit; // open on a first visit only; not persisted
+setFold($('cycle'), firstVisit); // open on a first visit only; not persisted
 
 // ---------------------------------------------------------------- maintenance switch
 // public/status.json { "maintenance": true|false, "message": "…" }. Read with a cache-busting query so a change
