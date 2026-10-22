@@ -49,5 +49,5 @@ jobs:
           if ! grep -q 'MGA Sprint Board' page.html; then
             echo "::error::$SITE/ does not contain 'MGA Sprint Board'"; fail=1
           fi
-          for f in /schedule.js /board.js /rules.js; do check "$f" /dev/null; done
+          for f in /render.js /board.css /schedule.js /board.js /rules.js; do check "$f" /dev/null; done
           exit $fail

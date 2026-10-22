@@ -3,7 +3,7 @@
 Tier: T1 (one owner, low stakes, no personal data, months-long lifetime). See software-project-playbook.
 Scope: MGA delivery unit only. Static page, no backend, no Jira calls (v1).
 Hosting: Render static site serving `public/` (no build step). Deploys go via the CI hook: `.github/workflows/deploy.yml` runs the tests (Tallinn and New York time zones) on every push and, on `main`, calls the Render deploy hook for the tested commit. A push alone does not deploy; `render.yaml` is not applied (Render has no GitHub app access to the repo).
-Page loads ES modules: `schedule.js` and `board.js` statically; `rules.js`, `duty.js` and `holidays.js` dynamically, each with its own fallback.
+Page: `index.html` (markup, `board.css`, and a small boot script) reads `status.json` first (maintenance switch, fails open), then imports `render.js`. `render.js` loads `schedule.js` and `board.js` statically; `rules.js`, `duty.js` and `holidays.js` dynamically, each with its own fallback. No build step.
 
 ## Files and owners
 
@@ -14,7 +14,9 @@ Page loads ES modules: `schedule.js` and `board.js` statically; `rules.js`, `dut
 | `duty.js` | owner | Static dev deploy rota: `SHOW_NAMES`, `RELEASES` (Demo and Live dates; Demo deployer, Live lead and backup), `ROTA_UPDATED`. Names are switched off (`SHOW_NAMES = false`, names `null`): the page shows the deploy times only. When on, names are first name + last initial only. |
 | `holidays.js` | owner | `HOLIDAYS = [{ date, country: 'EE'\|'PL', name }]` for 2026–2027 and `holidaysBetween(from, to)`. |
 | `rules.js` | analyst | `export const RULES = [...]` + `export const SOURCES = {...}` — data only |
-| `index.html` | dev | Page (artifact contract: no doctype/html/head/body tags; own `<title>` + `<style>` at top) |
+| `index.html` | dev | Page markup and the boot script (maintenance check, then `import('./render.js')`) |
+| `render.js` | dev | ES module: renders what `board.js` returns (Today, sprint view, cycle explainer, footer), focus handling, the 20 s tick |
+| `board.css` | dev | All styles (tokens, panels, light/dark, forced colours). No inline styles: positions in the cycle track are set through the CSSOM |
 | `schedule.test.js`, `rules.test.js` | dev (QA extends) | vitest, run with `npx vitest run sprint-monitor` |
 | `SPEC.md` | analyst | Problem, non-goals, acceptance checks, rule catalogue with sources, open discrepancies |
 

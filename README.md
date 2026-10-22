@@ -23,7 +23,9 @@ Spec: `docs/SPEC.md`. Calendar model, rule schema and API: `docs/CONTRACT.md`. D
 
 | File | What it is |
 |---|---|
-| `public/index.html` | The page. Renders what `board.js` returns. No build step. |
+| `public/index.html` | The page markup and a small boot script: checks `status.json` (maintenance switch, fails open), then imports `render.js`. No build step. |
+| `public/render.js` | Renders what `board.js` returns (ES module). |
+| `public/board.css` | The page styles. |
 | `public/schedule.js` | Date engine: sprint dates, today's context, which rules fire, Tallinn time, sprint view data. No DOM. |
 | `public/board.js` | State resolver: everything on the page as a pure function of (date, Tallinn time, role, rules, rota, holidays). |
 | `public/rules.js` | Rule catalogue and Confluence sources. Data only. |
