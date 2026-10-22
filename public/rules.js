@@ -510,7 +510,7 @@ export const RULES = [
     detail: "Check what was delivered this week, ask QA to start on finished tasks, and chase anything that is not moving.",
     who: ['IM/AM', 'Lead'],
     sprint: 'current',
-    when: { on: 'start', offset: 4 },
+    when: { on: 'mid' }, // middle of the sprint: Fri of week 1, or day 10 of the 20-day 2027-1 (owner, 2026-10-22)
     kind: 'reminder',
     source: 'biweeklyPlan',
   },

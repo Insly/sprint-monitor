@@ -52,6 +52,7 @@ describe('calendar model', () => {
       uatStart: '2026-09-30',
       cutoff: '2026-10-05',
       live: '2026-10-05',
+      mid: '2026-09-18', // middle working day (day 5): Friday of week 1
       label: '2026-20',
       projected: false,
       yearEndUnconfirmed: false,

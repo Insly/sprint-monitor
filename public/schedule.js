@@ -170,6 +170,16 @@ export function sprintDates(n) {
     live: addDays(end, 10),
   };
   const merged = { ...base, ...o, n };
+  // Middle of the sprint: working day N/2 (day 5 of 10 = Friday of week 1; day 10 of 20 in the long 2027-1).
+  if (!merged.mid) {
+    let total = 0;
+    for (let d = merged.start; d <= merged.end; d = addDays(d, 1)) if (!isWeekendDay(d)) total += 1;
+    const target = Math.max(1, Math.floor(total / 2));
+    let k = 0;
+    for (let d = merged.start; d <= merged.end; d = addDays(d, 1)) {
+      if (!isWeekendDay(d) && (k += 1) === target) { merged.mid = d; break; }
+    }
+  }
   return {
     ...merged,
     label: labelOf(n),
@@ -230,7 +240,7 @@ function relationSprint(ctx, relation) {
 
 export const DATE_KEYS = [
   'planning', 'start', 'end', 'freezeStart', 'bugRetro', 'demoStart',
-  'demoEnd', 'freezeEnd', 'uatStart', 'cutoff', 'live',
+  'demoEnd', 'freezeEnd', 'uatStart', 'cutoff', 'live', 'mid',
 ];
 
 function resolveKey(sprint, key) {
