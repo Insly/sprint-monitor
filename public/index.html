@@ -764,7 +764,7 @@ function renderDuty(m) {
   // running "London:" and the name together.
   const p = dutyParts(line);
   const dep = p ? h('span', { class: p.state === 'tonight' ? 'tonight' : null },
-    h('span', { class: 'dk' }, p.before, h('a', { href: linkTo(`#sprint-${p.label}`) }, p.label), p.after), ' ', personNodes(p.people)) : null;
+    h('span', { class: 'dk' }, p.before, h('a', { href: linkTo(`#sprint-${p.label}`) }, p.label), p.after), p.people.length ? [' ', personNodes(p.people)] : null) : null;
   $('duty').hidden = !dep;
   fill($('duty-inner'), dep);
 }
@@ -981,8 +981,10 @@ function renderSprintView(n) {
   const prev = sNum - 1 >= ANCHOR.number ? sprintDates(sNum - 1) : null;
   const next = isNumbered(sNum + 1) ? sprintDates(sNum + 1) : null; // no link to an unlabelled sprint (review 2.3)
   const svHref = (label) => (n.preview ? routeHref({ date: n.date, sprint: label }) : `#sprint-${label}`);
-  const demoPeople = DUTY ? deployPeople(DUTY, 'Demo', s.demoStart) : null;
-  const livePeople = DUTY ? deployPeople(DUTY, 'Live', s.live) : null;
+  // Names can be switched off in duty.js (SHOW_NAMES = false): then only the deploy times show.
+  const showNames = Boolean(DUTY) && DUTY.SHOW_NAMES !== false;
+  const demoPeople = showNames ? deployPeople(DUTY, 'Demo', s.demoStart) : null;
+  const livePeople = showNames ? deployPeople(DUTY, 'Live', s.live) : null;
 
   const nav = h('nav', { class: 'sv-nav', 'aria-label': 'Sprint navigation' }, h('div', { class: 'wrap pad' },
     h('a', { href: todayHref }, '← Today'),
@@ -1011,9 +1013,9 @@ function renderSprintView(n) {
     h('div', null,
       DUTY ? h('div', { class: 'sv-duty' },
         h('span', { class: 'ltag', 'aria-hidden': 'true' }, '<deploys>'),
-        h('div', null, h('span', { class: 'dk' }, `Demo update · ${fmtDay(s.demoStart)} · ${formatAcrossZones(s.demoStart, T.demo)}`), h('br'), personNodes(demoPeople)),
-        h('div', null, h('span', { class: 'dk' }, `Live update · ${fmtDay(s.live)} · ${formatAcrossZones(s.live, T.live)}`), h('br'),
-          'Lead ', livePeople[0].name || h('span', { class: 'na' }, NOT_ASSIGNED), ' · Backup ', livePeople[1].name || h('span', { class: 'na' }, NOT_ASSIGNED))) : null,
+        h('div', null, h('span', { class: 'dk' }, `Demo update · ${fmtDay(s.demoStart)} · ${formatAcrossZones(s.demoStart, T.demo)}`), demoPeople ? [h('br'), personNodes(demoPeople)] : null),
+        h('div', null, h('span', { class: 'dk' }, `Live update · ${fmtDay(s.live)} · ${formatAcrossZones(s.live, T.live)}`), livePeople ? [h('br'),
+          'Lead ', livePeople[0].name || h('span', { class: 'na' }, NOT_ASSIGNED), ' · Backup ', livePeople[1].name || h('span', { class: 'na' }, NOT_ASSIGNED)] : null)) : null,
       notice ? h('div', { class: 'sv-note' }, h('span', { 'aria-hidden': 'true' }, 'ⓘ '), notice) : null)));
 
   // Timeline with a Today marker as its own list item.

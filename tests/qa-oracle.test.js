@@ -11,7 +11,7 @@
 //   Code freeze from the sprint-end Friday until the Tuesday-evening Demo update; Beta reopens Wednesday.
 //   Pre-Refinement every Wed 14:00; Full Refinement Thu 14:00 in week 1; refinement belongs to the NEXT sprint.
 //   Sprint planning on the Thursday before the start.
-//   Rota: S20 Demo 29 Sep Rafael F.; Live 5 Oct Konstantin M. (lead), Evgeny M. (backup); support duty is not shown (differs per team)
+//   Rota: names switched off (owner 2026-10-22); support duty is not shown (differs per team)
 //   Names are always "First L."; no full surname anywhere in public/ or docs/.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -166,22 +166,8 @@ describe('refinement and planning (owner)', () => {
 });
 
 // ---------------------------------------------------------------- 3. duty rota against the owner
-describe('duty rota (owner)', () => {
-  it('S20 Demo Tue 29 Sep by Rafael F.; Live Mon 5 Oct Konstantin M. (lead), Evgeny M. (backup)', () => {
-    const r = DUTY.RELEASES.find((x) => x.demo === '2026-09-29');
-    expect(r).toMatchObject({ demoBy: 'Rafael F.', live: '2026-10-05', liveLead: 'Konstantin M.', liveBackup: 'Evgeny M.' });
-    expect(sprintDates(20).demoStart).toBe('2026-09-29');
-    expect(sprintDates(20).live).toBe('2026-10-05');
-  });
-
-  it('the page shows them on the day (duty line, real rota)', () => {
-    expect(dutyTexts(dutyLine('2026-09-29', DUTY, RULES))).toEqual([
-      'Tonight · Demo update 2026-20 · 17:00 Tallinn · 16:00 Warsaw · 15:00 London: Rafael F.',
-    ]);
-    expect(dutyTexts(dutyLine('2026-10-05', DUTY, RULES))[0])
-      .toBe('Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Konstantin M. (lead), Evgeny M. (backup)');
-  });
-});
+// Real-name rota checks were removed with the names (owner, 2026-10-22). When names return (duty.js SHOW_NAMES = true),
+// add back: S20 Demo 29 Sep deployer, Live 5 Oct lead and backup, and the duty-line text for those days.
 
 // ---------------------------------------------------------------- 4. holidays: complete official lists, by hand
 // Estonia (Public Holidays and Days of National Importance Act) and Poland (Act of 18 Jan 1951 as amended;
@@ -222,7 +208,15 @@ function walk(dir) {
   });
 }
 
-describe('no full surnames in public/ or docs/', () => {
+describe('names switched off (owner, 2026-10-22)', () => {
+  it.runIf(DUTY.SHOW_NAMES === false)('duty.js holds no names and the duty line shows only the update and its time', () => {
+    for (const r of DUTY.RELEASES) expect([r.demoBy, r.liveLead, r.liveBackup]).toEqual([null, null, null]);
+    expect(dutyTexts(dutyLine('2026-10-05', DUTY, RULES))).toEqual(['Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London']);
+    expect(dutyTexts(dutyLine('2026-10-01', DUTY, RULES))).toEqual(['Next · Live update Mon 5 Oct 20:00 Tallinn · 19:00 Warsaw · 18:00 London (2026-20)']);
+  });
+});
+
+describe.skipIf(DUTY.SHOW_NAMES === false)('no full surnames in public/ or docs/', () => {
   const people = [
     ...DUTY.RELEASES.flatMap((r) => [r.demoBy, r.liveLead, r.liveBackup]),
   ].filter(Boolean);

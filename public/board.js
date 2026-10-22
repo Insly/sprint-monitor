@@ -599,7 +599,8 @@ export function dutyLine(date, duty, rules = []) {
     date: dep.date,
     time: dep.time,
     zones: formatAcrossZones(dep.date, dep.time),
-    people: deployPeople(duty, dep.kind, dep.date),
+    // Names hidden (duty.SHOW_NAMES === false): no people part at all, not "not assigned yet".
+    people: duty.SHOW_NAMES === false ? [] : deployPeople(duty, dep.kind, dep.date),
   });
   const tonight = !isWeekendDay(d) && deploys.find((x) => x.date === d);
   if (tonight) return { state: 'tonight', deploy: mk(tonight) };
@@ -627,15 +628,17 @@ export function dutyParts(line) {
   const dep = line && line.deploy;
   if (!dep) return null;
   const base = { state: line.state, label: dep.label, people: dep.people };
-  if (line.state === 'tonight') return { ...base, before: `Tonight · ${dep.kind} update `, after: ` · ${dep.zones}:` };
-  if (line.state === 'last-night') return { ...base, before: `Last night · ${dep.kind} update `, after: ':' };
-  return { ...base, before: `Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (`, after: '):' };
+  const c = dep.people.length ? ':' : ''; // no trailing colon when names are hidden
+  if (line.state === 'tonight') return { ...base, before: `Tonight · ${dep.kind} update `, after: ` · ${dep.zones}${c}` };
+  if (line.state === 'last-night') return { ...base, before: `Last night · ${dep.kind} update `, after: c };
+  return { ...base, before: `Next · ${dep.kind} update ${fmtDay(dep.date)} ${dep.zones} (`, after: `)${c}` };
 }
 
 /** The duty line as plain text, as the page shows it (STATES.md §7 patterns). */
 export function dutyTexts(line) {
   const p = dutyParts(line);
-  return p ? [`${p.before}${p.label}${p.after} ${peopleText(p.people)}`] : [];
+  if (!p) return [];
+  return [p.people.length ? `${p.before}${p.label}${p.after} ${peopleText(p.people)}` : `${p.before}${p.label}${p.after}`];
 }
 
 // ---------------------------------------------------------------- agenda ("Your day")

@@ -2,7 +2,7 @@
 // Pure functions over the data modules; tests/freshness.test.js turns each finding into a failure.
 // Not part of `npm test` (see vitest.config.js): data running out must never block a deploy.
 // Run with `npm run freshness`; CI runs it weekly (.github/workflows/scheduled.yml).
-import { RELEASES } from '../../public/duty.js';
+import { RELEASES, SHOW_NAMES } from '../../public/duty.js';
 import { HOLIDAYS } from '../../public/holidays.js';
 import {
   OVERRIDES, YEAR_STARTS, LAST_CONFIRMED, sprintDates, sprintForDate, addDays, toKey,
@@ -28,8 +28,10 @@ export function runChecks(today, horizonDays = HORIZON_DAYS) {
   const out = [];
   const add = (name, coveredTo, ok, message) => out.push({ name, coveredTo, ok, message });
 
-  // 1a. Rota: last release with a full assignment (Demo deployer, Live lead and Live backup).
   const sorted = [...RELEASES].sort((a, b) => (a.live < b.live ? -1 : 1));
+  // 1a. Rota: last release with a full assignment (Demo deployer, Live lead and Live backup).
+  // Skipped while names are switched off (duty.js SHOW_NAMES = false, owner 2026-10-22).
+  if (SHOW_NAMES !== false) {
   const lastFull = [...sorted].reverse().find(full);
   const fullTo = lastFull ? lastFull.live : '0000-00-00';
   const gaps = sorted.filter((r) => r.live > today && r.live <= horizon && !full(r))
@@ -39,6 +41,7 @@ export function runChecks(today, horizonDays = HORIZON_DAYS) {
     + `Fill demoBy / liveLead / liveBackup from "Duty dev.xlsx" (first name + last initial only)`
     + (gaps.length ? `; open slots in the window: ${gaps.join('; ')}` : '')
     + `. Then update ROTA_UPDATED.`);
+  }
 
   // 1b. Rota: last release listed at all.
   const lastListed = sorted.length ? sorted[sorted.length - 1].live : '0000-00-00';

@@ -25,7 +25,7 @@ describe('duty.js data', () => {
     expect(() => parseDate(DUTY.ROTA_UPDATED)).not.toThrow();
   });
 
-  it('every name is "First L." (first name + last initial only; the page and repo are public)', () => {
+  it.skipIf(DUTY.SHOW_NAMES === false)('every name is "First L." (first name + last initial only; the page and repo are public)', () => {
     expect(names.length).toBeGreaterThan(0);
     for (const n of names) expect(n, n).toMatch(NAME);
   });
@@ -48,7 +48,8 @@ describe('duty line from the real rota', () => {
   it('Mon 5 Oct 2026: tonight is the 2026-20 Live update', () => {
     const line = dutyLine('2026-10-05', DUTY, RULES);
     expect(line.state).toBe('tonight');
-    expect(dutyTexts(line)[0]).toMatch(/^Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: \S+ \S\. \(lead\), \S+ \S\. \(backup\)$/);
+    if (DUTY.SHOW_NAMES === false) expect(dutyTexts(line)[0]).toBe('Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London');
+    else expect(dutyTexts(line)[0]).toMatch(/^Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: \S+ \S\. \(lead\), \S+ \S\. \(backup\)$/);
   });
 
   it('has no support-duty data or text (owner, 2026-10-01: it differs per team)', () => {

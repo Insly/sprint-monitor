@@ -70,10 +70,9 @@ To correct a sprint's dates, add an entry to `OVERRIDES`, e.g. `{ 27: { planning
 
 ### Duty rota (`public/duty.js`)
 
-Names are **first name + last initial only** (`'Andrei I.'`), because the page and the repo are public. Never add full names.
+**Names are switched off** (`SHOW_NAMES = false`, owner 2026-10-22) until the board moves behind employee sign-in: the duty line and sprint view show only the Demo/Live update and its time. The owner keeps the filled-in rota outside this public repo. To bring names back: set `SHOW_NAMES = true` and fill the names as **first name + last initial only** (e.g. `'Dev A.'`). Never add full names.
 
 - A release: add `{ demo: 'YYYY-MM-DD', demoBy, live: 'YYYY-MM-DD', liveLead, liveBackup }` to `RELEASES`. The dates must be the engine's Demo (Tuesday) and Live (Monday) dates for that sprint; a test checks this. Use `null` for "not assigned yet".
-- A support week: add `{ week: 'YYYY-MM-DD', dev }` to `SUPPORT_WEEKS`, keyed by the Monday of the Mon–Sun week.
 - Update `ROTA_UPDATED`. If the file is missing or broken, the duty line is simply not shown.
 
 ### Holidays (`public/holidays.js`)
