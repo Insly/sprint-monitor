@@ -57,6 +57,14 @@ h1, h2, h3 { line-height: 1.2; }
 
 .skip { position: absolute; left: 8px; top: -60px; z-index: 10; background: var(--surface); color: var(--text); padding: 10px 14px; border: 1px solid var(--control); border-radius: 4px; }
 .skip:focus { top: 8px; }
+/* Maintenance switch (public/status.json): only this panel shows; everything else is hidden. */
+body.maintenance > *:not(#maint):not(script) { display: none !important; }
+.maint { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; box-sizing: border-box; }
+.maint-card { max-width: 520px; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 32px 28px; text-align: left; }
+.maint-card .mark { display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #FF7D00; margin-right: 8px; vertical-align: -1px; }
+.maint-card .brand { font-size: 14px; font-weight: 700; color: var(--text-2); margin: 0 0 18px; }
+.maint-card h1 { font-size: 26px; line-height: 1.2; margin: 0 0 10px; color: var(--text); }
+.maint-card p { margin: 0; color: var(--text-2); font-size: 16px; }
 
 .wrap { max-width: 1200px; margin: 0 auto; }
 .pad { padding-left: 32px; padding-right: 32px; }
@@ -466,6 +474,13 @@ ul.src li { padding: 2px 0; break-inside: avoid; }
 </style>
 </head>
 <body>
+<section class="maint" id="maint" hidden aria-labelledby="maint-h">
+  <div class="maint-card">
+    <p class="brand"><i class="mark" aria-hidden="true"></i>MGA Sprint Board</p>
+    <h1 id="maint-h">Temporarily unavailable</h1>
+    <p id="maint-msg">The MGA Sprint Board is being updated. Please check back later.</p>
+  </div>
+</section>
 <a class="skip" href="#yourday">Skip to your day</a>
 <div id="preview" class="previewbar" role="region" aria-label="Preview" hidden></div>
 
@@ -1194,6 +1209,7 @@ function openKeys() { return new Set([...document.querySelectorAll('details[data
 function closedKeys() { return new Set([...document.querySelectorAll('details[data-k]:not([open])')].map((d) => d.dataset.k)); }
 
 function render({ keepFocus = false } = {}) {
+  if (maintenanceOn) return;
   const n = now();
   currentDate = n.date;
   const opened = openKeys();
@@ -1296,9 +1312,37 @@ $('viewdate-today').addEventListener('click', () => {
 }
 $('cycle').open = firstVisit; // open on a first visit only; not persisted
 
+// ---------------------------------------------------------------- maintenance switch
+// public/status.json { "maintenance": true|false, "message": "…" }. Read with a cache-busting query so a change
+// shows within minutes. Fails open: if the file can't be read, the normal page shows. ?full=1 bypasses it.
+let maintenanceOn = false;
+async function readStatus() {
+  try {
+    const r = await fetch(`./status.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return { maintenance: j && j.maintenance === true, message: j && typeof j.message === 'string' ? j.message : '' };
+  } catch { return null; }
+}
+const BYPASS = new URLSearchParams(location.search).has('full');
+function showMaintenance(st) {
+  maintenanceOn = true;
+  if (st.message) $('maint-msg').textContent = st.message;
+  document.body.classList.add('maintenance');
+  $('maint').hidden = false;
+  document.title = 'Temporarily unavailable · Sprint Board';
+}
+const status0 = BYPASS ? null : await readStatus();
+if (status0 && status0.maintenance) showMaintenance(status0);
+// Open tabs follow the switch: check once a minute and reload when it flips.
+if (!BYPASS) setInterval(async () => {
+  const st = await readStatus();
+  if (st && st.maintenance !== maintenanceOn) location.reload();
+}, 60_000);
+
 render();
-setInterval(tick, 20_000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
+setInterval(() => { if (!maintenanceOn) tick(); }, 20_000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !maintenanceOn) tick(); });
 // hashchange and popstate both fire on Back; render once per route.
 window.addEventListener('hashchange', () => { if (location.href !== lastHref) { cuLimit = null; render(); } });
 phoneMQ.addEventListener('change', () => { if (lastModel && !$('today-view').hidden) renderComingUp(lastModel); });
