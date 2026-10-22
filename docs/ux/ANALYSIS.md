@@ -1,3 +1,5 @@
+> Superseded by DESIGN.md v2.1, STATES.md and the built v2 page in `public/` (this file evaluates the v1 page) — kept as history.
+
 # MGA Sprint Board: heuristic evaluation of the current page
 
 Status: draft for review, 2026-10-01. Evaluated build: the live page at https://insly-sprint-monitor.onrender.com. A fetch on 2026-10-01 is byte-identical to `public/index.html` in the repo.

@@ -1,6 +1,8 @@
 # Render Blueprint for the MGA Sprint Board (static site, no build step).
-# One-time setup: Render dashboard > New > Blueprint > connect Insly/sprint-monitor.
-# Every push to main redeploys. Static sites do not sleep, so the page opens instantly.
+# NOT APPLIED: Render has no GitHub app access to this repo, so this Blueprint is not synced. Deploys go via the
+# deploy hook that CI calls after the tests pass on main (.github/workflows/deploy.yml); a push alone does not
+# deploy. Kept as the record of the intended service settings: the live ones are set in the Render dashboard.
+# Static sites do not sleep, so the page opens instantly.
 services:
   - type: web
     name: insly-sprint-monitor

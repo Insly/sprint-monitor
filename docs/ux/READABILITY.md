@@ -1,3 +1,5 @@
+> Superseded by the built page (now built as v2.2: the panels in `public/`), DESIGN.md and STATES.md — kept as history.
+
 # MGA Sprint Board: section readability (v2.2 proposal)
 
 Status: proposal, 2026-10-01. Answers the owner's feedback: "Maybe worth trying to put a rounded block around the collapsible blocks, such as you have 'Show only what is yours' in the beginning. Maybe increasing readability. Or the UX specialist has some other ideas?"

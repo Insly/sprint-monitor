@@ -1,3 +1,5 @@
+> Superseded by DESIGN.md v2.1 (which answers this review), STATES.md and the built page in `public/` — kept as history.
+
 # MGA Sprint Board v2: practitioner review
 
 Status: independent review, 2026-10-01. Reviewer: delivery practitioner (insurance-software implementation and release work).

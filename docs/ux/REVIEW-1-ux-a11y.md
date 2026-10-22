@@ -1,3 +1,5 @@
+> Superseded by DESIGN.md v2.1 (which answers this review), STATES.md and the built page in `public/` — kept as history.
+
 # Review 1: UX and accessibility critique of the v2 design
 
 Status: independent review, 2026-10-01. Reviewer lens: usability heuristics, 5-second glanceability, hierarchy, interaction design, WCAG 2.2 AA, dark mode, Insly brand craft.

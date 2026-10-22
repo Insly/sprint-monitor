@@ -1,6 +1,6 @@
 # MGA Sprint Board: design direction (v2)
 
-Status: v2.1, 2026-10-01 (the owner approved the v2 direction; the v2.1 addendum is below). Copy and components updated 2026-10-21 for review 2026-10-02 (support duty and "Also today" removed, other sprints always named, one duty-line builder). Where copy here and `STATES.md` / `tests/key-days.test.js` differ, those win. Companions: `USE-CASES.md` (who and why), `ANALYSIS.md` (what is wrong with the current page), **`STATES.md` (normative state table and fixtures)**, `mockup.html` (visual reference).
+Status: v2.1, 2026-10-01 (the owner approved the v2 direction; the v2.1 addendum is below). Copy and components updated 2026-10-21 for review 2026-10-02 (other sprints always named, one duty-line builder) and 2026-10-22 (names switched off in `duty.js`, `SHOW_NAMES = false`; panels in the disclosure pattern, review Batch 4). Where copy here and `STATES.md` / `tests/key-days.test.js` differ, those win. Companions: `USE-CASES.md` (who and why), `ANALYSIS.md` (what is wrong with the current page), **`STATES.md` (normative state table and fixtures)**, `mockup.html` (visual reference).
 Reviews addressed: `REVIEW-1-ux-a11y.md`, `REVIEW-2-practitioner.md`. The owner's decisions of 2026-10-01 override both where they conflict.
 
 Scope: presentation, plus a precise list of rule changes (§14) and one new static data file (`duty.js`, §9). Everything on screen comes from `schedule.js`, `rules.js`, `duty.js`, the Tallinn clock and one remembered role. Static deep links to Confluence pages are allowed. No Jira API.
@@ -17,7 +17,7 @@ Scope: presentation, plus a precise list of rule changes (§14) and one new stat
 | 4 | **One "IM / AM" role button.** "Everyone" is the only name for the all-roles view. First visit is derived from "no stored role" | Owner decision 3. R2 §3.3. R1 §6 |
 | 5 | **No completion claims.** A neutral "Passed" chip, "Earlier today" in the order strip, no ✓, no strikethrough. Deploys are always described as *scheduled* | Owner decision 6. R1 M-4. R2 C3, §4 |
 | 6 | **Freeze copy fixed everywhere:** "until the Demo update Tue {date} (evening)". Beta reopens Wednesday. `code-freeze` window now ends at `demoStart` (§14) | Owner decision 2. R2 C6 |
-| 7 | **Duty line** (one component) from the new static rota `duty.js`: tonight's, last night's or the next deployer(s). Support duty is not shown: it differs per team (owner, 2026-10-01) | Owner decision (new data) |
+| 7 | **Duty line** (one component) from the new static rota `duty.js`: tonight's, last night's or the next deploy, with its sprint label and three-office times. Names are off (`SHOW_NAMES = false`, owner 2026-10-22): no people part is shown | Owner decision (new data) |
 | 8 | **Carry-over is required:** "Confirm Live update to clients", "Golive Release page" and "Release page" also appear on the next working day | R2 A5, C7. R1 §8 |
 | 9 | **First-day and last-day promotion** of short windows (Run regression on freeze Friday, UAT window on Wednesday) | R2 D2 |
 | 10 | **Focus ring that works on every surface** (white, charcoal, orange, preview bar). Forced-colours styles. Focus and a status message on role change | R1 M-1, m-4, M-6 |
@@ -35,9 +35,9 @@ Scope: presentation, plus a precise list of rule changes (§14) and one new stat
 | 1 | **Sprint detail view**, linkable as `#sprint-{label}`. Each rail row and every sprint tag links to it |
 | 2 | **Owner deploy times:** Demo update 17:00, Live update 20:00 (Tallinn). Evening state: Demo Tuesday from 17:00, Live Monday from 20:00. Cut-off Monday 12:00–19:59 is `after` ("cut-off passed"). `EVENING_FROM` is replaced by these two times |
 | 3 | **Three-office time display** on the duty line and in the sprint view: `20:00 Tallinn · 19:00 Warsaw · 18:00 London` |
-| 4 | **Year end:** 2027-2 starts Mon 4 Jan 2027. There is no release on 28 Dec. A new `break` state covers 21–31 Dec (STATES.md §12) |
+| 4 | **Year end:** 2027-2 starts Mon 4 Jan 2027. There is no release on 28 Dec and no year-end break: 2027-1 is one 20-working-day sprint, 7 Dec to 1 Jan, so there is no break state (STATES.md §12 keeps the superseded draft) |
 | 5 | **EE and PL public holidays** as static data, shown inline only when they touch a sprint's key dates (decision below) |
-| 6 | Duty names: first name + last initial from `duty.js`. Placeholders (`Dev A.`) in all docs |
+| 6 | Duty names: first name + last initial from `duty.js`. Placeholders (`Dev A.`) in all docs. Currently switched off (`SHOW_NAMES = false`, 2026-10-22): the page shows deploy times only |
 
 ### v2.1-A. Sprint detail view
 
@@ -45,7 +45,7 @@ Scope: presentation, plus a precise list of rule changes (§14) and one new stat
 
 - **Route:** `#sprint-2026-21`. With a preview date: `#date-2026-10-01~sprint-2026-21`. Allowed characters are `[A-Za-z0-9._~-]` (the existing `SAFE_HASH`). Unknown labels show the `unknown` state (STATES.md §10). `hashchange` re-renders. Back returns to Today.
 - **Entry points:** the sprint label on every rail row is a real `<a href="#sprint-…">` (the row stays compact), every sprint tag on an item, and the ‹ › arrows inside the view.
-- **Layout (desktop ≥1200):** a header row with `← Today` (link to `#`), `‹ 2026-20` and `2026-22 ›` (links), and `Copy link`. Then an h1 `Sprint 2026-21`, the status line, the 5-step bar and the duty block for this sprint (Demo deployer, Live lead and backup, with three-office times). Body in two columns: **Timeline** on the left (a vertical `ol` of milestones with date and time, status `Passed` / `Today` / `Coming · in N working days`, and a "Today" marker as its own list item), and **Actions for {role}** on the right (grouped Passed / Running / Coming, with an `Everyone` toggle), then **Holidays**. At 768–1199 and on mobile it is a single column in the order header → timeline → duty → actions → holidays.
+- **Layout (desktop ≥1200):** a header row with `← Today` (link to `#`), `‹ 2026-20` and `2026-22 ›` (links), and `Copy link`. Then an h1 `Sprint 2026-21`, the status line, the 5-step bar and the duty block for this sprint (Demo and Live update with three-office times; the deployer, Live lead and backup only when names are on). Body in two columns: **Timeline** on the left (a vertical `ol` of milestones with date and time, status `Passed` / `Today` / `Coming · in N working days`, and a "Today" marker as its own list item), and **Actions for {role}** on the right (grouped Passed / Running / Coming, with an `Everyone` toggle), then **Holidays**. At 768–1199 and on mobile it is a single column in the order header → timeline → duty → actions → holidays.
 - **Role toggle:** a 2-option segmented control `{remembered role} | Everyone` (`role="radiogroup"`). It does **not** change the stored role and is not put in the URL. Shared links always open in the viewer's own role.
 - **Keyboard and screen reader:** on route entry, focus moves to the h1 (`tabindex="-1"`) and `document.title` becomes `Sprint 2026-21 · Sprint Board`. Leaving the view returns focus to the rail link that opened it. The timeline is an `ol` with `aria-current="step"` on the Today marker. Milestone statuses are text, never colour alone. "Copy link" reports "Link copied" through the existing `role="status"` node. Arrows have accessible names ("Previous sprint 2026-20"). There is no focus trap.
 - **Never claims completion:** a milestone is `Passed` by date or time only.
@@ -71,7 +71,6 @@ export function sprintDetail(n, date, rules, { role = null } = {})
   //                                    // from sprintDates(n-1).start to sprint.live; windows listed once,
   //                                    // on their `from` date; filtered by role when given
   // }
-export function isBreakDay(date)                // a weekday after current.end, beyond workingDaysIn(current)
 export function zonedNow(zone = 'Europe/Tallinn')            // { date: 'YYYY-MM-DD', time: 'HH:MM' }
 export function formatAcrossZones(dateKey, hhmm, zones)      // '20:00 Tallinn · 19:00 Warsaw · 18:00 London'
                                                              // zones: Europe/Tallinn, Europe/Warsaw, Europe/London
@@ -126,7 +125,7 @@ Unchanged from v1, and both reviewers agree. Every critical (C1) question is "wh
    4d. Every day this sprint   one row per sprint-long habit (expandable)
    4e. Next for you     first upcoming working day with items for the role ("Next" in the Everyone view)
    4f. Gates for planning   Lead only, planning eve and planning day
-   ("Also today" for other roles is not shown: switch to Everyone to see them. Owner, 2026-10-01.)
+   (Other roles' items are not shown: switch to Everyone to see them. Owner, 2026-10-01.)
 5. Sprint rail       <sprints>
 6. Coming up         <coming up> 7 working days on desktop ("+3 more"), 10 on expand
 7. How the cycle works   <cycle> collapsed; open on first visit
@@ -176,25 +175,25 @@ Target, met in every frame above: on key days the band, the duty line and every 
 | **Brand tag** `<label>` | Insly CVI section label (orange `<tag>`) | Five section anchors only: `<your day>`, `<sprints>`, `<coming up>`, `<cycle>`, plus the band's state tag (`<cut-off day>`, `<tonight>`, …) | The whole tag is `aria-hidden` where an `h2` follows. The band's state tag is repeated in visually hidden text inside the h1 (m-3). Orange `#C35500` on white. Charcoal on orange and on tints |
 | **Top bar** | Orientation and controls | Date (Tallinn), "Viewing as" role, View date | `header`. The radiogroup is labelled by the visible "Viewing as" (`aria-labelledby`). Not sticky (2.4.11) |
 | **Role control** | Filter | Everyone · IM / AM · Dev · QA · Lead · Analyst | Segmented radiogroup (desktop) / native select (mobile). `min-height`, not fixed heights (1.4.12). Tooltip on IM / AM: "IM, AM and project managers" |
-| **First-visit picker** | Choose a role once | Six buttons, plus "New here? See how the cycle works" | Shown when no role is stored. After a pick, focus moves to the "Today for {role}" h2 (`tabindex=-1`) |
-| **Status message** | Announce filter changes | "Showing 4 items for IM / AM" | Separate `role="status"` node. The headline live region only announces state changes |
+| **First-visit picker** | Choose a role once | Six buttons, plus "New here? See how the cycle works" | Shown when no role is stored, as a labelled group with an h3 inside the Today panel. After a pick, focus moves to the "Today for {role}" h2 (`tabindex=-1`) |
+| **Status message** | Announce filter changes | "Showing 4 items for IM / AM" / "Nothing due today for Dev" | The one live region (`role="status"`), cleared before each message. It counts what is shown. The h1 is not a live region (review Batch 4) |
 | **Headline band** | The day in one sentence | State tag, h1 headline, role-aware sub-line, countdown or next milestone, order strip | 7 states (§6). The h1 text node is updated only when its string changes |
 | **Countdown** | Time to 12:00 (cut-off morning only) | "2 h 50 min left until 12:00" + " (Tallinn time)" when the zones differ | Shows the date big and "in 2 working days" small on other days |
 | **Order strip** | The key day's sequence | e.g. Fix cut-off 12:00 → Reverts (if any) → Tonight · Live update → After · Confirm to clients (IM/AM) / Golive page (Dev) | `ol`. The current step has `aria-current="step"` and a visible word ("Now", "Tonight"). Steps before now say "Earlier today". **No ✓.** Only timed steps can be "earlier" |
-| **Duty line** | Who deploys | Tonight's / last night's / next deployer(s), with the sprint label | §9. One component, all roles, built once in `board.js` `dutyParts()` (the page and the tests use it). "not assigned yet" in muted text |
+| **Duty line** | Who deploys | Tonight's / last night's / next deployer(s), with the sprint label | §9. One component, all roles, built once in `board.js` `dutyParts()` (the page and the tests use it). With names on, a missing name reads "not assigned yet" in muted text; with names off (current) there is no people part and no colon |
 | **Agenda item** | One action | Slot or time · chip · title · sprint tag · chevron | Native `<details>`, collapsed by default. Expanded: rule `detail`, computed facts (e.g. UAT deadline with Copy), links (matrix, release pages), source |
 | **Chips** | Kind and status, always words | `Due` (orange tint, charcoal text) · `Meeting` (purple) · `Update` (Green 1 fill, charcoal text) · `Check` (grey) · `Opens today` / `Last day` (**outlined**, charcoal border) · `Passed` (**neutral** grey) · `If needed` (outlined) | Every item has a chip, so colour is never the only signal. Other roles' items always use the grey chip. Items with `slot: 'after-cutoff'` show `If needed` instead of `Due` |
 | **Slot heading** | Group by when | `By 12:00` · `Today` · `14:00` · `Tonight` · `After the update` · `From last night` | From the `slot` field (§14) |
 | **Running list** | Short windows (≤ 7 days) between first and last day | One row each: title · "until the Demo update Tue 13 Oct (evening)" / "until Mon 5 Oct 12:00" | A `ul` of `<details>`, 44 px rows. No pipe separators |
 | **Every day this sprint** | Sprint-long habits | One row each | Same pattern, collapsed group with a count |
 | **Next for you** | Prepare a day ahead | "Tomorrow, Tue 29 Sep" only when it is the real next day; else "Next for you · Mon 5 Oct" (Everyone: "Next · Mon 5 Oct"). Items in the order of that day, with time, "if needed" and the sprint label: `12:00 Fix cut-off 2026-20 · Revert items that missed the cut-off if needed · 2026-20 · 20:00 Live update 2026-20` | `board.js` `agenda().next`. The Everyone view prefixes role-only items (`IM/AM: …`) |
-| **Gates for planning** | Lead's checks | "Gates for planning (check in Jira)" on planning eve and planning day | Lead only. Other roles' items ("Also today") are not shown |
+| **Gates for planning** | Lead's checks | "Gates for planning (check in Jira)" on planning eve and planning day | Lead only. Other roles' items are not shown |
 | **Empty state** | Nothing due | "Nothing due for QA today. Next: Pre-Refinement Wed 7 Oct 14:00." | One per page |
 | **Sprint rail row** | Status of one sprint | Label · state label (STATES.md §6) · 5-step bar `Plan · Build · Freeze · UAT · Live` with the current step **labelled in text** | Rows = previous / current / next from the engine. The same bar on every row (R1 M-9) |
 | **Coming up day** | Agenda | Date · role items · unit milestones (Demo update, Live update, freeze, planning) always shown, marked with an orange square and the word "Unit" in visually hidden text | 7 working days on desktop with "+3 more" |
 | **Preview bar** | Not today | "Preview · Mon 12 Oct 2026 · ‹ › · Back to today" (+ "Show after 12:00" on a cut-off day) | Charcoal bar (light) / white bar (dark). Never orange |
 | **Notice** | Projected or unconfirmed dates | "Dates after 2026-22 are projected from the 2-week cadence." | Gray Row with an ⓘ |
-| **Cycle explainer** | Learning | Track with an environment strip (Beta → Demo → Live), refinement markers feeding the next planning, glossary | `<details>`, open by default only on first visit. The state is not persisted. Scroller is `tabindex=0 role=region` with a label |
+| **Cycle explainer** | Learning | Track with an environment strip (Beta → Demo → Live), refinement markers feeding the next planning, glossary | A disclosure panel (`<h2><button aria-expanded>`), open by default only on first visit. The state is not persisted. Scroller is `tabindex=0 role=region` with a label |
 | **Footer** | Trust | Sources (once), home-page setup, "Times are Tallinn time", "Confluence confirms dates up to 2026-22", rota updated date | — |
 
 ## 6. State model (summary; STATES.md is normative)
@@ -256,8 +255,8 @@ export const RELEASES = {
 };
 ```
 
-- As built (2026-10-01): `RELEASES` is a list of `{ demo, demoBy, live, liveLead, liveBackup }`; there is no support rota (support duty differs per team and is not shown).
-- Display (STATES.md §7): `Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Dev B. (lead), Dev C. (backup)` · `Last night · Live update 2026-20: Dev B. (lead), Dev C. (backup)` · `Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.` · `null` or a missing key → `not assigned yet` (muted, no warning colour) · file missing → the line is not rendered.
+- As built (2026-10-01): `RELEASES` is a list of `{ demo, demoBy, live, liveLead, liveBackup }`; plus `SHOW_NAMES` and `ROTA_UPDATED`. Since 2026-10-22 `SHOW_NAMES = false` and every name is `null` (names are off until the board moves behind sign-in).
+- Display (STATES.md §7): `Tonight · Live update 2026-20 · 20:00 Tallinn · 19:00 Warsaw · 18:00 London: Dev B. (lead), Dev C. (backup)` · `Last night · Live update 2026-20: Dev B. (lead), Dev C. (backup)` · `Next · Demo update Tue 13 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-21): Dev C.` · `null` or a missing key → `not assigned yet` (muted, no warning colour) · file missing → the line is not rendered. With names off (current): `Next · Demo update Tue 27 Oct 17:00 Tallinn · 16:00 Warsaw · 15:00 London (2026-22)`, no colon, no names.
 - States: `tonight`, `last-night` (the next working day), `next`, `unassigned`, `no-data` (STATES.md §7).
 - Tests: names match `/^\p{L}[\p{L}'-]* \p{Lu}\.$/u`. Rota dates equal the sprint dates in `schedule.js`.
 - The sheet confirms **2027-1: Demo Tue 5 Jan 2027, Live Mon 11 Jan 2027**. This closes the "Demo 5 Jan assumed" open item. Update the comment in `OVERRIDES[26]` and SPEC accordingly.
@@ -364,9 +363,9 @@ Panel and cycle headers clip (`overflow: hidden`), so their summary draws the ri
 ## 11. Accessibility
 
 - Landmarks: `header`, `main`, `footer`, and a skip link "Skip to your day". The headline h1 = the message. Section h2s. Items are list entries.
-- Live regions: the headline h1 updates only when its string changes (day rollover, 12:00, 17:00). A separate `role="status"` announces filter changes.
+- Live regions: one, the `role="status"` node. It announces role changes (counted from what is shown), copies, and a headline that the clock changes (day rollover, 12:00, 17:00). The h1 itself is not a live region, so nothing is announced twice (review 2026-10-02 Batch 4).
 - The order strip is an `ol` with `aria-current="step"` and a visible word.
-- Native `<details>` everywhere. Min 44 px rows on touch. `min-height`, never fixed `height`.
+- Native `<details>` for items and groups. Panels (Today, Sprints, Coming up, the cycle explainer, the sprint view's Timeline/Actions/Holidays) use the disclosure pattern, `<h2><button aria-expanded aria-controls>Title</button></h2>` plus the body it shows and hides, so their titles stay headings and the button's name is the title only (review 2026-10-02 Batch 4). Min 44 px rows on touch. `min-height`, never fixed `height`.
 - Cycle track: bars have a 1 px charcoal outline (meets 1.4.11) and text labels ("Freeze", "UAT") above them. The scroller is `tabindex="0" role="region" aria-label="Cycle timeline"`. It keeps the full text alternative.
 - Contrast: AA everywhere (tables above). Every coloured item has a word chip.
 
@@ -488,6 +487,6 @@ Every item is grounded in a source already cited in `SOURCES`. New optional fiel
 
 1. ~~Evening threshold~~: answered in v2.1 (Demo 17:00, Live 20:00).
 2. ~~2027-2 start~~: answered in v2.1 (Mon 4 Jan 2027). **New:** the 2027-2 planning date. The formula gives Thu 31 Dec.
-2b. **New:** the 2027-1 bug retro computes to Mon 21 Dec, inside the break. Confirm the date or override `bugRetro`.
+2b. ~~2027-1 bug retro~~: answered by the 20-working-day 2027-1 (no break): the bug retro is Mon 4 Jan 2027.
 3. JQL deep links: which project keys and fixVersion naming would be stable enough to template?
 4. ~~Holidays~~: answered in v2.1 (EE + PL static data, inline notices).

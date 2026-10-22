@@ -2,7 +2,7 @@
 
 Tier: T1 (one owner, low stakes, no personal data, months-long lifetime). See software-project-playbook.
 Scope: MGA delivery unit only. Static page, no backend, no Jira calls (v1).
-Hosting: Render static site serving `public/` (no build step). Every push to `main` deploys.
+Hosting: Render static site serving `public/` (no build step). Deploys go via the CI hook: `.github/workflows/deploy.yml` runs the tests (Tallinn and New York time zones) on every push and, on `main`, calls the Render deploy hook for the tested commit. A push alone does not deploy; `render.yaml` is not applied (Render has no GitHub app access to the repo).
 Page loads ES modules: `schedule.js` and `board.js` statically; `rules.js`, `duty.js` and `holidays.js` dynamically, each with its own fallback.
 
 ## Files and owners
@@ -11,7 +11,7 @@ Page loads ES modules: `schedule.js` and `board.js` statically; `rules.js`, `dut
 |---|---|---|
 | `schedule.js` | dev | Pure date engine. No DOM. ES module. |
 | `board.js` | dev | Pure state resolver for `docs/ux/STATES.md`: band, headline, sub-line, tab title, rail, duty line, Your day, Coming up. No DOM, no clock reads. |
-| `duty.js` | owner | Static dev duty rota: `RELEASES` (Demo deployer, Live lead and backup), `SUPPORT_WEEKS`, `ROTA_UPDATED`. Names are first name + last initial only. |
+| `duty.js` | owner | Static dev deploy rota: `SHOW_NAMES`, `RELEASES` (Demo and Live dates; Demo deployer, Live lead and backup), `ROTA_UPDATED`. Names are switched off (`SHOW_NAMES = false`, names `null`): the page shows the deploy times only. When on, names are first name + last initial only. |
 | `holidays.js` | owner | `HOLIDAYS = [{ date, country: 'EE'\|'PL', name }]` for 2026–2027 and `holidaysBetween(from, to)`. |
 | `rules.js` | analyst | `export const RULES = [...]` + `export const SOURCES = {...}` — data only |
 | `index.html` | dev | Page (artifact contract: no doctype/html/head/body tags; own `<title>` + `<style>` at top) |
