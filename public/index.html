@@ -122,15 +122,15 @@ function showMaintenance(st) {
   $('maint').hidden = false;
   document.title = 'Temporarily unavailable · Sprint Board';
 }
-const BYPASS = new URLSearchParams(location.search).has('full');
-const status0 = BYPASS ? null : await readStatus();
+// No bypass (owner, 2026-10-23): maintenance applies to everyone.
+const status0 = await readStatus();
 const maintenanceOn = Boolean(status0 && status0.maintenance);
 if (maintenanceOn) showMaintenance(status0);
 else {
   try { await import('./render.js'); } catch (err) { console.error('render.js failed to load', err); }
 }
 // Open tabs follow the switch: check once a minute and reload when it flips.
-if (!BYPASS) setInterval(async () => {
+setInterval(async () => {
   const st = await readStatus();
   if (st && st.maintenance !== maintenanceOn) location.reload();
 }, 60_000);
